@@ -7452,7 +7452,7 @@ button:focus {
     top: 0;
     left: 0;
     width: 100%;
-    height: 16rem;
+    height: 18rem;
     content: ""; }
 
 /* collapsed layout with sidebar */
@@ -7493,8 +7493,8 @@ button:focus {
 .narrow.open .sidebar-left {
   overflow-y: auto;
   overflow-x: hidden;
-  min-width: 16rem;
-  width: 16rem;
+  min-width: 18rem;
+  width: 18rem;
   height: 100%;
   position: fixed;
   z-index: 1000;
@@ -7546,7 +7546,7 @@ button:focus {
 .vertical .topnav,
 .vertical.hover .topnav,
 .narrow.open .topnav {
-  margin-left: 16rem;
+  margin-left: 18rem;
   padding-left: 2.2rem;
   padding-right: 2.2rem; }
   .vertical .topnav .nav-notif,
@@ -7561,7 +7561,7 @@ button:focus {
 .vertical .main-content,
 .vertical.hover .main-content,
 .narrow.open .main-content {
-  margin-left: 16rem;
+  margin-left: 18rem;
   overflow: hidden;
   padding: 1.2rem;
   min-height: 100vh;
@@ -7933,8 +7933,8 @@ select {
     padding-left: 1.2rem;
     padding-right: 1.2rem; }
   .vertical.collapsed .sidebar-left, .vertical.narrow.open .sidebar-left {
-    min-width: 16rem;
-    width: 16rem; }
+    min-width: 18rem;
+    width: 18rem; }
     .vertical.collapsed .sidebar-left .nav-heading,
     .vertical.collapsed .sidebar-left .btn-box, .vertical.narrow.open .sidebar-left .nav-heading,
     .vertical.narrow.open .sidebar-left .btn-box {
@@ -7953,7 +7953,7 @@ select {
   .vertical.collapsed .topnav,
   .vertical.collapsed .main-content, .vertical.narrow.open .topnav,
   .vertical.narrow.open .main-content {
-    margin-left: 16rem; }
+    margin-left: 18rem; }
   .topnav .form-inline {
     display: none; }
   .horizontal .navbar-nav .dropdown-menu {
@@ -7998,8 +7998,8 @@ select {
       padding: 0;
       display: inline-block; }
     .horizontal .navbar-slide.show {
-      width: 16rem;
-      max-width: 16rem;
+      width: 18rem;
+      max-width: 18rem;
       padding: 0;
       display: block !important; }
   /* modal */
@@ -8043,7 +8043,7 @@ select {
   margin-left: 21rem !important; }
 
 .vertical.secondary .secondary-nav {
-  width: 16rem;
+  width: 18rem;
   position: fixed;
   left: 5rem;
   height: 100%; }
