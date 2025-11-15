@@ -2617,7 +2617,7 @@ html {
   .rtl.vertical .main-content, .rtl.vertical.hover .topnav,
   .rtl.vertical.hover .main-content {
     margin-left: 0;
-    margin-right: 16rem; }
+    margin-right: 18rem; }
   .rtl .vertnav .badge {
     float: left; }
   .rtl .vertnav .dropdown-toggle::after {
@@ -2647,8 +2647,8 @@ html {
   .rtl.vertical.hover .main-content {
     margin-right: 0; }
   .rtl.vertical.collapsed .sidebar-left {
-    min-width: 16rem;
-    width: 16rem; }
+    min-width: 18rem;
+    width: 18rem; }
   .rtl.vertical.collapsed .topnav,
   .rtl.vertical.collapsed .main-content {
     margin-right: 0; }
