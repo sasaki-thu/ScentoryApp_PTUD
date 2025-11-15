@@ -4,5 +4,175 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h1>Coupons</h1>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý mã giảm giá</h2>
+                </div>
+                <div class="col-auto">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <!-- Thêm Mới mã giảm giá, mở bảng để điền -->
+                            <button type="button" class="btn coupon btn-primary" id="addCoupon">
+                                <i class="fe fe-plus fe-16"></i> Thêm mã giảm giá mới
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Bảng dữ liệu mã giảm giá -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <table class="table table-hover table-borderless border-v">
+                        <thead>
+                            <tr>
+                                <th>ID Mã giảm giá</th>
+                                <th>Mô tả</th>
+                                <th>Loại giảm</th>
+                                <th>Giá trị giảm</th>
+                                <th>Giá trị tối thiểu</th>
+                                <th>Giá giảm tối đa</th>
+                                <th>Ngày bắt đầu</th>
+                                <th>Ngày kết thúc</th>
+                                <th>Giới hạn sử dụng</th>
+                            </tr>
+                        </thead>
+                        <tbody id="couponTableBody">
+                            <!-- Thay dữ liệu vào -->
+                            <tr id="row-GG001">
+                                <td>GG001</td>
+                                <td>Ưu đãi dành cho khách hàng mới nhân dịp khai trương</td>
+                                <td>%</td>
+                                <td>5</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>01/09/2025 8:00:00</td>
+                                <td>05/09/2025 8:00:00</td>
+                                <td>2</td>
+                            </tr>
+                            <tr id="row-GG002">
+                                <td>GG002</td>
+                                <td>Ưu đãi giảm giá giữa tháng</td>
+                                <td>VNĐ</td>
+                                <td>15.000</td>
+                                <td>0</td>
+                                <td>15.000</td>
+                                <td>15/09/2025 00:00:00</td>
+                                <td>15/09/2025 23:59:59</td>
+                                <td>1</td>
+                            </tr>
+                            <tr id="row-GG003">
+                                <td>GG003</td>
+                                <td>Ưu đãi giảm giá cuối tháng</td>
+                                <td>%</td>
+                                <td>5</td>
+                                <td>0</td>
+                                <td>25.000</td>
+                                <td>25/09/2025 00:00:00</td>
+                                <td>25/09/2025 23:59:59</td>
+                                <td>1</td>
+                            </tr>
+                            <tr id="row-GG004">
+                                <td>GG004</td>
+                                <td>Ưu đãi Ưu đãi săn sale ngày đôi</td>
+                                <td>%</td>
+                                <td>10</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>10/10/2025 00:00:00</td>
+                                <td>10/10/2025 23:59:59</td>
+                                <td>2</td>
+                            </tr>
+                            <tr id="row-GG005">
+                                <td>GG005</td>
+                                <td>Ưu đãi Ưu đãi dịp lễ 20/10</td>
+                                <td>VNĐ</td>
+                                <td>20.000</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>18/10/2025 18:10:00</td>
+                                <td>20/10/2025 23:59:59</td>
+                                <td>2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div> <!-- .row -->
+    </div> <!-- .container-fluid -->
+<!-- =================================================== -->
+<!-- Modal (Bảng chi tiết) cho Add / Edit / Details -->
+<!-- =================================================== -->
+<div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="couponModalLabel">Thông tin mã giảm giá</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="coupontForm">
+                    <fieldset id="productFieldset">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="cp_id">ID Mã giảm giá</label>
+                                <input type="text" class="form-control" id="cp_id" placeholder="GG00x">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="cp_mota">Mô tả</label>
+                                <input type="text" class="form-control" id="cp_mota" placeholder="Ưu đãi...">
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="cp_loaigiam">Loại giảm</label>
+                            <select id="cp_loaigiam" class="form-control">
+                                <option selected>%</option>
+                                <option>VNĐ</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="cp_giatrigiam">Giá trị giảm</label>
+                                <input type="number" class="form-control" id="cp_giatrigiam" placeholder="5">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="cp_giatritoithieu">Giá trị tối thiểu</label>
+                                <input type="number" class="form-control" id="cp_giatrithoithieu" placeholder="0">
+                        </div>
+                            <div class="form-group col-md-4">
+                                <label for="cp_giagiamtoida">Giá giảm tối đa</label>
+                                <input type="number" class="form-control" id="cp_giagiamtoida" placeholder="0">
+                        </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="cp_ngaybatdau">Ngày bắt đầu</label>
+                                <input type="datetime-local" class="form-control" id="cp_ngaybatdau">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="cp_ngayketthuc">Ngày kết thúc</label>
+                                <input type="datetime-local" class="form-control" id="cp_ngayketthuc">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="cp_gioihansudung">Giới hạn sử dụng</label>
+                                <input type="number" class="form-control" id="cp_gioihansudung" placeholder="1">
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="savecouponBtn">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
 
