@@ -1,8 +1,388 @@
-﻿
-@{
-    ViewData["Title"] = "Customers";
+﻿@{
+    ViewData["Title"] = "Quản lý khách hàng";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h1>Customers</h1>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
 
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý khách hàng</h2>
+                </div>
+                <div class="col-auto">
+                    <button type="button" class="btn btn-primary" id="addCustomers">
+                        <i class="fe fe-plus fe-16"></i> Thêm khách hàng mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bảng dữ liệu -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <table class="table table-hover table-borderless border-v">
+                        <thead>
+                            <tr>
+                                <th>ID Khách Hàng</th>
+                                <th>Tên Khách hàng</th>
+                                <th>Email</th>
+                                <th>Giới tính</th>
+                                <th>Ngày sinh</th>
+                                <th>Số điện thoại</th>
+                                <th>Địa chỉ</th>
+                                <th>Tác vụ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customerTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div> 
+</div>
+
+
+<!-- ========================= -->
+<!-- Modal Khách hàng -->
+<!-- ========================= -->
+<div class="modal fade" id="customerModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="customerModalLabel">Thông tin khách hàng</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="customerForm">
+                    <fieldset id="customerFieldset">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="cust_id">ID Khách hàng</label>
+                                <input type="text" class="form-control" id="cust_id" readonly>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="cust_name">Tên khách hàng *</label>
+                                <input type="text" class="form-control" id="cust_name">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cust_email">Email *</label>
+                            <input type="text" class="form-control" id="cust_email">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="cust_gender">Giới tính</label>
+                                <select class="form-control" id="cust_gender">
+                                    <option>Nam</option>
+                                    <option>Nữ</option>
+                                    <option>Khác</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="cust_birthday">Ngày sinh *</label>
+                                <input type="date" class="form-control" id="cust_birthday">
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="cust_phone">Số điện thoại *</label>
+                                <input type="text" class="form-control" id="cust_phone">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cust_address">Địa chỉ</label>
+                            <input type="text" class="form-control" id="cust_address">
+                        </div>
+
+                    </fieldset>
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" id="saveCustomerBtn">Lưu thay đổi</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================= -->
+<!-- Modal Xóa -->
+<!-- ========================= -->
+<div class="modal fade" id="confirmRemoveModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa khách hàng <strong id="customerNameRemove"></strong> không?
+                <input type="hidden" id="removeCustomerId" />
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button class="btn btn-danger" id="confirmRemoveBtn">Xóa</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+<script>
+$(document).ready(function () {
+
+
+    // ====================================
+    // MOCK DATA KHÁCH HÀNG
+    // ====================================
+    let mockCustomers = {
+        'kh001': {
+            id: 'KH001',
+            name: 'Nguyễn Minh Anh',
+            email: 'minh.anh@example.com',
+            gender: 'Nữ',
+            birthday: '1998-05-12',
+            phone: '0905123456',
+            address: '123 Nguyễn Trãi, Hà Nội'
+        },
+        'kh002': {
+            id: 'KH002',
+            name: 'Trần Hoàng Duy',
+            email: 'duy.tran@example.com',
+            gender: 'Nam',
+            birthday: '1999-10-21',
+            phone: '0933445566',
+            address: '45 Lê Lợi, TP.HCM'
+        },
+        'kh003': {
+            id: 'KH003',
+            name: 'Lê Thu Trang',
+            email: 'trang.le@example.com',
+            gender: 'Nữ',
+            birthday: '2000-03-08',
+            phone: '0988776655',
+            address: '88 Hai Bà Trưng, Đà Nẵng'
+        }
+    };
+
+
+    // ====================================
+    // VALIDATION
+    // ====================================
+    function validateCustomerForm() {
+
+        let name = $('#cust_name').val().trim();
+        let email = $('#cust_email').val().trim();
+        let phone = $('#cust_phone').val().trim();
+        let birthday = $('#cust_birthday').val();
+
+        let emailRegex = /^[A-Za-z0-9._%+-]+@@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+        let phoneRegex = /^[0-9]{10}$/;
+
+        let errors = [];
+
+        if (name === "") errors.push("Vui lòng nhập tên khách hàng.");
+        if (email === "") errors.push("Vui lòng nhập email.");
+        if (phone === "") errors.push("Vui lòng nhập số điện thoại.");
+        if (birthday === "") errors.push("Vui lòng chọn ngày sinh.");
+
+        if (email !== "" && !emailRegex.test(email)) {
+            errors.push("Email không hợp lệ. Vui lòng nhập đúng định dạng.");
+        }
+
+        if (phone !== "" && !phoneRegex.test(phone)) {
+            errors.push("Số điện thoại phải gồm đúng 10 chữ số.");
+        }
+
+        if (errors.length > 0) {
+            alert(errors.join("\n"));
+            return false;
+        }
+
+        return true;
+    }
+
+
+    // ====================================
+    // Render bảng
+    // ====================================
+    function renderCustomerTable() {
+        let tbody = $('#customerTableBody');
+        tbody.empty();
+
+        Object.keys(mockCustomers).forEach(key => {
+            const c = mockCustomers[key];
+            const row = `
+                <tr id="row-${key}">
+                    <td>${c.id}</td>
+                    <td>${c.name}</td>
+                    <td>${c.email}</td>
+                    <td>${c.gender}</td>
+                    <td>${c.birthday}</td>
+                    <td>${c.phone}</td>
+                    <td>${c.address}</td>
+                    <td>
+                        <div class="dropdown">
+                            <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown"></button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item btn-details" href="#" data-id="${key}">Chi tiết</a>
+                                <a class="dropdown-item btn-edit" href="#" data-id="${key}">Chỉnh sửa</a>
+                                <a class="dropdown-item btn-remove" href="#" data-id="${key}">Xóa</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+    }
+
+    renderCustomerTable();
+
+
+    // ====================================
+    // FORM HELPERS
+    // ====================================
+    function fillCustomerForm(data) {
+        $('#cust_id').val(data.id);
+        $('#cust_name').val(data.name);
+        $('#cust_email').val(data.email);
+        $('#cust_gender').val(data.gender);
+        $('#cust_birthday').val(data.birthday);
+        $('#cust_phone').val(data.phone);
+        $('#cust_address').val(data.address);
+    }
+
+    function clearCustomerForm() {
+        $('#customerForm')[0].reset();
+        $('#cust_id').val('');
+    }
+
+    function toggleCustomerFormLock(disabled) {
+        $('#customerFieldset').prop('disabled', disabled);
+        disabled ? $('#saveCustomerBtn').hide() : $('#saveCustomerBtn').show();
+    }
+
+
+    // ====================================
+    // ADD
+    // ====================================
+    $('#addCustomers').on('click', function () {
+        clearCustomerForm();
+
+        let newIdNum = Object.keys(mockCustomers).length + 1;
+        let newId = "KH" + newIdNum.toString().padStart(3, '0');
+
+        $('#cust_id').val(newId);
+
+        toggleCustomerFormLock(false);
+        $('#customerModalLabel').text('Thêm khách hàng mới');
+        $('#customerModal').modal('show');
+    });
+
+
+    // ====================================
+    // DETAILS
+    // ====================================
+    $('#customerTableBody').on('click', '.btn-details', function () {
+        let key = $(this).data('id');
+        fillCustomerForm(mockCustomers[key]);
+
+        toggleCustomerFormLock(true);
+        $('#customerModalLabel').text('Chi tiết khách hàng');
+        $('#customerModal').modal('show');
+    });
+
+
+    // ====================================
+    // EDIT
+    // ====================================
+    let editingId = null;
+
+    $('#customerTableBody').on('click', '.btn-edit', function () {
+        editingId = $(this).data('id');
+
+        fillCustomerForm(mockCustomers[editingId]);
+
+        toggleCustomerFormLock(false);
+        $('#customerModalLabel').text('Chỉnh sửa khách hàng');
+        $('#customerModal').modal('show');
+    });
+
+
+    // ====================================
+    // SAVE (ADD + UPDATE)
+    // ====================================
+    $('#saveCustomerBtn').on('click', function () {
+
+        if (!validateCustomerForm()) return;
+
+        const newData = {
+            id: $('#cust_id').val(),
+            name: $('#cust_name').val(),
+            email: $('#cust_email').val(),
+            gender: $('#cust_gender').val(),
+            birthday: $('#cust_birthday').val(),
+            phone: $('#cust_phone').val(),
+            address: $('#cust_address').val()
+        };
+
+        const key = newData.id.toLowerCase();
+        mockCustomers[key] = newData;
+
+        editingId = null;
+
+        renderCustomerTable();
+        $('#customerModal').modal('hide');
+    });
+
+
+    // ====================================
+    // REMOVE
+    // ====================================
+    $('#customerTableBody').on('click', '.btn-remove', function () {
+        let id = $(this).data('id');
+        let c = mockCustomers[id];
+
+        $('#customerNameRemove').text(`${c.name} (ID: ${c.id})`);
+        $('#removeCustomerId').val(id);
+
+        $('#confirmRemoveModal').modal('show');
+    });
+
+    $('#confirmRemoveBtn').on('click', function () {
+        const key = $('#removeCustomerId').val();
+
+        delete mockCustomers[key];
+        renderCustomerTable();
+
+        $('#confirmRemoveModal').modal('hide');
+    });
+
+});
+</script>
+}
