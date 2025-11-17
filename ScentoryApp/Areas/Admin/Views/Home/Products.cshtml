@@ -3,6 +3,34 @@
     ViewData["Title"] = "Quản lý sản phẩm";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
+<style>
+    /* CSS tùy chỉnh cho khu vực tải ảnh lên */
+    .image-upload-area {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .image-upload-area:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+
+        .image-upload-area .fe-upload {
+            color: #6c757d;
+        }
+
+        .image-upload-area:hover .fe-upload {
+            color: #007bff;
+        }
+    /* Đảm bảo hình ảnh xem trước hiển thị đúng */
+    #imagePreview img {
+        max-width: 150px;
+        max-height: 150px;
+        object-fit: contain;
+    }
+</style>
 
 <div class="container-fluid">
     <div class="row justify-content-center">
@@ -55,9 +83,9 @@
                                             <span class="text-muted sr-only">Action</span>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item btn-details" href="#" data-id="sp001">Details</a>
-                                            <a class="dropdown-item btn-edit" href="#" data-id="sp001">Edit</a>
-                                            <a class="dropdown-item btn-remove" href="#" data-id="sp001">Remove</a>
+                                            <a class="dropdown-item btn-details" href="#" data-id="sp001">Chi tiết</a>
+                                            <a class="dropdown-item btn-edit" href="#" data-id="sp001">Sửa</a>
+                                            <a class="dropdown-item btn-remove" href="#" data-id="sp001">Xóa</a>
                                         </div>
                                     </div>
                                 </td>
@@ -76,9 +104,9 @@
                                             <span class="text-muted sr-only">Action</span>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item btn-details" href="#" data-id="sp002">Details</a>
-                                            <a class="dropdown-item btn-edit" href="#" data-id="sp002">Edit</a>
-                                            <a class="dropdown-item btn-remove" href="#" data-id="sp002">Remove</a>
+                                            <a class="dropdown-item btn-details" href="#" data-id="sp002">Chi tiết</a>
+                                            <a class="dropdown-item btn-edit" href="#" data-id="sp002">Sửa</a>
+                                            <a class="dropdown-item btn-remove" href="#" data-id="sp002">Xóa</a>
                                         </div>
                                     </div>
                                 </td>
@@ -97,9 +125,9 @@
                                             <span class="text-muted sr-only">Action</span>
                                         </button>
                                         <div class="dropdown-menu dropdown-menu-right">
-                                            <a class="dropdown-item btn-details" href="#" data-id="sp003">Details</a>
-                                            <a class="dropdown-item btn-edit" href="#" data-id="sp003">Edit</a>
-                                            <a class="dropdown-item btn-remove" href="#" data-id="sp003">Remove</a>
+                                            <a class="dropdown-item btn-details" href="#" data-id="sp003">Chi tiết</a>
+                                            <a class="dropdown-item btn-edit" href="#" data-id="sp003">Sửa</a>
+                                            <a class="dropdown-item btn-remove" href="#" data-id="sp003">Xóa</a>
                                         </div>
                                     </div>
                                 </td>
@@ -140,6 +168,27 @@
                             <label for="sp_mota">Mô tả sản phẩm</label>
                             <textarea class="form-control" id="sp_mota" rows="3" placeholder="Mô tả chi tiết..."></textarea>
                         </div>
+
+                        <!-- START: Khu vực Tải ảnh lên (ĐÃ THÊM) -->
+                        <div class="form-group">
+                            <label>Hình ảnh Sản Phẩm (Tùy chọn)</label>
+                            <div id="imageDropzone" class="image-upload-area">
+                                <!-- Đổi id thành "sp_image" -->
+                                <input type="file" id="sp_image" accept="image/*" class="d-none">
+                                <div class="text-center p-4">
+                                    <i class="fe fe-upload fe-32 text-muted"></i>
+                                    <p class="mt-2 text-muted">Thả tệp tin của bạn vào đây hoặc nhấp để tải lên.</p>
+                                    <small class="text-secondary">Chỉ hỗ trợ 1 tệp hình ảnh (JPG, PNG).</small>
+                                </div>
+                            </div>
+                            <div id="imagePreview" class="mt-2 p-2 border rounded d-flex align-items-center" style="display:none;">
+                                <img id="previewImage" src="" alt="Image Preview" class="img-thumbnail mr-3">
+                                <span id="imageName" class="text-sm flex-grow-1"></span>
+                                <button type="button" class="btn btn-sm btn-outline-danger fe fe-x" id="removeImageBtn" aria-label="Remove image"></button>
+                            </div>
+                        </div>
+                        <!-- END: Khu vực Tải ảnh lên -->
+
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="sp_gia">Giá niêm yết</label>
@@ -208,6 +257,58 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // --- START: JS CHO TẢI ẢNH (ĐÃ THÊM) ---
+
+        // --- HÀM: Cập nhật trạng thái hiển thị của khu vực preview ảnh ---
+        function updateImagePreview(data) {
+            const previewContainer = $('#imagePreview');
+            const previewImg = $('#previewImage');
+            const imageNameSpan = $('#imageName');
+            const dropzone = $('#imageDropzone');
+
+            if (data && (data.file || data.mockImagePath)) {
+                // Nếu là File object mới chọn hoặc có đường dẫn mockup
+                const fileURL = data.file ? URL.createObjectURL(data.file) : data.mockImagePath;
+                const fileName = data.file ? data.file.name : 'Đã tải lên (' + data.id + ')';
+
+                previewImg.attr('src', fileURL);
+                imageNameSpan.text(fileName);
+                previewContainer.css('display', 'flex'); // Hiển thị preview
+                dropzone.hide();
+            } else {
+                // Xóa preview và hiển thị dropzone
+                previewContainer.hide();
+                previewImg.attr('src', '');
+                imageNameSpan.text('');
+                dropzone.show();
+                // Đảm bảo input file được reset
+                $('#sp_image').val(''); // Đổi id
+            }
+        }
+
+        // Bấm vào dropzone để kích hoạt input file
+        $('#imageDropzone').on('click', function () {
+            // Chỉ cho phép kích hoạt khi form không bị khóa (Details mode)
+            if (!$('#productFieldset').prop('disabled')) { // Đổi id
+                $('#sp_image').trigger('click'); // Đổi id
+            }
+        });
+
+        // Xử lý khi chọn file xong
+        $('#sp_image').on('change', function (e) { // Đổi id
+            const file = e.target.files[0];
+            if (file) {
+                // Hiển thị preview cho file mới chọn
+                updateImagePreview({ file: file });
+            }
+        });
+
+        // Nút xóa ảnh
+        $('#removeImageBtn').on('click', function () {
+            updateImagePreview(null); // Xóa preview và reset input file
+        });
+
+        // --- END: JS CHO TẢI ẢNH ---
 
             // --- HÀM MOCKUP: Lấy dữ liệu (giả) của 1 sản phẩm ---
             function getMockProductData(id) {

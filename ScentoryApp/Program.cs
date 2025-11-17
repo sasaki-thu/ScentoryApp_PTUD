@@ -1,8 +1,19 @@
-using AspNetCoreHero.ToastNotification;
+﻿using AspNetCoreHero.ToastNotification;
+using ScentoryApp.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// kết nối db
+var stringConnectdb = builder.Configuration.GetConnectionString("ScentoryPTUD");
+builder.Services.AddDbContext<ScentoryPtudContext>(options => options.UseSqlServer(stringConnectdb));
+// hiểu kí tự tiếng Việt
+builder.Services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(allowedRanges: new[] { UnicodeRanges.All })); 
+
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddNotyf(config =>
 {
