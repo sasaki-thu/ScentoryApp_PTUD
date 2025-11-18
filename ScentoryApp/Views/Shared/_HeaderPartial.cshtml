@@ -1,0 +1,247 @@
+﻿    <!-- màn hình tìm kiếm -->
+<div class="search-popup">
+    <div class="search-popup-container">
+
+        <form role="search" method="get" class="form-group" action="">
+            <input type="search" id="search-form" class="form-control border-0 border-bottom"
+                   placeholder="Type and press enter" value="" name="s" />
+            <button type="submit" class="search-submit border-0 position-absolute bg-white"
+                    style="top: 15px;right: 15px;">
+                <svg class="search" width="24" height="24">
+                    <use xlink:href="#search"></use>
+                </svg>
+            </button>
+        </form>
+
+        <h5 class="cat-list-title">Browse Categories</h5>
+
+        <ul class="cat-list">
+            <li class="cat-list-item">
+                <a href="#" title="Jackets">Jackets</a>
+            </li>
+            <li class="cat-list-item">
+                <a href="#" title="T-shirts">T-shirts</a>
+            </li>
+            <li class="cat-list-item">
+                <a href="#" title="Handbags">Handbags</a>
+            </li>
+            <li class="cat-list-item">
+                <a href="#" title="Accessories">Accessories</a>
+            </li>
+            <li class="cat-list-item">
+                <a href="#" title="Cosmetics">Cosmetics</a>
+            </li>
+            <li class="cat-list-item">
+                <a href="#" title="Dresses">Dresses</a>
+            </li>
+            <li class="cat-list-item">
+                <a href="#" title="Jumpsuits">Jumpsuits</a>
+            </li>
+        </ul>
+
+    </div>
+</div>
+<!-- kết thúc màn hình tìm kiếm -->
+<!-- giỏ hàng trượt -->
+<div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasCart" aria-labelledby="My Cart">
+    <div class="offcanvas-header justify-content-center">
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="order-md-last">
+            <h4 class="d-flex justify-content-between align-items-center mb-3">
+                <span class="text-primary">Your cart</span>
+                <span class="badge bg-primary rounded-pill">3</span>
+            </h4>
+            <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">Growers cider</h6>
+                        <small class="text-body-secondary">Brief description</small>
+                    </div>
+                    <span class="text-body-secondary">$12</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">Fresh grapes</h6>
+                        <small class="text-body-secondary">Brief description</small>
+                    </div>
+                    <span class="text-body-secondary">$8</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between lh-sm">
+                    <div>
+                        <h6 class="my-0">Heinz tomato ketchup</h6>
+                        <small class="text-body-secondary">Brief description</small>
+                    </div>
+                    <span class="text-body-secondary">$5</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>Total (USD)</span>
+                    <strong>$20</strong>
+                </li>
+            </ul>
+
+            <button class="w-100 btn btn-primary btn-lg" type="submit">Continue to Checkout</button>
+        </div>
+    </div>
+</div>
+<!-- kết thúc giỏ hàng trượt -->
+<!-- menu được chia làm 3 thẻ div: logo, menu chính và icon-->
+<nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
+    <div class="container-fluid">
+        <div class="row justify-content-between align-items-center w-100">
+            <!-- logo -->
+            <div class="col-auto">
+                <a class="navbar-brand text-white" asp-controller="Home" asp-action="Index">
+                    <img src="~/adminassets/images/scentorylogoopen.png" alt="Scentory Logo" style="max-height: 60px;margin-top: -10px;" />
+
+                </a>
+            </div>
+            <!-- kết thúc logo -->
+
+            <!-- menu chính -->
+            <div class="col-auto">
+                <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+                        aria-controls="offcanvasNavbar">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar"
+                     aria-labelledby="offcanvasNavbarLabel">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                                aria-label="Close"></button>
+                    </div>
+
+                    <div class="offcanvas-body">
+                        <ul class="navbar-nav justify-content-end flex-grow-1 gap-1 gap-md-5 pe-3">
+                            <!-- 1. Trang chủ -->
+                            <li class="nav-item active">
+                                <a class="nav-link" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            </li>
+
+                            <!-- 2. Về chúng tôi-->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="About">Về chúng tôi</a>
+                            </li>
+
+                            <!-- 3. Cửa hàng (gồm Nước hoa và tinh dầu-->
+                            <li class="nav-item dropdown d-flex">
+                                <!-- Nút 1: Link chính (đi đến trang Shop) -->
+                                <a class="nav-link" asp-controller="Home" asp-action="Shop">Cửa hàng</a>
+
+                                <!-- Nút 2: Mũi tên (mở dropdown) -->
+                                <a class="nav-link dropdown-toggle dropdown-toggle-split"
+                                   href="#"
+                                   id="dropdownShop"
+                                   data-bs-toggle="dropdown"
+                                   aria-haspopup="true" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </a>
+
+                                <!-- Menu con -->
+                                <ul class="dropdown-menu list-unstyled" aria-labelledby="dropdownShop">
+                                    <li>
+                                        <a class="dropdown-item item-anchor" asp-controller="Home" asp-action="Perfumes">Nước hoa</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item item-anchor" asp-controller="Home" asp-action="Oils">Tinh dầu</a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <!-- 4. Liên hệ -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Contact">Liên hệ</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- kết thúc menu chính -->
+
+            <!-- wishlist & cart-->
+            <div class="col-3 col-lg-auto">
+                <ul class="list-unstyled d-flex m-0">
+                    @* CODE CŨ
+                    <li class="d-none d-lg-block">
+                        <a href="index.html" class="text-uppercase mx-3">
+                            Wishlist <span class="wishlist-count">(0)</span>
+                        </a>
+                    </li>
+                    <li class="d-none d-lg-block">
+                        <a href="index.html" class="text-uppercase mx-3" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
+                           aria-controls="offcanvasCart">
+                            Cart <span class="cart-count">(0)</span>
+                        </a>
+                    </li>
+                    <li class="d-lg-none">
+                        <a href="#" class="mx-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#heart"></use>
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="d-lg-none">
+                        <a href="#" class="mx-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
+                           aria-controls="offcanvasCart">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#cart"></use>
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="search-box" class="mx-2">
+                        <a href="#search" class="search-button">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#search"></use>
+                            </svg>
+                        </a>
+                    </li>*@
+
+                    <!-- 1. Wishlist (Icon) -->
+                    <li>
+                        <a asp-controller="Home" asp-action="Wishlist" class="mx-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#heart"></use>
+                            </svg>
+                            <span class="wishlist-count">(0)</span>
+                        </a>
+                    </li>
+
+                    <!-- 2. Cart (Icon) -->
+                    <li>
+                        <a href="#" class="mx-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
+                           aria-controls="offcanvasCart">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#cart"></use>
+                            </svg>
+                            <span class="cart-count">(0)</span>
+                        </a>
+                    </li>
+
+                    <!-- 3. TÀI KHOẢN (Icon) -->
+                    <li>
+                        <a asp-controller="Account" asp-action="Index" class="mx-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#user"></use>
+                            </svg>
+                        </a>
+                    </li>
+
+                    <!-- 4. Search (Icon) -->
+                    <li class="mx-2 search-box">
+                        <a href="#search" class="search-button">
+                            <svg width="24" height="24" viewBox="0 0 24 24">
+                                <use xlink:href="#search"></use>
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- kết thúc wishlist & cart-->
+        </div>
+
+    </div>
+</nav>
+<!-- kế thúc menu-->
