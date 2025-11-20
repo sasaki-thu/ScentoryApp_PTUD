@@ -1,8 +1,454 @@
-﻿
-@{
-    ViewData["Title"] = "Orders";
+﻿﻿
+<@{
+ViewData["Title"] = "Quản lý đơn hàng";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+        }
+
+<style>
+#orderTableBody .badge-status {
+    min-width: 110px;
 }
 
-<h1>Orders</h1>
+.money {
+    white-space: nowrap;
+}
+</style>
 
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý đơn hàng</h2>
+                </div>
+                <div class="col-auto">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <button type="button" class="btn btn-outline-secondary" id="refreshOrders">
+                                <i class="fe fe-refresh-cw fe-16"></i> Làm mới
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bảng dữ liệu đơn hàng -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <table class="table table-hover table-borderless border-v">
+                        <thead>
+                            <tr>
+                                <th>ID Đơn</th>
+                                <th>Khách hàng (ID)</th>
+                                <th>Thời gian đặt</th>
+                                <th>Ngày giao dự kiến</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody">
+                            <tr id="row-DH001">
+                                <td>DH001</td>
+                                <td>Đào Ngọc Huỳnh Anh (ND004)</td>
+                                <td>2025-09-02 14:20:10</td>
+                                <td>2025-09-05</td>
+                                <td class="money">649,000 ₫</td>
+                                <td><span class="badge badge-warning badge-status">Đã giao</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="text-muted sr-only">Action</span>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item btn-details" href="#" data-id="DH001">Chi tiết</a>
+                                            <a class="dropdown-item btn-edit" href="#" data-id="DH001">Chỉnh sửa</a>
+                                            <a class="dropdown-item btn-cancel" href="#" data-id="DH001">Hủy / Xóa</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr id="row-DH002">
+                                <td>DH002</td>
+                                <td>Nguyễn Thị Ngọc Bích (ND005)</td>
+                                <td>2025-09-06 02:30:02</td>
+                                <td>2025-09-09</td>
+                                <td class="money">649,000 ₫</td>
+                                <td><span class="badge badge-info badge-status">Đã giao</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="text-muted sr-only">Action</span>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item btn-details" href="#" data-id="DH002">Chi tiết</a>
+                                            <a class="dropdown-item btn-edit" href="#" data-id="DH002">Chỉnh sửa</a>
+                                            <a class="dropdown-item btn-cancel" href="#" data-id="DH002">Hủy / Xóa</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr id="row-DH003">
+                                <td>DH003</td>
+                                <td>Trần Lê Huy (ND006)</td>
+                                <td>2025-09-07 22:16:14</td>
+                                <td>2025-09-10</td>
+                                <td class="money">369,000 ₫</td>
+                                <td><span class="badge badge-success badge-status">Đã giao</span></td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="text-muted sr-only">Action</span>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-right">
+                                            <a class="dropdown-item btn-details" href="#" data-id="DH003">Chi tiết</a>
+                                            <a class="dropdown-item btn-edit" href="#" data-id="DH003">Chỉnh sửa</a>
+                                            <a class="dropdown-item btn-cancel" href="#" data-id="DH003">Hủy / Xóa</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- =================================================== -->
+<!-- Modal Chi tiết / Edit -->
+<!-- =================================================== -->
+<div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderModalLabel">Thông tin đơn hàng</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form id="orderForm">
+                    <fieldset id="orderFieldset">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="dh_id">ID Đơn hàng</label>
+                                <input type="text" class="form-control" id="dh_id" readonly>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="dh_user">ID Người dùng</label>
+                                <input type="text" class="form-control" id="dh_user" placeholder="USRxxx">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="dh_shipper">Đơn vị vận chuyển (ID)</label>
+                                <input type="text" class="form-control" id="dh_shipper" placeholder="DVV001">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="dh_thoigian">Thời gian đặt</label>
+                                <input type="text" class="form-control" id="dh_thoigian" readonly>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="dh_ngaygiao">Ngày giao dự kiến</label>
+                                <input type="date" class="form-control" id="dh_ngaygiao">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="dh_thoigiancapnhat">Thời gian cập nhật</label>
+                                <input type="text" class="form-control" id="dh_thoigiancapnhat" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="dh_tongtien">Tổng tiền đơn</label>
+                                <input type="number" class="form-control" id="dh_tongtien" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="dh_feeship">Phí vận chuyển</label>
+                                <input type="number" class="form-control" id="dh_feeship" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="dh_tax">Thuế bán hàng</label>
+                                <input type="number" class="form-control" id="dh_tax" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="dh_status">Tình trạng đơn hàng</label>
+                                <select id="dh_status" class="form-control">
+                                    <option value="Đang chuẩn bị">Đang chuẩn bị</option>
+                                    <option value="Đang giao">Đang giao</option>
+                                    <option value="Đã giao">Đã giao</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="dh_voucher">Mã giảm giá (nếu có)</label>
+                                <input type="text" class="form-control" id="dh_voucher">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dh_note">Ghi chú / Địa chỉ giao hàng</label>
+                            <textarea id="dh_note" class="form-control" rows="3" placeholder="Địa chỉ, chú ý giao..."></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="dh_completed_time">Thời gian hoàn tất</label>
+                                <input type="text" class="form-control" id="dh_completed_time" readonly>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="saveOrderBtn">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =================================================== -->
+<!-- Modal Xác nhận Hủy / Xóa -->
+<!-- =================================================== -->
+<div class="modal fade" id="confirmCancelModal" tabindex="-1" role="dialog" aria-labelledby="confirmCancelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận hủy / xóa đơn</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn hủy / xóa đơn <strong id="orderCancelName"></strong>? Hành động này không thể hoàn tác.
+                <input type="hidden" id="cancelOrderId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmCancelBtn">Hủy / Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+                <script>
+                    $(document).ready(function () {
+
+                        // --- HÀM MOCKUP: Lấy dữ liệu (giả) của 1 đơn hàng ---
+                        function getMockOrderData(id) {
+                            const mock = {
+                                'DH001': {
+                                    id: 'DH001',
+                                    idNguoiDung: 'ND004',
+                                    tenNguoiDung: 'Đào Ngọc Huỳnh Anh',
+                                    ThoiGianDatHang: '2025-09-02 14:20:10',
+                                    NgayGiaoHangDuKien: '2025-09-05',
+                                    ID_DonViVanChuyen: 'DVVC1',
+                                    TongTienDonHang: 649000.00,
+                                    PhiVanChuyen: 0.00,
+                                    ThueBanHang: 51920.00,
+                                    ThoiGianCapNhat: '2025-09-02 14:20:10',
+                                    TinhTrangDonHang: 'Đã giao',
+                                    ThoiGianHoanTatDonHang: '2025-09-04 13:10:53',
+                                    ID_MaGiamGia: null,
+                                    DiaChi: 'Nguyễn Chí Thanh, phường Vườn Lài, TP.HCM'
+                                },
+                                'DH002': {
+                                    id: 'DH002',
+                                    idNguoiDung: 'ND005',
+                                    tenNguoiDung: 'Nguyễn Thị Ngọc Bích',
+                                    ThoiGianDatHang: '2025-09-06 02:30:02',
+                                    NgayGiaoHangDuKien: '2025-09-09',
+                                    ID_DonViVanChuyen: 'DVVC2',
+                                    TongTienDonHang: 649000.00,
+                                    PhiVanChuyen: 0.00,
+                                    ThueBanHang: 51920.00,
+                                    ThoiGianCapNhat: '2025-09-06 02:30:02',
+                                    TinhTrangDonHang: 'Đã giao',
+                                    ThoiGianHoanTatDonHang: '2025-09-09 16:45:07',
+                                    ID_MaGiamGia: null,
+                                    DiaChi: '543 Lê Duẩn, phường Buôn Ma Thuột, tỉnh Đak Lak'
+                                },
+                                'DH003': {
+                                    id: 'DH003',
+                                    idNguoiDung: 'ND006',
+                                    tenNguoiDung: 'Trần Lê Huy',
+                                    ThoiGianDatHang: '2025-09-07 22:16:14',
+                                    NgayGiaoHangDuKien: '2025-09-10',
+                                    ID_DonViVanChuyen: 'DVVC3',
+                                    TongTienDonHang: 369000.00,
+                                    PhiVanChuyen: 20000.00,
+                                    ThueBanHang: 27920.00,
+                                    ThoiGianCapNhat: '2025-09-07 22:16:14',
+                                    TinhTrangDonHang: 'Đã giao',
+                                    ThoiGianHoanTatDonHang: '2025-09-10 09:56:48',
+                                    ID_MaGiamGia: null,
+                                    DiaChi: 'Tạ Quang Bửu, phường Bình Đông, TP.HCM'
+                                }
+                            };
+                            return mock[id];
+                        }
+
+                        // --- HÀM: Đổ dữ liệu vào form ---
+                        function fillOrderForm(data) {
+                            $('#dh_id').val(data.id);
+                            $('#dh_user').val(data.idNguoiDung);
+                            $('#dh_shipper').val(data.ID_DonViVanChuyen);
+                            $('#dh_thoigian').val(data.ThoiGianDatHang);
+                            $('#dh_ngaygiao').val(data.NgayGiaoHangDuKien);
+                            $('#dh_thoigiancapnhat').val(data.ThoiGianCapNhat);
+                            $('#dh_tongtien').val(data.TongTienDonHang);
+                            $('#dh_feeship').val(data.PhiVanChuyen);
+                            $('#dh_tax').val(data.ThueBanHang);
+                            $('#dh_status').val(data.TinhTrangDonHang);
+                            $('#dh_voucher').val(data.ID_MaGiamGia || '');
+                            $('#dh_note').val(data.DiaChi || '');
+                            $('#dh_completed_time').val(data.ThoiGianHoanTatDonHang || '');
+                        }
+
+                        // --- HÀM: Clear form ---
+                        function clearOrderForm() {
+                            $('#orderForm')[0].reset();
+                            $('#dh_id').val('');
+                            $('#dh_thoigian').val('');
+                            $('#dh_thoigiancapnhat').val('');
+                            $('#dh_completed_time').val('');
+                        }
+
+                        // --- HÀM: Khoá/Mở form ---
+                        function toggleOrderFormLock(disabled) {
+                            $('#orderFieldset').prop('disabled', disabled);
+                            if (disabled) {
+                                $('#saveOrderBtn').hide();
+                            } else {
+                                $('#saveOrderBtn').show();
+                            }
+                        }
+
+                        // --- HÀM: Cập nhật row trong table sau khi save (mock) ---
+                        function updateOrderRow(data) {
+                            const row = $('#row-' + data.id);
+                            if (row.length === 0) return;
+
+                            row.find('td').eq(1).text((data.tenNguoiDung || '') + ' (' + data.idNguoiDung + ')');
+                            row.find('td').eq(2).text(data.ThoiGianDatHang);
+                            row.find('td').eq(3).text(data.NgayGiaoHangDuKien);
+                            row.find('td').eq(4).text(formatMoney(data.TongTienDonHang));
+                            const badge = row.find('.badge-status');
+                            badge.removeClass('badge-warning badge-info badge-success badge-danger badge-secondary');
+                            switch (data.TinhTrangDonHang) {
+                                case 'pending': badge.addClass('badge-secondary').text('pending'); break;
+                                case 'processing': badge.addClass('badge-warning').text('processing'); break;
+                                case 'shipping': badge.addClass('badge-info').text('shipping'); break;
+                                case 'completed': badge.addClass('badge-success').text('completed'); break;
+                                case 'cancelled': badge.addClass('badge-danger').text('cancelled'); break;
+                                default: badge.addClass('badge-secondary').text(data.TinhTrangDonHang); break;
+                            }
+                        }
+
+                        function formatMoney(value) {
+                            if (value == null) return '0 ₫';
+                            // simple VNĐ formatting with thousands separator
+                            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' ₫';
+                        }
+
+                        // === EVENTS ===
+
+                        // Refresh (chỉ mock: reload table static)
+                        $('#refreshOrders').on('click', function () {
+                            // Trong bản thật, gọi AJAX để load lại dữ liệu
+                            alert('Làm mới danh sách (mock). Trong thực tế bạn sẽ gọi API để tải dữ liệu mới.');
+                        });
+
+                        // Details
+                        $('#orderTableBody').on('click', '.btn-details', function (e) {
+                            e.preventDefault();
+                            const id = $(this).data('id');
+                            const data = getMockOrderData(id);
+
+                            fillOrderForm(data);
+                            toggleOrderFormLock(true);
+                            $('#orderModalLabel').text('Chi tiết đơn hàng');
+                            $('#orderModal').modal('show');
+                        });
+
+                        // Edit
+                        $('#orderTableBody').on('click', '.btn-edit', function (e) {
+                            e.preventDefault();
+                            const id = $(this).data('id');
+                            const data = getMockOrderData(id);
+
+                            fillOrderForm(data);
+                            toggleOrderFormLock(false);
+                            $('#orderModalLabel').text('Chỉnh sửa đơn hàng');
+                            $('#orderModal').modal('show');
+                        });
+
+                        // Cancel / Remove (show confirm)
+                        $('#orderTableBody').on('click', '.btn-cancel', function (e) {
+                            e.preventDefault();
+                            const id = $(this).data('id');
+                            const data = getMockOrderData(id);
+
+                            $('#orderCancelName').text(data.id + ' - ' + (data.tenNguoiDung || data.idNguoiDung));
+                            $('#cancelOrderId').val(id);
+                            $('#confirmCancelModal').modal('show');
+                        });
+
+                        // Confirm cancel
+                        $('#confirmCancelBtn').on('click', function () {
+                            const id = $('#cancelOrderId').val();
+
+                            // Trong thực tế: AJAX DELETE tới Controller
+                            $('#row-' + id).remove();
+                            $('#confirmCancelModal').modal('hide');
+                        });
+
+                        // Save changes (mock)
+                        $('#saveOrderBtn').on('click', function () {
+                            const id = $('#dh_id').val();
+                            if (!id) {
+                                alert('ID đơn không tồn tại trong mock. Chế độ này dùng cho edit mockup.');
+                                return;
+                            }
+
+                            // Lấy dữ liệu từ form
+                            const updated = {
+                                id: $('#dh_id').val(),
+                                idNguoiDung: $('#dh_user').val(),
+                                tenNguoiDung: $('#dh_user').val(), // mock: dùng ID làm tên nếu không có
+                                ID_DonViVanChuyen: $('#dh_shipper').val(),
+                                ThoiGianDatHang: $('#dh_thoigian').val() || new Date().toISOString(),
+                                NgayGiaoHangDuKien: $('#dh_ngaygiao').val(),
+                                ThoiGianCapNhat: new Date().toISOString(),
+                                TongTienDonHang: parseFloat($('#dh_tongtien').val()) || 0,
+                                PhiVanChuyen: parseFloat($('#dh_feeship').val()) || 0,
+                                ThueBanHang: parseFloat($('#dh_tax').val()) || 0,
+                                TinhTrangDonHang: $('#dh_status').val(),
+                                ThoiGianHoanTatDonHang: $('#dh_status').val() === 'completed' ? new Date().toISOString() : null,
+                                ID_MaGiamGia: $('#dh_voucher').val() || null,
+                                DiaChi: $('#dh_note').val()
+                            };
+
+                            // Mock update row
+                            updateOrderRow(updated);
+
+                            // Đóng modal
+                            $('#orderModal').modal('hide');
+                        });
+
+                    });
+                </script>
+}
