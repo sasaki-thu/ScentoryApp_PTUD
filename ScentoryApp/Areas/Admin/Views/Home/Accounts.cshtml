@@ -1,8 +1,375 @@
-﻿
-@{
-    ViewData["Title"] = "Accounts";
+﻿@{
+    ViewData["Title"] = "Quản lý tài khoản";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
-<h1>Accounts</h1>
+<div class="container-fluid">
+    <!-- TIÊU ĐỀ + NÚT THÊM -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Quản lý tài khoản</h2>
+        <button class="btn btn-primary" id="addAccountBtn">
+            + Thêm tài khoản mới
+        </button>
+    </div>
+
+    <!-- Bảng dữ liệu -->
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>ID Tài khoản</th>
+                        <th>Tên đăng nhập</th>
+                        <th>Vai trò</th>
+                        <th>ID Người dùng</th>
+                        <th style="width:80px;">Tác vụ</th>
+                    </tr>
+                </thead>
+                <tbody id="accountsTableBody">
+                    <!-- Rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- Modal Add/Edit Account -->
+<!-- ========================= -->
+<div class="modal fade" id="accountModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="accountModalLabel">Thông tin tài khoản</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="accountForm">
+                    <input type="hidden" id="acc_id_hidden" />
+                    <div class="form-group">
+                        <label for="acc_id">ID Tài khoản</label>
+                        <input type="text" class="form-control" id="acc_id">
+                    </div>
+                    <div class="form-group">
+                        <label for="acc_username">Tên đăng nhập *</label>
+                        <input type="text" class="form-control" id="acc_username">
+                    </div>
+                    <div class="form-group">
+                        <label for="acc_password">Mật khẩu</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="acc_password">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                    <i class="fe fe-eye"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="acc_role">Vai trò</label>
+                        <select class="form-control" id="acc_role">
+                            <option>Admin</option>
+                            <option>Khách hàng</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="acc_userid">ID Người dùng</label>
+                        <input type="text" class="form-control" id="acc_userid">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" id="saveAccountBtn">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- Modal Delete Confirmation -->
+<!-- ========================= -->
+<div class="modal fade" id="confirmRemoveModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa tài khoản <strong id="accountNameRemove"></strong> không?
+                <input type="hidden" id="removeAccountId" />
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button class="btn btn-danger" id="confirmRemoveBtn">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        select.no-arrow:disabled {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+    <script>
+$(document).ready(function () {
+
+    // ====================================
+    // MOCK DATA
+    // ====================================
+    let mockAccounts = {
+        'TK001': { id: 'TK001', username: 'scentory01', password: 'password123', role: 'Admin', userId: 'ND001' },
+        'TK002': { id: 'TK002', username: 'scentory02', password: 'password456', role: 'Admin', userId: 'ND002' },
+        'TK003': { id: 'TK003', username: 'scentory03', password: 'password789', role: 'Admin', userId: 'ND003' },
+        'TK004': { id: 'TK004', username: 'user01', password: 'userpass', role: 'Khách hàng', userId: 'ND004' }
+    };
+
+    // ====================================
+    // Render Table
+    // ====================================
+    function renderTable() {
+        let tbody = $('#accountsTableBody');
+        tbody.empty();
+        Object.values(mockAccounts).forEach(acc => {
+            const row = `
+                <tr id="row-${acc.id}">
+                    <td>${acc.id}</td>
+                    <td>${acc.username}</td>
+                    <td>${acc.role}</td>
+                    <td>${acc.userId}</td>
+                    <td class="text-center align-middle">
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm" data-toggle="dropdown" style="border-radius:50%;"><i class="fe fe-more-vertical"></i></button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item btn-details" href="#" data-id="${acc.id}">Chi tiết</a>
+                                <a class="dropdown-item btn-edit" href="#" data-id="${acc.id}">Chỉnh sửa</a>
+                                <a class="dropdown-item btn-remove" href="#" data-id="${acc.id}" data-name="${acc.username}">Xóa</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>`;
+            tbody.append(row);
+        });
+    }
+
+    // Initial load
+    renderTable();
+
+    // ====================================
+    // Form Helpers
+    // ====================================
+    function clearForm() {
+        $('#accountForm')[0].reset();
+        $('#acc_id').prop('readonly', false);
+        $('#acc_id_hidden').val('');
+    }
+
+    function fillForm(data, isDetailsView = false) {
+        $('#acc_id').val(data.id).prop('readonly', true);
+        $('#acc_id_hidden').val(data.id);
+        $('#acc_username').val(data.username);
+        $('#acc_role').val(data.role);
+        $('#acc_userid').val(data.userId).prop('readonly', true);
+
+        if (isDetailsView) {
+            $('#acc_password').val(data.password);
+        } else {
+            $('#acc_password').val('');
+        }
+    }
+
+    function toggleAccountFormLock(disabled) {
+        $('#accountForm input, #accountForm select').prop('disabled', disabled);
+        $('#acc_role').toggleClass('no-arrow', disabled);
+        // Hide save button if form is locked (details view)
+        disabled ? $('#saveAccountBtn').hide() : $('#saveAccountBtn').show();
+    }
+
+    function generateNewAccountId() {
+        const ids = Object.keys(mockAccounts)
+            .filter(k => k.startsWith('TK'))
+            .map(k => parseInt(k.substring(2)))
+            .filter(n => !isNaN(n));
+
+        const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+        const newIdNum = maxId + 1;
+        return 'TK' + String(newIdNum).padStart(3, '0');
+    }
+
+    function generateNewUserId() {
+        const userIds = Object.values(mockAccounts)
+            .map(acc => acc.userId)
+            .filter(id => id && id.startsWith('ND'))
+            .map(id => parseInt(id.substring(2)))
+            .filter(n => !isNaN(n));
+
+        const maxId = userIds.length > 0 ? Math.max(...userIds) : 0;
+        const newIdNum = maxId + 1;
+        return 'ND' + String(newIdNum).padStart(3, '0');
+    }
+
+    // ====================================
+    // Add
+    // ====================================
+    $('#addAccountBtn').on('click', function () {
+        clearForm();
+        toggleAccountFormLock(false);
+
+        const newAccId = generateNewAccountId();
+        $('#acc_id').val(newAccId).prop('readonly', true);
+
+        const newUserId = generateNewUserId();
+        $('#acc_userid').val(newUserId).prop('readonly', true);
+
+        $('#accountModalLabel').text('Thêm tài khoản mới');
+        $('#accountModal').modal('show');
+    });
+
+    // ====================================
+    // Details
+    // ====================================
+    $('#accountsTableBody').on('click', '.btn-details', function () {
+        let id = $(this).data('id');
+        let data = mockAccounts[id];
+        if (data) {
+            fillForm(data, true);
+            toggleAccountFormLock(true); // Lock the form
+            $('#accountModalLabel').text('Chi tiết tài khoản');
+            $('#accountModal').modal('show');
+        }
+    });
+
+    // ====================================
+    // Edit
+    // ====================================
+    $('#accountsTableBody').on('click', '.btn-edit', function () {
+        let id = $(this).data('id');
+        let data = mockAccounts[id];
+        if (data) {
+            fillForm(data, false);
+            toggleAccountFormLock(false); // Unlock the form
+            $('#accountModalLabel').text('Chỉnh sửa tài khoản');
+            $('#accountModal').modal('show');
+        }
+    });
+
+    // ====================================
+    // Save (Add + Update)
+    // ====================================
+    $('#saveAccountBtn').on('click', function () {
+        const id = $('#acc_id').val().trim();
+        const hiddenId = $('#acc_id_hidden').val();
+        const isEdit = hiddenId !== '';
+
+        if (!id) {
+            alert("ID tài khoản là bắt buộc.");
+            return;
+        }
+
+        const validationRegex = /^[a-zA-Z0-9_.-]+$/;
+
+        const username = $('#acc_username').val().trim();
+        if (!username) {
+            alert("Tên đăng nhập là bắt buộc.");
+            return;
+        }
+        if (!validationRegex.test(username)) {
+            alert("Tên đăng nhập không hợp lệ. Nó chỉ được chứa chữ, số và các ký tự '_', '.', '-' và không được có khoảng trắng.");
+            return;
+        }
+
+        const isUsernameTaken = Object.values(mockAccounts).some(acc => {
+            if (isEdit && acc.id === hiddenId) {
+                return false; // Skip self-check on edit
+            }
+            return acc.username.toLowerCase() === username.toLowerCase();
+        });
+
+        if (isUsernameTaken) {
+            alert("Tên đăng nhập này đã được sử dụng. Vui lòng chọn một tên khác.");
+            return;
+        }
+
+        const password = $('#acc_password').val();
+        if (!isEdit && !password) {
+            alert("Mật khẩu là bắt buộc khi tạo tài khoản mới.");
+            return;
+        }
+
+        if (isEdit) {
+            // For existing accounts, get all data and only update what's new
+            const updatedData = { ...mockAccounts[hiddenId] }; // copy existing data
+            updatedData.username = username;
+            updatedData.role = $('#acc_role').val();
+            if (password) {
+                updatedData.password = password;
+            }
+            mockAccounts[hiddenId] = updatedData;
+        } else {
+            // For new accounts, create the full object
+            const newData = {
+                id: id,
+                username: username,
+                password: password,
+                role: $('#acc_role').val(),
+                userId: $('#acc_userid').val().trim()
+            };
+            mockAccounts[id] = newData;
+        }
+
+        renderTable();
+        $('#accountModal').modal('hide');
+    });
+
+    // ====================================
+    // Remove
+    // ====================================
+    $('#accountsTableBody').on('click', '.btn-remove', function () {
+        let id = $(this).data('id');
+        let name = $(this).data('name');
+        $('#accountNameRemove').text(`${name} (ID: ${id})`);
+        $('#removeAccountId').val(id);
+        $('#confirmRemoveModal').modal('show');
+    });
+
+    $('#confirmRemoveBtn').on('click', function () {
+        const id = $('#removeAccountId').val();
+        if (mockAccounts[id]) {
+            delete mockAccounts[id];
+            renderTable();
+        }
+        $('#confirmRemoveModal').modal('hide');
+    });
+
+    // ====================================
+    // Password Toggle
+    // ====================================
+    $(document).on('click', '#togglePassword', function () {
+        const passwordInput = $('#acc_password');
+        const icon = $(this).find('i');
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
+            icon.removeClass('fe-eye').addClass('fe-eye-off');
+        } else {
+            passwordInput.attr('type', 'password');
+            icon.removeClass('fe-eye-off').addClass('fe-eye');
+        }
+    });
+
+    $('#accountModal').on('show.bs.modal', function () {
+        // Reset password field state
+        $('#acc_password').attr('type', 'password');
+        $('#togglePassword i').removeClass('fe-eye-off').addClass('fe-eye');
+    });
+});
+    </script>
+}
+
+
+
 

@@ -16,6 +16,11 @@ namespace ScentoryApp.Areas.Admin.Controllers
             return View();
         }
 
+        public IActionResult Accounts()
+        {
+            return View();
+        }
+
         public IActionResult Categories()
     {
         return View();
@@ -32,11 +37,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
     }
 
     public IActionResult Coupons()
-    {
-        return View();
-    }
-
-    public IActionResult Accounts()
     {
         return View();
     }
