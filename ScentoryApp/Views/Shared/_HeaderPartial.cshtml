@@ -151,7 +151,17 @@
                                 </ul>
                             </li>
 
-                            <!-- 4. Liên hệ -->
+                            <!-- 4. Blog -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Blog">Blog</a>
+                            </li>
+
+                            <!-- 5. Chính sách -->
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Home" asp-action="Privacy">Chính sách</a>
+                            </li>
+
+                            <!-- 6. Liên hệ -->
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="Home" asp-action="Contact">Liên hệ</a>
                             </li>
@@ -199,17 +209,7 @@
                         </a>
                     </li>*@
 
-                    <!-- 1. Wishlist (Icon) -->
-                    <li>
-                        <a asp-controller="Home" asp-action="Wishlist" class="mx-2">
-                            <svg width="24" height="24" viewBox="0 0 24 24">
-                                <use xlink:href="#heart"></use>
-                            </svg>
-                            <span class="wishlist-count">(0)</span>
-                        </a>
-                    </li>
-
-                    <!-- 2. Cart (Icon) -->
+                    <!-- 1. Cart (Icon) -->
                     <li>
                         <a href="#" class="mx-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
                            aria-controls="offcanvasCart">
@@ -220,7 +220,7 @@
                         </a>
                     </li>
 
-                    <!-- 3. TÀI KHOẢN (Icon) -->
+                    <!-- 2. TÀI KHOẢN (Icon) -->
                     <li>
                         <a asp-controller="Account" asp-action="Index" class="mx-2">
                             <svg width="24" height="24" viewBox="0 0 24 24">
@@ -229,7 +229,7 @@
                         </a>
                     </li>
 
-                    <!-- 4. Search (Icon) -->
+                    <!-- 3. Search (Icon) -->
                     <li class="mx-2 search-box">
                         <a href="#search" class="search-button">
                             <svg width="24" height="24" viewBox="0 0 24 24">
