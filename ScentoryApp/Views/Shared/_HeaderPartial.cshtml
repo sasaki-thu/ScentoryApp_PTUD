@@ -42,50 +42,7 @@
     </div>
 </div>
 <!-- kết thúc màn hình tìm kiếm -->
-<!-- giỏ hàng trượt -->
-<div class="offcanvas offcanvas-end" data-bs-scroll="true" tabindex="-1" id="offcanvasCart" aria-labelledby="My Cart">
-    <div class="offcanvas-header justify-content-center">
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <div class="order-md-last">
-            <h4 class="d-flex justify-content-between align-items-center mb-3">
-                <span class="text-primary">Your cart</span>
-                <span class="badge bg-primary rounded-pill">3</span>
-            </h4>
-            <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between lh-sm">
-                    <div>
-                        <h6 class="my-0">Growers cider</h6>
-                        <small class="text-body-secondary">Brief description</small>
-                    </div>
-                    <span class="text-body-secondary">$12</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-sm">
-                    <div>
-                        <h6 class="my-0">Fresh grapes</h6>
-                        <small class="text-body-secondary">Brief description</small>
-                    </div>
-                    <span class="text-body-secondary">$8</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between lh-sm">
-                    <div>
-                        <h6 class="my-0">Heinz tomato ketchup</h6>
-                        <small class="text-body-secondary">Brief description</small>
-                    </div>
-                    <span class="text-body-secondary">$5</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between">
-                    <span>Total (USD)</span>
-                    <strong>$20</strong>
-                </li>
-            </ul>
 
-            <button class="w-100 btn btn-primary btn-lg" type="submit">Continue to Checkout</button>
-        </div>
-    </div>
-</div>
-<!-- kết thúc giỏ hàng trượt -->
 <!-- menu được chia làm 3 thẻ div: logo, menu chính và icon-->
 <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
     <div class="container-fluid">
@@ -210,14 +167,26 @@
                     </li>*@
 
                     <!-- 1. Cart (Icon) -->
-                    <li>
-                        <a href="#" class="mx-2" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart"
-                           aria-controls="offcanvasCart">
-                            <svg width="24" height="24" viewBox="0 0 24 24">
-                                <use xlink:href="#cart"></use>
-                            </svg>
+                    <li class="cart-container position-relative">
+                        <a href="/Cart" id="cart-icon" class="mx-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#cart"></use></svg>
                             <span class="cart-count">(0)</span>
                         </a>
+
+                        <!-- MINI CART DROPDOWN -->
+                        <div id="mini-cart" class="mini-cart shadow">
+                            <ul id="cart-list" class="list-unstyled m-0 p-0"></ul>
+
+                            <div class="p-3 border-top">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="fw-bold">Tổng số phụ:</span>
+                                    <span id="cart-total" class="fw-bold">0 đ</span>
+                                </div>
+
+                                <a href="/Cart" class="btn w-100 mb-2 btn-outline-secondary">XEM GIỎ HÀNG</a>
+                                <a href="/Checkout" class="btn w-100 btn-primary">THANH TOÁN</a>
+                            </div>
+                        </div>
                     </li>
 
                     <!-- 2. TÀI KHOẢN (Icon) -->
@@ -245,3 +214,106 @@
     </div>
 </nav>
 <!-- kế thúc menu-->
+
+<!-- SCRIPT XỬ LÝ GIỎ HÀNG -->
+<script>
+       let cartItems = [
+        {
+            id: 1,
+            name: "Nước hoa Reminiscence - Eclipse (Huyền) 10ml | Scentory",
+            price: 159000,
+            img: "assets/images/product-item-6.jpg"
+        },
+        {
+            id: 2,
+            name: "Nước hoa Reminiscence - Horizon (Miên) 10ml | Scentory",
+            price: 159000,
+            img: "assets/images/product-item-6.jpg"
+        },
+        {
+            id: 3,
+            name: "Nước hoa Reminiscence - Whisper (Thầm) 10ml | Scentory",
+            price: 159000,
+            img: "assets/images/product-item-6.jpg"
+        }
+    ];
+
+    function formatVN(num) {
+        return num.toLocaleString("vi-VN") + " đ";
+    }
+
+    function renderCart() {
+        const cartList = document.getElementById("cart-list");
+        const cartTotal = document.getElementById("cart-total");
+        const cartCount = document.querySelector(".cart-count");
+
+        cartList.innerHTML = "";
+        let total = 0;
+
+        cartItems.forEach(item => {
+            total += item.price;
+
+            cartList.innerHTML += `
+                <li class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex gap-3">
+                        <img src="${item.img}" style="width:50px;height:50px;object-fit:cover;">
+                        <div>
+                            <div class="fw-bold">${item.name}</div>
+                            <small>1 × ${formatVN(item.price)}</small>
+                        </div>
+                    </div>
+
+                    <span class="remove-btn" data-id="${item.id}">&times;</span>
+                </li>
+            `;
+        });
+
+        cartTotal.textContent = formatVN(total);
+        cartCount.textContent = `(${cartItems.length})`;
+
+        attachRemoveEvents();
+    }
+
+    function attachRemoveEvents() {
+        document.querySelectorAll(".remove-btn").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const id = parseInt(this.getAttribute("data-id"));
+                cartItems = cartItems.filter(x => x.id !== id);
+                renderCart();
+            });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", renderCart);
+</script>
+<style>
+    .mini-cart {
+        position: absolute;
+        top: 28px;
+        right: 0;
+        width: 320px;
+        background: #fff;
+        border-radius: 8px;
+        display: none;
+        z-index: 99999;
+    }
+
+    .cart-container:hover .mini-cart {
+        display: block;
+    }
+
+    .mini-cart ul li {
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .remove-btn {
+        cursor: pointer;
+        font-size: 20px;
+        color: #999;
+    }
+
+        .remove-btn:hover {
+            color: #333;
+        }
+</style>

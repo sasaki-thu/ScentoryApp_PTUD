@@ -1,0 +1,210 @@
+﻿@{
+    ViewData["Title"] = "Giỏ hàng";
+}
+
+<div class="container my-5">
+    <h2 class="mb-4 fw-bold">Giỏ hàng của bạn</h2>
+
+    <table class="table cart-table align-middle">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Tên sản phẩm</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Tạm tính</th>
+            </tr>
+        </thead>
+        <tbody id="cart-body">
+        </tbody>
+    </table>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nhập mã giảm giá">
+                <button class="btn btn-primary">ÁP DỤNG</button>
+            </div>
+        </div>
+
+        <div class="col-md-6 text-end">
+            <button class="btn btn-primary px-5">CẬP NHẬT GIỎ HÀNG</button>
+        </div>
+    </div>
+
+    <div class="text-end mt-4">
+        <h4 class="fw-bold">Tổng cộng: <span id="cart-total">0 đ</span></h4>
+    </div>
+</div>
+
+<style>
+    .cart-table th {
+        background: #fafafa;
+        font-weight: 700;
+        font-size: 18px;
+        padding: 18px;
+    }
+
+    .cart-table td {
+        padding: 20px 12px;
+        vertical-align: middle;
+        border-bottom: 1px solid #eee;
+    }
+
+    .remove-btn {
+        font-size: 22px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        color: #8c8c8c;
+    }
+
+        .remove-btn:hover {
+            color: #000;
+        }
+
+    .qty-box {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ddd;
+        width: 120px;
+        border-radius: 4px;
+    }
+
+    .qty-btn {
+        width: 34px;
+        height: 34px;
+        border: none;
+        background: #f8f8f8;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .qty-input {
+        width: 50px;
+        text-align: center;
+        border: none;
+        outline: none;
+        background: white;
+    }
+
+    .product-img {
+        width: 70px;
+        height: 70px;
+        object-fit: cover;
+        border-radius: 6px;
+    }
+
+    .product-name {
+        font-size: 17px;
+        font-weight: 600;
+        color: #c09250;
+        max-width: 330px;
+        display: inline-block;
+        line-height: 1.4;
+    }
+</style>
+
+<script>
+    // HARD CODE PRODUCT LIST (page only)
+    let cartPageItems = [
+        {
+            id: 1,
+            name: "Nước hoa Reminiscence - Eclipse (Huyền) 10ml | Scentory",
+            img: "assets/images/product-item-6.jpg",
+            price: 159000,
+            quantity: 1
+        },
+        {
+            id: 2,
+            name: "Nước hoa Reminiscence - Horizon (Miên) 10ml | Scentory",
+            img: "assets/images/product-item-6.jpg",
+            price: 159000,
+            quantity: 1
+        },
+        {
+            id: 3,
+            name: "Nước hoa Reminiscence - Whisper (Thầm) 10ml | Scentory",
+            img: "assets/images/product-item-6.jpg",
+            price: 159000,
+            quantity: 1
+        }
+    ];
+
+    function formatVN(num) {
+        return num.toLocaleString("vi-VN") + " đ";
+    }
+
+    function renderCartPage() {
+        const tbody = document.getElementById("cart-body");
+        const totalBox = document.getElementById("cart-total");
+
+        tbody.innerHTML = "";
+        let total = 0;
+
+        cartPageItems.forEach(item => {
+            const subtotal = item.price * item.quantity;
+            total += subtotal;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <button class="remove-btn" data-id="${item.id}">&times;</button>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-3 align-items-center">
+                            <img src="${item.img}" class="product-img">
+                            <span class="product-name">${item.name}</span>
+                        </div>
+                    </td>
+                    <td>${formatVN(item.price)}</td>
+                    <td>
+                        <div class="qty-box">
+                            <button class="qty-btn minus-btn" data-id="${item.id}">-</button>
+                            <input type="text" class="qty-input" value="${item.quantity}" readonly>
+                            <button class="qty-btn plus-btn" data-id="${item.id}">+</button>
+                        </div>
+                    </td>
+                    <td>${formatVN(subtotal)}</td>
+                </tr>
+            `;
+        });
+
+        totalBox.textContent = formatVN(total);
+        attachCartPageEvents();
+    }
+
+    function attachCartPageEvents() {
+        document.querySelectorAll(".remove-btn").forEach(btn => {
+            btn.onclick = function () {
+                const id = parseInt(this.dataset.id);
+                cartPageItems = cartPageItems.filter(x => x.id !== id);
+                renderCartPage();
+            };
+        });
+
+        document.querySelectorAll(".minus-btn").forEach(btn => {
+            btn.onclick = function () {
+                const id = parseInt(this.dataset.id);
+                const item = cartPageItems.find(x => x.id === id);
+
+                item.quantity--;
+                if (item.quantity <= 0) {
+                    cartPageItems = cartPageItems.filter(x => x.id !== id);
+                }
+                renderCartPage();
+            };
+        });
+
+        document.querySelectorAll(".plus-btn").forEach(btn => {
+            btn.onclick = function () {
+                const id = parseInt(this.dataset.id);
+                const item = cartPageItems.find(x => x.id === id);
+                item.quantity++;
+                renderCartPage();
+            };
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", renderCartPage);
+</script>
