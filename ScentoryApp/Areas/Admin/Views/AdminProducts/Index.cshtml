@@ -1,0 +1,399 @@
+﻿@model IEnumerable<ScentoryApp.Models.SanPham>
+
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* CSS tùy chỉnh cho khu vực tải ảnh lên */
+    .image-upload-area {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .image-upload-area:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+
+        .image-upload-area .fe-upload {
+            color: #6c757d;
+        }
+
+        .image-upload-area:hover .fe-upload {
+            color: #007bff;
+        }
+    /* Đảm bảo hình ảnh xem trước hiển thị đúng */
+    #imagePreview img {
+        max-width: 150px;
+        max-height: 150px;
+        object-fit: contain;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý sản phẩm</h2>
+                </div>
+                <div class="col-auto">
+                    <form class="form-inline">
+                        <div class="form-check group">
+                            <!-- Thêm Mới Sản phẩm, mở bảng để điền -->
+                            <button type="button" class="btn btn-primary" id="addProductBtn">
+                                <i class="fe fe-plus fe-16"></i> Thêm sản phẩm mới
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Bảng dữ liệu sản phẩm -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <table class="table table-hover table-borderless border-v">
+                        <thead>
+                            <tr>
+                                <th>ID Sản phẩm</th>
+                                <th>Tên Sản phẩm</th>
+                                <th>Giá niêm yết</th>
+                                <th>Số lượng tồn kho</th>
+                                <th>Trạng thái</th>
+                                <th>Thời gian tạo</th>
+                                <th>Danh mục</th>
+                                <th>Tác vụ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                            <!-- thay dữ liệu -->
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr id="row-@item.IdSanPham">
+                                        <td>@item.IdSanPham</td>
+                                        <td>@item.TenSanPham</td>
+                                        <td>@item.GiaNiemYet.ToString("N0") đ</td>
+                                        <td>@item.SoLuongTonKho</td>
+                                        <td>
+                                            @if (item.TrangThaiSp)
+                                            {
+                                                <span class="badge badge-success">Đang bán</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge badge-danger">Ngừng bán</span>
+                                            }
+                                        </td>
+                                        <td>@item.ThoiGianTaoSp.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            @(item.IdDanhMucSanPhamNavigation != null ? item.IdDanhMucSanPhamNavigation.TenDanhMucSanPham : item.IdDanhMucSanPham)
+                                        </td>
+                                        <td>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
+                                                    <span class="text-muted sr-only">Action</span>
+                                                </button>
+                                                <div class="dropdown-menu dropdown-menu-right">
+                                                    <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdSanPham">Chi tiết</a>
+                                                    <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdSanPham">Chỉnh sửa</a>
+                                                    <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdSanPham">Xóa</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="8" class="text-center">Chưa có dữ liệu.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> <!-- .row -->
+</div> <!-- .container-fluid -->
+<!-- =================================================== -->
+<!-- Modal (Bảng chi tiết) cho Add / Edit / Details -->
+<!-- =================================================== -->
+<div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thông tin sản phẩm</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="productForm">
+                    <fieldset id="productFieldset">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label>ID Sản phẩm (*)</label>
+                                <input type="text" class="form-control" id="IdSanPham" name="IdSanPham" placeholder="VD: SP001" required>
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label>Tên Sản phẩm (*)</label>
+                                <input type="text" class="form-control" id="TenSanPham" name="TenSanPham" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Mô tả</label>
+                            <textarea class="form-control" id="MoTaSanPham" name="MoTaSanPham" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Hình ảnh</label>
+                            <div id="imageDropzone" class="image-upload-area">
+                                <input type="file" id="ImageFile" name="ImageFile" accept="image/*" class="d-none">
+                                <div class="text-center p-4">
+                                    <i class="fe fe-upload fe-32 text-muted"></i>
+                                    <p class="mt-2 text-muted">Nhấp để chọn ảnh (JPG, PNG).</p>
+                                </div>
+                            </div>
+                            <div id="imagePreview" class="mt-2 p-2 border rounded align-items-center" style="display:none;">
+                                <img id="previewImg" src="" alt="Preview" class="img-thumbnail mr-3">
+                                <button type="button" class="btn btn-sm btn-outline-danger fe fe-x" id="removeImageBtn"></button>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label>Giá niêm yết</label>
+                                <input type="number" class="form-control" id="GiaNiemYet" name="GiaNiemYet" placeholder="0">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Số lượng tồn kho</label>
+                                <input type="number" class="form-control" id="SoLuongTonKho" name="SoLuongTonKho" placeholder="0">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Danh mục</label>
+                                <select class="form-control" id="IdDanhMucSanPham" name="IdDanhMucSanPham" asp-items="ViewBag.IdDanhMucSanPham">
+                                    <option value="">-- Chọn danh mục --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Thời gian tạo</label>
+                                <input type="text" class="form-control" id="ThoiGianTaoSp" readonly placeholder="Tự động cập nhật...">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Cập nhật lần cuối</label>
+                                <input type="text" class="form-control" id="ThoiGianCapNhat" readonly placeholder="Chưa cập nhật">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="TrangThaiSp" name="TrangThaiSp" value="true" checked>
+                                <label class="custom-control-label" for="TrangThaiSp">Đang bán</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btnSave">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- =================================================== -->
+<!-- Modal (Xác nhận Xóa) -->
+<!-- =================================================== -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa sản phẩm <strong id="deleteName"></strong> không?
+                <input type="hidden" id="deleteId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            // --- 1. XỬ LÝ ẢNH ---
+            $('#imageDropzone').click(function () {
+                if (!$('#productFieldset').prop('disabled')) $('#ImageFile').click();
+            });
+
+            $('#ImageFile').change(function () {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#previewImg').attr('src', e.target.result);
+                        $('#imagePreview').css('display', 'flex');
+                        $('#imageDropzone').hide();
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            $('#removeImageBtn').click(function () {
+                $('#ImageFile').val('');
+                $('#previewImg').attr('src', '');
+                $('#imagePreview').hide();
+                $('#imageDropzone').show();
+            });
+
+            // --- 2. RESET FORM ---
+            function resetForm() {
+                $('#productForm')[0].reset();
+                $('#IdSanPham').prop('readonly', false);
+                $('#removeImageBtn').click();
+                $('#productFieldset').prop('disabled', false);
+                $('#btnSave').show();
+                $('#TrangThaiSp').prop('checked', true);
+
+                // Reset hiển thị ngày tháng
+                $('#ThoiGianTaoSp').val('');
+                $('#ThoiGianCapNhat').val('');
+            }
+
+            // --- 3. NÚT THÊM MỚI ---
+            $('#addProductBtn').click(function () {
+                resetForm();
+                $('#modalTitle').text('Thêm sản phẩm mới');
+                // Khi thêm mới, hiển thị ngày hiện tại
+                var now = new Date().toLocaleString();
+                $('#ThoiGianTaoSp').val(now);
+                $('#productModal').modal('show');
+            });
+
+            // --- 4. NÚT SỬA & CHI TIẾT ---
+            $('body').on('click', '.btn-edit, .btn-details', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                var isDetail = $(this).hasClass('btn-details');
+
+                $.ajax({
+                    url: '/Admin/AdminProducts/GetById',
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            var d = res.data;
+                            resetForm();
+
+                            // Map dữ liệu
+                            $('#IdSanPham').val(d.idSanPham).prop('readonly', true);
+                            $('#TenSanPham').val(d.tenSanPham);
+                            $('#MoTaSanPham').val(d.moTaSanPham);
+                            $('#GiaNiemYet').val(d.giaNiemYet);
+                            $('#SoLuongTonKho').val(d.soLuongTonKho);
+                            $('#IdDanhMucSanPham').val(d.idDanhMucSanPham);
+                            $('#TrangThaiSp').prop('checked', d.trangThaiSp);
+
+                            // Map ngày tháng
+                            $('#ThoiGianTaoSp').val(d.thoiGianTaoSp);
+                            $('#ThoiGianCapNhat').val(d.thoiGianCapNhat);
+
+                            // Hiển thị ảnh
+                            if (d.anhBase64) {
+                                $('#previewImg').attr('src', d.anhBase64);
+                                $('#imagePreview').css('display', 'flex');
+                                $('#imageDropzone').hide();
+                            }
+
+                            if (isDetail) {
+                                $('#modalTitle').text('Chi tiết sản phẩm');
+                                $('#productFieldset').prop('disabled', true);
+                                $('#btnSave').hide();
+                            } else {
+                                $('#modalTitle').text('Cập nhật sản phẩm');
+                            }
+                            $('#productModal').modal('show');
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+
+            // --- 5. NÚT LƯU ---
+            $('#btnSave').click(function () {
+                if (!$('#IdSanPham').val() || !$('#TenSanPham').val()) {
+                    alert('Vui lòng nhập ID và Tên sản phẩm!');
+                    return;
+                }
+                var formData = new FormData($('#productForm')[0]);
+                if (!$('#TrangThaiSp').is(':checked')) {
+                    formData.set('TrangThaiSp', 'false');
+                } else {
+                    formData.set('TrangThaiSp', 'true');
+                }
+
+                $.ajax({
+                    url: '/Admin/AdminProducts/Save',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            alert("Lỗi: " + res.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Lỗi hệ thống!");
+                    }
+                });
+            });
+
+            // --- 6. NÚT XÓA ---
+            $('body').on('click', '.btn-delete', function () {
+                var id = $(this).data('id');
+                var name = $(this).closest('tr').find('td:eq(1)').text(); // Lấy cột tên (index 1)
+                $('#deleteName').text(name);
+                $('#deleteId').val(id);
+                $('#deleteModal').modal('show');
+            });
+
+            $('#btnConfirmDelete').click(function () {
+                var id = $('#deleteId').val();
+                $.ajax({
+                    url: '/Admin/AdminProducts/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            $('#deleteModal').modal('hide');
+                            $('#row-' + id).remove();
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
