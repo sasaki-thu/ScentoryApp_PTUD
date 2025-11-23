@@ -7,9 +7,9 @@ public partial class SanPham
 {
     public string IdSanPham { get; set; } = null!;
 
-    public string TenSanPham { get; set; } = null!;
+    public string? TenSanPham { get; set; }
 
-    public string MoTaSanPham { get; set; } = null!;
+    public string? MoTaSanPham { get; set; }
 
     public decimal GiaNiemYet { get; set; }
 
@@ -22,6 +22,8 @@ public partial class SanPham
     public DateTime? ThoiGianCapNhat { get; set; }
 
     public string IdDanhMucSanPham { get; set; } = null!;
+
+    public byte[]? AnhSanPham { get; set; }
 
     public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
 

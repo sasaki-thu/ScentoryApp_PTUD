@@ -39,7 +39,7 @@ public partial class ScentoryPtudContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DAT;Database=ScentoryPTUD;Integrated Security=true;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=DAT;Database=ScentoryPTUD;Integrated Security=true;Encrypt=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -149,8 +149,7 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_DanhMucSanPham");
-            entity.Property(e => e.MoTaDanhMuc).HasMaxLength(1);
-            entity.Property(e => e.TenDanhMucSanPham).HasMaxLength(1);
+            entity.Property(e => e.AnhDanhMuc).HasColumnType("image");
             entity.Property(e => e.ThoiGianCapNhatDm)
                 .HasColumnType("datetime")
                 .HasColumnName("ThoiGianCapNhatDM");
@@ -192,7 +191,7 @@ public partial class ScentoryPtudContext : DbContext
                 .HasColumnType("datetime");
             entity.Property(e => e.ThoiGianHoanTatDonHang).HasColumnType("datetime");
             entity.Property(e => e.ThueBanHang).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.TinhTrangDonHang).HasMaxLength(1);
+            entity.Property(e => e.TinhTrangDonHang).HasMaxLength(20);
             entity.Property(e => e.TongTienDonHang).HasColumnType("decimal(10, 2)");
 
             entity.HasOne(d => d.IdDonViVanChuyenNavigation).WithMany(p => p.DonHangs)
@@ -305,14 +304,13 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_SanPham");
+            entity.Property(e => e.AnhSanPham).HasColumnType("image");
             entity.Property(e => e.GiaNiemYet).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.IdDanhMucSanPham)
                 .HasMaxLength(5)
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_DanhMucSanPham");
-            entity.Property(e => e.MoTaSanPham).HasMaxLength(1);
-            entity.Property(e => e.TenSanPham).HasMaxLength(1);
             entity.Property(e => e.ThoiGianCapNhat).HasColumnType("datetime");
             entity.Property(e => e.ThoiGianTaoSp)
                 .HasDefaultValueSql("(getdate())")
