@@ -26,16 +26,6 @@ CSS STRUCTURE:
 @font-face {
     font-family: 'phudu';
     src: url('fonts/dtphudu-medium.otf') format('opentype');
-    font-weight: 500;
-    font-style: normal;
-}
-
-/* 2. Khai báo font đậm (Bold) */
-@font-face {
-    font-family: 'phudu';
-    src: url('fonts/dtphudu-bold.otf') format('opentype');
-    font-weight: 700;
-    font-style: normal;
 }
 
 /*3. Font script điệu*/
@@ -51,40 +41,36 @@ CSS STRUCTURE:
 }
 
 body {
-  --heading-font: "phudu", Roboto, sans-serif;
-  --heading-font-weight: 500;
-  --heading-color: #c38154;
-  --heading-line-height: 1.24;
+    --heading-font: "phudu", Roboto, sans-serif;
+    --heading-font-weight: 500;
+    --heading-color: #c38154;
+    --heading-line-height: 1.24;
+    --swiper-theme-color: #8C907E;
 
-  --swiper-theme-color: #8C907E;
-
-  /* bootstrap */
-  --bs-body-font-family: "questrial", Roboto, sans-serif;
-  --bs-body-font-size: 18px;
-  --bs-body-font-weight: 400;
-  --bs-body-line-height: 1.5;
-  --bs-body-color: #8f8f8f;
-  --bs-body-color-rgb: 143, 143, 143;
-
-  --bs-primary: #8C907E;
-  --bs-secondary: #6c757d;
-  --bs-black: #111;
-  --bs-light: #F1F1F0;
-  --bs-dark: #212529;
-  --bs-gray: #9aa1a7;
-  --bs-gray-dark: #51565b;
-
-  --bs-primary-rgb: 140, 144, 126;
-  --bs-secondary-rgb: 108, 117, 125;
-  --bs-black-rgb: 17, 17, 17;
-  --bs-light-rgb: 241, 241, 240;
-  --bs-dark-rgb: 33, 37, 41;
-
-  --bs-link-color: #111;
-  --bs-link-color-rgb: 17, 17, 17;
-  --bs-link-decoration: underline;
-  --bs-link-hover-color: #111;
-  --bs-link-hover-color-rgb: 17, 17, 17;
+    /* bootstrap */
+    --bs-body-font-family: "questrial", Roboto, sans-serif;
+    --bs-body-font-size: 18px;
+    --bs-body-font-weight: 400;
+    --bs-body-line-height: 1.5;
+    --bs-body-color: #8f8f8f;
+    --bs-body-color-rgb: 143, 143, 143;
+    --bs-primary: #8C907E;
+    --bs-secondary: #6c757d;
+    --bs-black: #111;
+    --bs-light: #F1F1F0;
+    --bs-dark: #212529;
+    --bs-gray: #9aa1a7;
+    --bs-gray-dark: #51565b;
+    --bs-primary-rgb: 140, 144, 126;
+    --bs-secondary-rgb: 108, 117, 125;
+    --bs-black-rgb: 17, 17, 17;
+    --bs-light-rgb: 241, 241, 240;
+    --bs-dark-rgb: 33, 37, 41;
+    --bs-link-color: #111;
+    --bs-link-color-rgb: 17, 17, 17;
+    --bs-link-decoration: underline;
+    --bs-link-hover-color: #111;
+    --bs-link-hover-color-rgb: 17, 17, 17;
 }
 
 body {
