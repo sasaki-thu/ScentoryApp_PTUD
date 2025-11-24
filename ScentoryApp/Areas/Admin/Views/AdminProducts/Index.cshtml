@@ -5,13 +5,15 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
+<link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+
 <style>
-    /* CSS tùy chỉnh cho khu vực tải ảnh lên */
     .image-upload-area {
         border: 2px dashed #ccc;
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s ease-in-out;
+        background: #fff;
     }
 
         .image-upload-area:hover {
@@ -26,103 +28,119 @@
         .image-upload-area:hover .fe-upload {
             color: #007bff;
         }
-    /* Đảm bảo hình ảnh xem trước hiển thị đúng */
+
     #imagePreview img {
         max-width: 150px;
         max-height: 150px;
         object-fit: contain;
+        border-radius: 4px;
+    }
+
+    /* Chỉnh lại phân trang cho đẹp */
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    /* Ẩn thanh search mặc định của DataTables */
+    .dataTables_filter {
+        display: none;
+    }
+
+    /* chỉnh màu */
+    #dataTable-1 thead th {
+        color: #007bff;
     }
 </style>
 
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12">
+
             <div class="row align-items-center mb-2">
                 <div class="col">
                     <h2 class="h2 page-title">Quản lý sản phẩm</h2>
                 </div>
                 <div class="col-auto">
-                    <form class="form-inline">
-                        <div class="form-check group">
-                            <!-- Thêm Mới Sản phẩm, mở bảng để điền -->
-                            <button type="button" class="btn btn-primary" id="addProductBtn">
-                                <i class="fe fe-plus fe-16"></i> Thêm sản phẩm mới
-                            </button>
+                    <div class="form-inline">
+                        <div class="form-group mr-2">
+                            <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm kiếm sản phẩm..." style="min-width: 250px;">
                         </div>
-                    </form>
+                        <button type="button" class="btn btn-primary" id="addProductBtn">
+                            <i class="fe fe-plus fe-16"></i> Thêm sản phẩm mới
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Bảng dữ liệu sản phẩm -->
-            <div class="card shadow">
-                <div class="card-body">
-                    <table class="table table-hover table-borderless border-v">
-                        <thead>
-                            <tr>
-                                <th>ID Sản phẩm</th>
-                                <th>Tên Sản phẩm</th>
-                                <th>Giá niêm yết</th>
-                                <th>Số lượng tồn kho</th>
-                                <th>Trạng thái</th>
-                                <th>Thời gian tạo</th>
-                                <th>Danh mục</th>
-                                <th>Tác vụ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="productTableBody">
-                            <!-- thay dữ liệu -->
-                            @if (Model != null && Model.Any())
-                            {
-                                foreach (var item in Model)
-                                {
-                                    <tr id="row-@item.IdSanPham">
-                                        <td>@item.IdSanPham</td>
-                                        <td>@item.TenSanPham</td>
-                                        <td>@item.GiaNiemYet.ToString("N0") đ</td>
-                                        <td>@item.SoLuongTonKho</td>
-                                        <td>
-                                            @if (item.TrangThaiSp)
-                                            {
-                                                <span class="badge badge-success">Đang bán</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge badge-danger">Ngừng bán</span>
-                                            }
-                                        </td>
-                                        <td>@item.ThoiGianTaoSp.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>
-                                            @(item.IdDanhMucSanPhamNavigation != null ? item.IdDanhMucSanPhamNavigation.TenDanhMucSanPham : item.IdDanhMucSanPham)
-                                        </td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
-                                                    <span class="text-muted sr-only">Action</span>
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-right">
-                                                    <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdSanPham">Chi tiết</a>
-                                                    <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdSanPham">Chỉnh sửa</a>
-                                                    <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdSanPham">Xóa</a>
-                                                </div>
-                                            </div>
-                                        </td>
+            <div class="row my-1">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <table class="table datatables" id="dataTable-1">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian tạo</th>
+                                        <th>Danh mục</th>
+                                        <th>Tác vụ</th>
                                     </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr><td colspan="8" class="text-center">Chưa có dữ liệu.</td></tr>
-                            }
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody id="productTableBody">
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="row-@item.IdSanPham.Trim()">
+                                                <td>@item.IdSanPham</td>
+                                                <td>@item.TenSanPham</td>
+                                                <td>@item.GiaNiemYet.ToString("N0") đ</td>
+                                                <td>@item.SoLuongTonKho</td>
+                                                <td>
+                                                    @if (item.TrangThaiSp)
+                                                    {
+                                                        <span class="badge badge-success">Đang bán</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-danger">Ngừng bán</span>
+                                                    }
+                                                </td>
+                                                <td>@item.ThoiGianTaoSp.ToString("dd/MM/yyyy HH:mm")</td>
+                                                <td>
+                                                    @(item.IdDanhMucSanPhamNavigation != null ? item.IdDanhMucSanPhamNavigation.TenDanhMucSanPham : item.IdDanhMucSanPham)
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
+                                                            <span class="text-muted sr-only">Action</span>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdSanPham.Trim()">Chi tiết</a>
+                                                            <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdSanPham.Trim()">Chỉnh sửa</a>
+                                                            <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdSanPham.Trim()">Xóa</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
-    </div> <!-- .row -->
-</div> <!-- .container-fluid -->
-<!-- =================================================== -->
-<!-- Modal (Bảng chi tiết) cho Add / Edit / Details -->
-<!-- =================================================== -->
+    </div>
+</div>
+
 <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -145,12 +163,10 @@
                                 <input type="text" class="form-control" id="TenSanPham" name="TenSanPham" required>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label>Mô tả</label>
                             <textarea class="form-control" id="MoTaSanPham" name="MoTaSanPham" rows="3"></textarea>
                         </div>
-
                         <div class="form-group">
                             <label>Hình ảnh</label>
                             <div id="imageDropzone" class="image-upload-area">
@@ -165,7 +181,6 @@
                                 <button type="button" class="btn btn-sm btn-outline-danger fe fe-x" id="removeImageBtn"></button>
                             </div>
                         </div>
-
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label>Giá niêm yết</label>
@@ -182,7 +197,6 @@
                                 </select>
                             </div>
                         </div>
-
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label>Thời gian tạo</label>
@@ -193,7 +207,6 @@
                                 <input type="text" class="form-control" id="ThoiGianCapNhat" readonly placeholder="Chưa cập nhật">
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="custom-control custom-switch">
                                 <input type="checkbox" class="custom-control-input" id="TrangThaiSp" name="TrangThaiSp" value="true" checked>
@@ -210,9 +223,7 @@
         </div>
     </div>
 </div>
-<!-- =================================================== -->
-<!-- Modal (Xác nhận Xóa) -->
-<!-- =================================================== -->
+
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -235,10 +246,43 @@
 </div>
 
 @section Scripts {
+    <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
+    <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+    
     <script>
         $(document).ready(function () {
 
-            // --- 1. XỬ LÝ ẢNH ---
+            // --- CẤU HÌNH DATATABLES ---
+            var table = $('#dataTable-1').DataTable({
+                autoWidth: true,
+                "lengthChange": false,
+                "searching": true,
+                "dom": 'rt<"d-flex justify-content-between align-items-center"ip>',
+
+                "language": {
+                    "sProcessing":   "Đang xử lý...",
+                    "sZeroRecords":  "Không tìm thấy kết quả phù hợp",
+                    "sInfo":         "Đang hiển thị _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                    "sInfoEmpty":    "Đang hiển thị 0 đến 0 trong tổng số 0 mục",
+                    "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+                    "sSearch":       "Tìm kiếm:",
+                    "oPaginate": {
+                        "sFirst":    "Đầu",
+                        "sPrevious": "Trước",
+                        "sNext":     "Tiếp",
+                        "sLast":     "Cuối"
+                    }
+                }
+            });
+
+            // --- KẾT NỐI Ô TÌM KIẾM CUSTOM ---
+            $('#customSearch').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+
+            // --- CODE AJAX LOGIC ---
+
+            // 1. XỬ LÝ ẢNH
             $('#imageDropzone').click(function () {
                 if (!$('#productFieldset').prop('disabled')) $('#ImageFile').click();
             });
@@ -262,7 +306,7 @@
                 $('#imageDropzone').show();
             });
 
-            // --- 2. RESET FORM ---
+            // 2. RESET FORM
             function resetForm() {
                 $('#productForm')[0].reset();
                 $('#IdSanPham').prop('readonly', false);
@@ -270,23 +314,20 @@
                 $('#productFieldset').prop('disabled', false);
                 $('#btnSave').show();
                 $('#TrangThaiSp').prop('checked', true);
-
-                // Reset hiển thị ngày tháng
                 $('#ThoiGianTaoSp').val('');
                 $('#ThoiGianCapNhat').val('');
             }
 
-            // --- 3. NÚT THÊM MỚI ---
+            // 3. NÚT THÊM MỚI
             $('#addProductBtn').click(function () {
                 resetForm();
                 $('#modalTitle').text('Thêm sản phẩm mới');
-                // Khi thêm mới, hiển thị ngày hiện tại
                 var now = new Date().toLocaleString();
                 $('#ThoiGianTaoSp').val(now);
                 $('#productModal').modal('show');
             });
 
-            // --- 4. NÚT SỬA & CHI TIẾT ---
+            // 4. NÚT SỬA & CHI TIẾT
             $('body').on('click', '.btn-edit, .btn-details', function (e) {
                 e.preventDefault();
                 var id = $(this).data('id');
@@ -300,8 +341,6 @@
                         if (res.success) {
                             var d = res.data;
                             resetForm();
-
-                            // Map dữ liệu
                             $('#IdSanPham').val(d.idSanPham).prop('readonly', true);
                             $('#TenSanPham').val(d.tenSanPham);
                             $('#MoTaSanPham').val(d.moTaSanPham);
@@ -309,12 +348,9 @@
                             $('#SoLuongTonKho').val(d.soLuongTonKho);
                             $('#IdDanhMucSanPham').val(d.idDanhMucSanPham);
                             $('#TrangThaiSp').prop('checked', d.trangThaiSp);
-
-                            // Map ngày tháng
                             $('#ThoiGianTaoSp').val(d.thoiGianTaoSp);
                             $('#ThoiGianCapNhat').val(d.thoiGianCapNhat);
 
-                            // Hiển thị ảnh
                             if (d.anhBase64) {
                                 $('#previewImg').attr('src', d.anhBase64);
                                 $('#imagePreview').css('display', 'flex');
@@ -336,7 +372,7 @@
                 });
             });
 
-            // --- 5. NÚT LƯU ---
+            // 5. NÚT LƯU
             $('#btnSave').click(function () {
                 if (!$('#IdSanPham').val() || !$('#TenSanPham').val()) {
                     alert('Vui lòng nhập ID và Tên sản phẩm!');
@@ -369,10 +405,10 @@
                 });
             });
 
-            // --- 6. NÚT XÓA ---
+            // 6. NÚT XÓA
             $('body').on('click', '.btn-delete', function () {
                 var id = $(this).data('id');
-                var name = $(this).closest('tr').find('td:eq(1)').text(); // Lấy cột tên (index 1)
+                var name = $(this).closest('tr').find('td:eq(1)').text();
                 $('#deleteName').text(name);
                 $('#deleteId').val(id);
                 $('#deleteModal').modal('show');
@@ -387,7 +423,9 @@
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
-                            $('#row-' + id).remove();
+                            // Xóa dòng trong DataTable (Cập nhật giao diện ngay mà ko cần reload)
+                            var table = $('#dataTable-1').DataTable();
+                            table.row($('#row-' + id)).remove().draw();
                         } else {
                             alert(res.message);
                         }

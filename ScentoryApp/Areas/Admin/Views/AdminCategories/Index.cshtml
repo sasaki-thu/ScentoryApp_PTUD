@@ -5,13 +5,15 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
+<link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+
 <style>
-    /* CSS tùy chỉnh cho khu vực tải ảnh lên */
     .image-upload-area {
         border: 2px dashed #ccc;
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.2s ease-in-out;
+        background: #fff;
     }
 
         .image-upload-area:hover {
@@ -26,108 +28,126 @@
         .image-upload-area:hover .fe-upload {
             color: #007bff;
         }
-    /* Đảm bảo hình ảnh xem trước hiển thị đúng */
+
     #imagePreview img {
         max-width: 150px;
         max-height: 150px;
         object-fit: contain;
+        border-radius: 4px;
+    }
+
+    /* Chỉnh lại nút phân trang */
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    /* Ẩn thanh search mặc định */
+    .dataTables_filter {
+        display: none;
+    }
+    /* chỉnh màu */
+    #dataTable-1 thead th {
+        color: #007bff;
     }
 </style>
 
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12">
+
             <div class="row align-items-center mb-2">
                 <div class="col">
                     <h2 class="h2 page-title">Quản lý danh mục sản phẩm</h2>
                 </div>
                 <div class="col-auto">
-                    <!-- Thêm Mới Danh mục, mở bảng để điền -->
-                    <button type="button" class="btn btn-primary" id="addCategoryBtn">
-                        <i class="fe fe-plus fe-16"></i> Thêm danh mục mới
-                    </button>
+                    <div class="form-inline">
+                        <div class="form-group mr-2">
+                            <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm kiếm danh mục..." style="min-width: 250px;">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="addCategoryBtn">
+                            <i class="fe fe-plus fe-16"></i> Thêm danh mục mới
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Bảng dữ liệu danh mục -->
-            <div class="card shadow">
-                <div class="card-body">
-                    <table class="table table-hover table-borderless border-v">
-                        <thead>
-                            <tr>
-                                <th>ID Danh Mục</th>
-                                <th>Tên Danh Mục</th>
-                                <th>Mô tả</th>
-                                <th>Trạng thái</th>
-                                <th>Thời gian tạo</th>
-                                <th>Thời gian cập nhật</th>
-                                <th>Tác vụ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="categoryTableBody">
-                            <!-- thêm dữ liệu -->
-                            @if (Model != null && Model.Any())
-                            {
-                                foreach (var item in Model)
-                                {
-                                    <tr id="row-@item.IdDanhMucSanPham.Trim()">
-                                        <td>@item.IdDanhMucSanPham</td>
-                                        <td>@item.TenDanhMucSanPham</td>
-                                        <td>
-                                            @if (!string.IsNullOrEmpty(item.MoTaDanhMuc) && item.MoTaDanhMuc.Length > 50)
-                                            {
-                                                @item.MoTaDanhMuc.Substring(0, 50)
-                                    
-                                                <span>...</span>
-                                            }
-                                            else
-                                            {
-                                                @item.MoTaDanhMuc
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (item.TrangThaiDanhMuc)
-                                            {
-                                                <span class="badge badge-success">Đang hiển thị</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge badge-secondary">Đang ẩn</span>
-                                            }
-                                        </td>
-                                        <td>@item.ThoiGianTaoDm.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>
-                                            @(item.ThoiGianCapNhatDm.HasValue? item.ThoiGianCapNhatDm.Value.ToString("dd/MM/yyyy HH:mm") : "")
-                                        </td>
-                                        <td>
-                                            <div class="dropdown">
-                                                <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
-                                                    <span class="text-muted sr-only">Action</span>
-                                                </button>
-                                                <div class="dropdown-menu dropdown-menu-right">
-                                                    <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdDanhMucSanPham.Trim()">Chi tiết</a>
-                                                    <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdDanhMucSanPham.Trim()">Chỉnh sửa</a>
-                                                    <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdDanhMucSanPham.Trim()">Xóa</a>
-                                                </div>
-                                            </div>
-                                        </td>
+            <div class="row my-1">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <table class="table datatables" id="dataTable-1">
+                                <thead>
+                                    <tr>
+                                        <th>ID Danh Mục</th>
+                                        <th>Tên Danh Mục</th>
+                                        <th>Mô tả</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian tạo</th>
+                                        <th>Thời gian cập nhật</th>
+                                        <th>Tác vụ</th>
                                     </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr><td colspan="7" class="text-center">Chưa có danh mục nào.</td></tr>
-                            }
-                        </tbody>
-                    </table>
+                                </thead>
+                                <tbody id="categoryTableBody">
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="row-@item.IdDanhMucSanPham.Trim()">
+                                                <td>@item.IdDanhMucSanPham</td>
+                                                <td>@item.TenDanhMucSanPham</td>
+                                                <td>
+                                                    @if (!string.IsNullOrEmpty(item.MoTaDanhMuc) && item.MoTaDanhMuc.Length > 50)
+                                                    {
+                                                        @item.MoTaDanhMuc.Substring(0, 50)
+                                            
+                                                        <span>...</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @item.MoTaDanhMuc
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (item.TrangThaiDanhMuc)
+                                                    {
+                                                        <span class="badge badge-success">Đang hiển thị</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge badge-secondary">Đang ẩn</span>
+                                                    }
+                                                </td>
+                                                <td>@item.ThoiGianTaoDm.ToString("dd/MM/yyyy HH:mm")</td>
+                                                <td>
+                                                    @(item.ThoiGianCapNhatDm.HasValue? item.ThoiGianCapNhatDm.Value.ToString("dd/MM/yyyy HH:mm") : "")
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
+                                                            <span class="text-muted sr-only">Action</span>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdDanhMucSanPham.Trim()">Chi tiết</a>
+                                                            <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdDanhMucSanPham.Trim()">Chỉnh sửa</a>
+                                                            <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdDanhMucSanPham.Trim()">Xóa</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
-    </div> <!-- .row -->
-</div> <!-- .container-fluid -->
-<!-- =================================================== -->
-<!-- Modal (Bảng chi tiết) cho Add / Edit / Details -->
-<!-- =================================================== -->
+    </div>
+</div>
+
 <div class="modal fade" id="categoryModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -150,13 +170,10 @@
                                 <input type="text" class="form-control" id="TenDanhMucSanPham" name="TenDanhMucSanPham" placeholder="Tên danh mục..." required>
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label>Mô tả</label>
                             <textarea class="form-control" id="MoTaDanhMuc" name="MoTaDanhMuc" rows="3"></textarea>
                         </div>
-
-                        <!-- START: Khu vực Tải ảnh lên -->
                         <div class="form-group">
                             <label>Hình ảnh Danh Mục (Tùy chọn)</label>
                             <div id="imageDropzone" class="image-upload-area">
@@ -171,8 +188,6 @@
                                 <button type="button" class="btn btn-sm btn-outline-danger fe fe-x" id="removeImageBtn"></button>
                             </div>
                         </div>
-                        <!-- END: Khu vực Tải ảnh lên -->
-
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label>Thời gian tạo</label>
@@ -183,7 +198,6 @@
                                 <input type="text" class="form-control" id="ThoiGianCapNhatDm" readonly placeholder="Chưa cập nhật">
                             </div>
                         </div>
-
                         <div class="form-group">
                             <div class="custom-control custom-switch">
                                 <input type="checkbox" class="custom-control-input" id="TrangThaiDanhMuc" name="TrangThaiDanhMuc" value="true" checked>
@@ -201,9 +215,6 @@
     </div>
 </div>
 
-<!-- =================================================== -->
-<!-- Modal (Xác nhận Xóa) -->
-<!-- =================================================== -->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -227,10 +238,45 @@
 </div>
 
 @section Scripts {
+    <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
+    <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+
     <script>
         $(document).ready(function () {
 
-            // --- 1. XỬ LÝ ẢNH ---
+            // --- 1. CẤU HÌNH DATATABLES ---
+            var table = $('#dataTable-1').DataTable({
+                autoWidth: true,
+                "lengthChange": false,
+                "searching": true,
+                // Cấu hình vị trí: Info trái, Pagination phải, nằm dưới cùng
+                "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
+                "language": {
+                    "sProcessing":   "Đang xử lý...",
+                    "sZeroRecords":  "Không tìm thấy danh mục nào",
+                    "sInfo":         "Đang hiển thị _START_ đến _END_ trong tổng số _TOTAL_ mục",
+                    "sInfoEmpty":    "Đang hiển thị 0 đến 0 trong tổng số 0 mục",
+                    "sInfoFiltered": "(được lọc từ _MAX_ mục)",
+                    "sSearch":       "Tìm kiếm:",
+                    "oPaginate": {
+                        "sFirst":    "Đầu",
+                        "sPrevious": "Trước",
+                        "sNext":     "Tiếp",
+                        "sLast":     "Cuối"
+                    }
+                }
+            });
+
+            // --- KẾT NỐI Ô TÌM KIẾM CUSTOM ---
+            $('#customSearch').on('keyup', function () {
+                table.search(this.value).draw();
+            });
+
+            // ==========================================
+            // --- PHẦN LOGIC AJAX (GIỮ NGUYÊN) ---
+            // ==========================================
+
+            // Xử lý ảnh
             $('#imageDropzone').click(function () {
                 if (!$('#categoryFieldset').prop('disabled')) $('#ImageFile').click();
             });
@@ -254,21 +300,19 @@
                 $('#imageDropzone').show();
             });
 
-            // --- 2. RESET FORM ---
+            // Reset Form
             function resetForm() {
                 $('#categoryForm')[0].reset();
-                $('#IdDanhMucSanPham').prop('readonly', false); // Mở khóa ID
+                $('#IdDanhMucSanPham').prop('readonly', false);
                 $('#removeImageBtn').click();
                 $('#categoryFieldset').prop('disabled', false);
                 $('#btnSave').show();
                 $('#TrangThaiDanhMuc').prop('checked', true);
-
-                // Reset ngày tháng
                 $('#ThoiGianTaoDm').val('');
                 $('#ThoiGianCapNhatDm').val('');
             }
 
-            // --- 3. NÚT THÊM MỚI ---
+            // Thêm mới
             $('#addCategoryBtn').click(function () {
                 resetForm();
                 $('#modalTitle').text('Thêm danh mục mới');
@@ -277,7 +321,7 @@
                 $('#categoryModal').modal('show');
             });
 
-            // --- 4. NÚT SỬA & CHI TIẾT (AJAX) ---
+            // Sửa & Chi tiết
             $('body').on('click', '.btn-edit, .btn-details', function (e) {
                 e.preventDefault();
                 var id = $(this).data('id');
@@ -291,17 +335,13 @@
                         if (res.success) {
                             var d = res.data;
                             resetForm();
-
-                            // Map dữ liệu
                             $('#IdDanhMucSanPham').val(d.idDanhMucSanPham).prop('readonly', true);
                             $('#TenDanhMucSanPham').val(d.tenDanhMucSanPham);
                             $('#MoTaDanhMuc').val(d.moTaDanhMuc);
                             $('#TrangThaiDanhMuc').prop('checked', d.trangThaiDanhMuc);
-
                             $('#ThoiGianTaoDm').val(d.thoiGianTaoDm);
                             $('#ThoiGianCapNhatDm').val(d.thoiGianCapNhatDm);
 
-                            // Hiển thị ảnh
                             if (d.anhBase64) {
                                 $('#previewImg').attr('src', d.anhBase64);
                                 $('#imagePreview').css('display', 'flex');
@@ -319,20 +359,16 @@
                         } else {
                             alert(res.message);
                         }
-                    },
-                    error: function() {
-                        alert("Lỗi kết nối!");
                     }
                 });
             });
 
-            // --- 5. NÚT LƯU (SAVE) ---
+            // Lưu
             $('#btnSave').click(function () {
                 if (!$('#IdDanhMucSanPham').val() || !$('#TenDanhMucSanPham').val()) {
                     alert('Vui lòng nhập ID và Tên danh mục!');
                     return;
                 }
-
                 var formData = new FormData($('#categoryForm')[0]);
                 if (!$('#TrangThaiDanhMuc').is(':checked')) {
                     formData.set('TrangThaiDanhMuc', 'false');
@@ -360,10 +396,10 @@
                 });
             });
 
-            // --- 6. NÚT XÓA ---
+            // Xóa
             $('body').on('click', '.btn-delete', function () {
                 var id = $(this).data('id');
-                var name = $(this).closest('tr').find('td:eq(1)').text(); // Lấy cột tên (index 1)
+                var name = $(this).closest('tr').find('td:eq(1)').text();
                 $('#deleteName').text(name);
                 $('#deleteId').val(id);
                 $('#deleteModal').modal('show');
@@ -378,14 +414,14 @@
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
-                            $('#row-' + id).remove();
+                            var table = $('#dataTable-1').DataTable();
+                            table.row($('#row-' + id)).remove().draw();
                         } else {
                             alert(res.message);
                         }
                     }
                 });
             });
-
         });
     </script>
 }
