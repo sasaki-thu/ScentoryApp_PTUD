@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 var stringConnectdb = builder.Configuration.GetConnectionString("ScentoryPTUD");
 builder.Services.AddDbContext<ScentoryPtudContext>(options => options.UseSqlServer(stringConnectdb));
 // hiểu kí tự tiếng Việt
-builder.Services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(allowedRanges: new[] { UnicodeRanges.All })); 
+builder.Services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(allowedRanges: new[] { UnicodeRanges.All }));
 
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddNotyf(config =>
@@ -44,7 +44,7 @@ app.MapControllerRoute(
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Login}/{id?}");
 
 
 

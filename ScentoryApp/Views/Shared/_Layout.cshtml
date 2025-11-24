@@ -21,6 +21,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Marcellus&display=swap"
           rel="stylesheet">
+    @await RenderSectionAsync("styles", required: false)
 </head>
 
 <body class="homepage">
@@ -148,19 +149,15 @@
         </defs>
     </svg>
     <!-- kết thúc định nghĩa icon-->
-
     <!-- màn hình chờ -->
     <div class="preloader text-white fs-6 text-uppercase overflow-hidden"></div>
     <!-- kết thúc màn hình chờ -->
-    
     <!-- header-->
     @await Html.PartialAsync("_HeaderPartial.cshtml")
     <!-- kết thúc header-->
-
     <!-- main content -->
     @RenderBody()
     <!-- kết thúc main content -->
-
     <!-- footer -->
     @await Html.PartialAsync("_FooterPartial.cshtml")
     <!-- kết thúc footer -->

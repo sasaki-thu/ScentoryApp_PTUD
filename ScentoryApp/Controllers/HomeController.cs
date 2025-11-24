@@ -42,26 +42,22 @@ namespace ScentoryApp.Controllers
             return View();
         }
 
-        public IActionResult CS_Baomat()
-        {
-            return View();
-        }
-
-        public IActionResult CS_Banhang()
-        {
-            return View();
-        }
-
-        public IActionResult CS_Doitra()
-        {
-            return View();
-        }
-        public IActionResult CS_Giaohang()
+        public IActionResult Privacy()
         {
             return View();
         }
 
         public IActionResult Blog()
+        {
+            return View();
+        }
+
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        public IActionResult Register()
         {
             return View();
         }
