@@ -348,54 +348,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Role Selection Screen -->
-        <div id="roleSelection">
-            <div class="header">
-                <div class="logo">SCENTORY</div>
-                <p class="subtitle">Vui lòng chọn vai trò để đăng ký</p>
-            </div>
-            <div class="role-selection">
-                <div class="role-card" onclick="selectRole('Admin')">
-                    <div class="role-card-content">
-                        <div class="role-card-left">
-                            <div class="role-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            </div>
-                            <div>
-                                <div class="role-title">Admin</div>
-                                <div class="role-desc">Dành cho quản trị viên hệ thống</div>
-                            </div>
-                        </div>
-                        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg>
-                    </div>
-                </div>
-                <div class="role-card" onclick="selectRole('User')">
-                    <div class="role-card-content">
-                        <div class="role-card-left">
-                            <div class="role-icon">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            </div>
-                            <div>
-                                <div class="role-title">User</div>
-                                <div class="role-desc">Dành cho khách hàng thân thiết</div>
-                            </div>
-                        </div>
-                        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg>
-                    </div>
-                </div>
-            </div>
-            <div class="login-link-container" style="text-align: center; margin-top: 1.5rem;">
-                <span style="color: #eee; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">Đã có tài khoản?</span>
-                <a href="/Home/Login" style="color: #fff; font-weight: 600; text-decoration: underline;">Đăng nhập ngay</a>
-            </div>
-        </div>
-
+    <div class="container wide">
         <!-- Registration Form Screen -->
-        <div id="authScreen" class="hidden">
+        <div id="authScreen">
             <div class="header">
                 <div class="logo">SCENTORY</div>
-                <p class="subtitle">Đăng ký vai trò: <span id="selectedRoleText" class="role-badge"></span></p>
+                <p class="subtitle">Đăng ký tài khoản khách hàng</p>
             </div>
 
             <div class="auth-card">
@@ -413,7 +371,7 @@
                                 </div>
                                 <div class="form-group"><label class="form-label">Email *</label><input type="email" class="form-input" id="regEmail" placeholder="email@example.com" required><div class="error-message"></div></div>
                                 <div class="form-row">
-                                    <div class="form-group"><label class="form-label">Số điện thoại *</label><input type="tel" class="form-input" id="regPhone" placeholder="0123456789" required><div class="error-message"></div></div>
+                                    <div class="form-group"><label class="form-label">Số điện thoại *</label><input type="tel" class="form-input" id="regPhone" placeholder="0123456789" required pattern="[0-9]*" inputmode="numeric"><div class="error-message"></div></div>
                                     <div class="form-group"><label class="form-label">Ngày sinh *</label><input type="date" class="form-input" id="regBirthDate" required><div class="error-message"></div></div>
                                 </div>
                                 <div class="form-group"><label class="form-label">Địa chỉ *</label><input type="text" class="form-input" id="regAddress" placeholder="Số nhà, đường, quận, thành phố" required><div class="error-message"></div></div>
@@ -443,7 +401,7 @@
                     </div>
 
                     <div class="nav-buttons">
-                        <button class="nav-btn hidden" id="prevBtn">Quay lại</button>
+                        <button class="nav-btn" id="prevBtn">Quay lại</button>
                         <button class="submit-btn" id="nextBtn">Tiếp theo</button>
                         <button class="submit-btn hidden" id="submitBtn">Đăng ký</button>
                     </div>
@@ -455,13 +413,8 @@
         </div>
     </div>
     <script>
-        let selectedRole = null;
         let currentStep = 1;
 
-        const container = document.querySelector('.container');
-        const roleSelectionScreen = document.getElementById('roleSelection');
-        const authScreen = document.getElementById('authScreen');
-        const selectedRoleText = document.getElementById('selectedRoleText');
         const registerSteps = document.querySelector('.register-steps');
         const progressBarFill = document.querySelector('.progress-bar-fill');
         const prevBtn = document.getElementById('prevBtn');
@@ -470,7 +423,7 @@
 
         prevBtn.addEventListener('click', () => {
             if (currentStep === 1) {
-                backToRoleSelection();
+                window.location.href = '/Home/Login';
             } else {
                 changeStep(-1);
             }
@@ -478,22 +431,8 @@
         nextBtn.addEventListener('click', () => changeStep(1));
         submitBtn.addEventListener('click', handleRegister);
 
-        function selectRole(role) {
-            selectedRole = role;
-            roleSelectionScreen.classList.add('hidden');
-            authScreen.classList.remove('hidden');
-            container.classList.add('wide');
-            selectedRoleText.textContent = role;
-            currentStep = 1;
-            updateStepUI();
-        }
-
-        function backToRoleSelection() {
-            selectedRole = null;
-            roleSelectionScreen.classList.remove('hidden');
-            authScreen.classList.add('hidden');
-            container.classList.remove('wide');
-        }
+        // Initialize UI
+        updateStepUI();
 
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
@@ -519,7 +458,7 @@
             registerSteps.style.transform = `translateX(-${(currentStep - 1) * 50}%)`;
             progressBarFill.style.width = `${currentStep * 50}%`;
 
-            prevBtn.classList.remove('hidden');
+            prevBtn.classList.toggle('hidden', currentStep < 1);
             nextBtn.classList.toggle('hidden', currentStep === 2);
             submitBtn.classList.toggle('hidden', currentStep !== 2);
         }
@@ -539,6 +478,9 @@
                     isValid = false;
                 } else if (input.type === 'email' && !/^\S+@@\S+\.\S+$/.test(input.value)) {
                     message = 'Email không hợp lệ.';
+                    isValid = false;
+                } else if (input.id === 'regPhone' && !/^\d+$/.test(input.value)) {
+                    message = 'Số điện thoại chỉ được nhập số.';
                     isValid = false;
                 } else if (input.id === 'regPassword' && input.value.length < 6) {
                     message = 'Mật khẩu phải có ít nhất 6 ký tự.';
@@ -570,7 +512,7 @@
                 address: document.getElementById('regAddress').value,
                 username: document.getElementById('regUsername').value,
                 password: document.getElementById('regPassword').value,
-                role: selectedRole
+                role: 'User'
             };
 
             console.log('Register:', userData);
