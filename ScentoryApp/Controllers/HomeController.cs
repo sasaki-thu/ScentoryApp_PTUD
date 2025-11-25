@@ -1,6 +1,10 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ScentoryApp.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ScentoryApp.Controllers
 {
@@ -69,7 +73,44 @@ namespace ScentoryApp.Controllers
             return View();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Login(TaiKhoan model)
+        {
+            // This is a dummy login for demonstration.
+            // In a real application, you would validate the user's credentials against a database.
+            if (!string.IsNullOrEmpty(model.TenDangNhap) && !string.IsNullOrEmpty(model.MatKhau))
+            {
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, model.TenDangNhap),
+                };
+
+                var claimsIdentity = new ClaimsIdentity(
+                    claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+
+                return RedirectToAction("Index", "Home");
+            }
+
+            return View(model);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Home");
+        }
+
         public IActionResult Register()
+        {
+            return View();
+        }
+
+        public IActionResult Account()
         {
             return View();
         }
@@ -81,3 +122,4 @@ namespace ScentoryApp.Controllers
         }
     }
 }
+

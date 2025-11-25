@@ -42,7 +42,6 @@
     </div>
 </div>
 <!-- kết thúc màn hình tìm kiếm -->
-
 <!-- menu được chia làm 3 thẻ div: logo, menu chính và icon-->
 <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
     <div class="container-fluid">
@@ -55,7 +54,6 @@
                 </a>
             </div>
             <!-- kết thúc logo -->
-
             <!-- menu chính -->
             <div class="col-auto">
                 <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
@@ -123,7 +121,6 @@
                 </div>
             </div>
             <!-- kết thúc menu chính -->
-
             <!-- wishlist & cart-->
             <div class="col-3 col-lg-auto">
                 <ul class="list-unstyled d-flex m-0">
@@ -186,12 +183,16 @@
                     </li>
 
                     <!-- 2. TÀI KHOẢN (Icon) -->
-                    <li>
-                        <a asp-controller="Account" asp-action="Index" class="mx-2">
+                    <li class="dropdown">
+                        <a href="#" class="mx-2 dropdown-toggle no-arrow" data-bs-toggle="dropdown" aria-expanded="false">
                             <svg width="24" height="24" viewBox="0 0 24 24">
                                 <use xlink:href="#user"></use>
                             </svg>
                         </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" asp-controller="Home" asp-action="Account">Tài khoản</a></li>
+                            <li><a class="dropdown-item" href="#" id="logout-link">Đăng xuất</a></li>
+                        </ul>
                     </li>
 
                     <!-- 3. Search (Icon) -->
@@ -210,7 +211,6 @@
     </div>
 </nav>
 <!-- kế thúc menu-->
-
 <!-- SCRIPT XỬ LÝ GIỎ HÀNG -->
 <script>
        let cartItems = [
@@ -313,3 +313,51 @@
             color: #333;
         }
 </style>
+
+<style>
+    .no-arrow::after {
+        display: none !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var logoutLink = document.getElementById('logout-link');
+        var logoutModal = new bootstrap.Modal(document.getElementById('logoutModal'), {
+            keyboard: false
+        });
+        var confirmLogoutButton = document.getElementById('confirm-logout-button');
+
+        if (logoutLink) {
+            logoutLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                logoutModal.show();
+            });
+        }
+
+        if (confirmLogoutButton) {
+            confirmLogoutButton.addEventListener('click', function (e) {
+                window.location.href = '/Home/Login';
+            });
+        }
+    });
+</script>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalLabel">Xác nhận đăng xuất</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn đăng xuất?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirm-logout-button">Đăng xuất</button>
+            </div>
+        </div>
+    </div>
+</div>

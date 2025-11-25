@@ -1,4 +1,5 @@
 ﻿using AspNetCoreHero.ToastNotification;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using ScentoryApp.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Encodings.Web;
@@ -15,6 +16,12 @@ builder.Services.AddDbContext<ScentoryPtudContext>(options => options.UseSqlServ
 builder.Services.AddSingleton<HtmlEncoder>(HtmlEncoder.Create(allowedRanges: new[] { UnicodeRanges.All }));
 
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Home/Login";
+    });
+
 builder.Services.AddNotyf(config =>
 {
     config.DurationInSeconds = 10;
@@ -36,6 +43,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

@@ -201,6 +201,17 @@
                 box-shadow: 0 0 0 4px rgba(139, 111, 71, 0.15);
             }
 
+            .form-input.invalid {
+                border-color: #e74c3c;
+            }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.75rem;
+            margin-top: 4px;
+            height: 12px;
+        }
+
         .password-input-wrapper {
             position: relative;
         }
@@ -330,10 +341,6 @@
                     </div>
                 </div>
             </div>
-            <div class="register-link-container" style="text-align: center; margin-top: 1.5rem;">
-                <span style="color: #eee; text-shadow: 0 1px 2px rgba(0,0,0,0.4);">Chưa có tài khoản?</span>
-                <a href="/Home/Register" style="color: #fff; font-weight: 600; text-decoration: underline;">Đăng ký ngay</a>
-            </div>
         </div>
 
         <!-- Login Form Screen -->
@@ -351,6 +358,7 @@
                     <div class="form-group">
                         <label class="form-label">Tên đăng nhập *</label>
                         <input type="text" class="form-input" id="loginUsername" placeholder="Nhập tên đăng nhập" required>
+                        <div class="error-message"></div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Mật khẩu *</label>
@@ -360,12 +368,17 @@
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                             </button>
                         </div>
+                        <div class="error-message"></div>
                     </div>
                     <div class="form-footer">
                         <label class="checkbox-label"><input type="checkbox"><span>Ghi nhớ</span></label>
                         <a href="#" class="forgot-link">Quên mật khẩu?</a>
                     </div>
                     <button class="submit-btn" onclick="handleLogin()">Đăng nhập</button>
+                    <div class="register-link-container hidden" id="registerLinkContainer">
+                        <span>Chưa có tài khoản?</span>
+                        <a href="/Home/Register">Đăng ký ngay</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -383,6 +396,13 @@
             document.getElementById('roleSelection').classList.add('hidden');
             document.getElementById('authScreen').classList.remove('hidden');
             document.getElementById('selectedRoleText').textContent = role;
+
+            const registerLink = document.getElementById('registerLinkContainer');
+            if (role === 'User') {
+                registerLink.classList.remove('hidden');
+            } else {
+                registerLink.classList.add('hidden');
+            }
         }
 
         function backToRoleSelection() {
@@ -403,14 +423,33 @@
             }
         }
 
-        function handleLogin() {
-            const username = document.getElementById('loginUsername').value;
-            const password = document.getElementById('loginPassword').value;
+        function validateLogin() {
+            let isValid = true;
+            const inputs = document.getElementById('authScreen').querySelectorAll('input[required]');
 
-            if (!username || !password) {
-                alert('Vui lòng điền đầy đủ thông tin!');
+            inputs.forEach(input => {
+                const parent = input.closest('.form-group');
+                const errorDiv = parent.querySelector('.error-message');
+                let message = '';
+
+                if (input.value.trim() === '') {
+                    message = 'Vui lòng không để trống trường này.';
+                    isValid = false;
+                }
+
+                errorDiv.textContent = message;
+                input.classList.toggle('invalid', message !== '');
+            });
+            return isValid;
+        }
+
+        function handleLogin() {
+            if (!validateLogin()) {
                 return;
             }
+
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
 
             console.log('Login attempt:', { username, password, role: selectedRole });
             alert(`Đăng nhập với vai trò ${selectedRole} và tài khoản: ${username}`);
