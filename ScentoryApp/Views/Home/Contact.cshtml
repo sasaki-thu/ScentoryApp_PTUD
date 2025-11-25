@@ -1,8 +1,200 @@
-﻿
-@{
-    ViewData["Title"] = "Contact";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+﻿@{
+    ViewData["Title"] = "Liên Hệ";
 }
 
-<h1>Contact</h1>
+<section class="page-header py-5" style="background-color: #FFF7F1;">
+    <div class="container text-center">
+        <h1 class="section-title text-uppercase" data-aos="fade-up">Liên Hệ Với Scentory</h1>
+        <p class="text-secondary w-100 mx-auto" data-aos="fade-up" data-aos-delay="200">
+            Chúng tôi luôn sẵn sàng lắng nghe câu chuyện và thắc mắc của bạn. Hãy kết nối với Scentory nhé!
+        </p>
+    </div>
+</section>
 
+<section class="contact-page py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-6" data-aos="fade-right">
+
+                <div class="contact-info text-center text-lg-start mb-4">
+                    <h3 class="section-title text-center mb-4">THÔNG TIN LIÊN HỆ</h3>
+
+                    <div class="d-flex flex-column align-items-center align-items-lg-start gap-3 mb-4">
+                        <div class="info-item d-inline-block px-3 py-2">
+                            <span class="fw-bold">Email:</span> scentorynotes@gmail.com
+                        </div>
+                        <div class="info-item d-inline-block px-3 py-2">
+                            <span class="fw-bold">Hotline:</span> 0899123456
+                        </div>
+                        <div class="info-item d-inline-block px-3 py-2">
+                            <span class="fw-bold">Địa chỉ:</span> 279 Nguyễn Tri Phương, phường Diên Hồng, TP. Hồ Chí Minh
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-container shadow-sm border border-2 border-white">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.6696584237025!2d106.6659720745148!3d10.759922259495764!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f9023a3b85d%3A0x9259bad475336d5c!2zMjc5IE5ndXnhu4VuIFRyaSBQaMawxqFuZywgUGjGsOG7nW5nIDUsIFF14bqtbiAxMCwgVGjDoW5oIHBo4buRIEjhu5MgQ2jDrSBNaW5o!5e0!3m2!1svi!2s!4v1700000000000!5m2!1svi!2s"
+                            width="100%"
+                            height="450"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+
+            <div class="col-lg-6" data-aos="fade-left">
+                <div class="contact-form bg-white p-4 p-md-5 shadow-sm h-100">
+                    <form>
+                        <div class="mb-4">
+                            <label for="name" class="form-label text-secondary">Tên của bạn</label>
+                            <input type="text" class="form-control form-control-lg rounded-0 bg-light border-0" id="name">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="phone" class="form-label text-secondary">Số điện thoại của bạn</label>
+                            <input type="tel" class="form-control form-control-lg rounded-0 bg-light border-0" id="phone">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="email" class="form-label text-secondary">Email của bạn</label>
+                            <input type="email" class="form-control form-control-lg rounded-0 bg-light border-0" id="email">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="message" class="form-label text-secondary">Tin nhắn của bạn</label>
+                            <textarea class="form-control form-control-lg rounded-0 bg-light border-0" id="message" rows="6"></textarea>
+                        </div>
+
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-dark text-uppercase px-5 py-3 rounded-0">Gửi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="faqs-section py-5">
+    <div class="container">
+        <h3 class="section-title text-center text-uppercase mb-5" style="color: #c38154;" data-aos="fade-up">
+            FAQS – CÂU HỎI THƯỜNG GẶP
+        </h3>
+
+        <div class="accordion" id="accordionScentory" data-aos="fade-up" data-aos-delay="200">
+
+            <div class="accordion-item border-0 mb-3">
+                <div class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed custom-question" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        1. Scentory là thương hiệu về gì?
+                    </button>
+                </div>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionScentory">
+                    <div class="accordion-body">
+                        Scentory là thương hiệu chuyên về cung cấp nước hoa và tinh dầu tại Việt Nam. Scentory tập trung vào yếu tố: tạo mùi cá nhân hóa và theo câu chuyện của khách hàng.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-3">
+                <div class="accordion-header" id="headingTwo">
+                    <button class="accordion-button collapsed custom-question" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        2. Hiện tại Scentory đang có những mùi nước hoa nào?
+                    </button>
+                </div>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionScentory">
+                    <div class="accordion-body">
+                        Hiện tại, Scentory đang có bộ sưu tập nước hoa Reminiscence gồm 4 mùi: Whisper – Thầm, Horizon – Miên, Eclipse – Huyền, Aurora – Uyển.
+                        Chi tiết về 4 mùi nước hoa này bạn có thể tham khảo thêm <a href="/Home/Perfumes" class="fw-bold text-decoration-underline text-dark">ở đây</a> nhé!
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-3">
+                <div class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed custom-question" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        3. Scentory đang có tinh dầu nào?
+                    </button>
+                </div>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionScentory">
+                    <div class="accordion-body">
+                        Hiện tại, Scentory đang có 4 mùi tinh dầu của bộ sưu tập Seviora gồm: Spring – Xuân, Smer – Hạ, Atum – Thu, Winter – Đông.
+                        Chi tiết về 4 mùi tinh dầu bạn có thể xem thêm <a href="/Home/Oils" class="fw-bold text-decoration-underline text-dark">ở đây</a> nhé!
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-3">
+                <div class="accordion-header" id="headingFour">
+                    <button class="accordion-button collapsed custom-question" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                        4. Scentory có hỗ trợ đổi trả không?
+                    </button>
+                </div>
+                <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionScentory">
+                    <div class="accordion-body">
+                        Scentory có hỗ trợ đổi trả sản phẩm cho khách hàng và chỉ nhận đổi trả, bảo hành sản phẩm khi lỗi đến từ nhà sản xuất hoặc do quá trình vận chuyển. Thời hạn đổi trả là 7 ngày kể từ khi nhận sản phẩm.
+                        Bạn có thể xem chi tiết <a href="/Home/CS_Doitra" class="fw-bold text-decoration-underline text-dark">chính sách Đổi trả và Hoàn tiền</a> của shop nha!
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-3">
+                <div class="accordion-header" id="headingFive">
+                    <button class="accordion-button collapsed custom-question" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                        5. Scentory có nhận giao hàng khu vực ngoài TP. Hồ Chí Minh không?
+                    </button>
+                </div>
+                <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionScentory">
+                    <div class="accordion-body">
+                        Scentory có nhận vận chuyển ở các tỉnh, thành phố khác tại Việt Nam.
+                        Bạn có thể xem thêm <a href="/Home/CS_Giaohang" class="fw-bold text-decoration-underline text-dark">chính sách Giao hàng</a> của shop nha!
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Chỉnh style chung cho thanh câu hỏi */
+    .custom-question {
+        font-size: 18px; /* Font chữ bình thường */
+        font-weight: 600; /* Không in đậm (Normal) */
+        padding: 15px 15px; /* Tăng chiều cao: 25px trên dưới, 30px trái phải */
+        border-radius: 0 !important;
+        box-shadow: none !important; /* Bỏ viền xanh khi bấm */
+    }
+
+    /* Khi ĐÓNG (Màu nâu cam) */
+    .accordion-button.collapsed {
+        background-color: #c38154;
+        color: #333;
+    }
+
+    /* Khi MỞ (Vẫn màu nâu nhưng chữ trắng) */
+    .accordion-button:not(.collapsed) {
+        background-color: #c38154;
+        color: #fff;
+    }
+
+    /* Phần nội dung bên trong */
+    .accordion-body {
+        background-color: #F9E7C9;
+        color: #333;
+        padding: 30px; /* Tăng khoảng cách nội dung cho thoáng */
+    }
+
+    /* Mũi tên */
+    .accordion-button::after {
+        filter: brightness(0) invert(0.2);
+        transform: scale(1.2); /* Làm mũi tên to lên một chút cho cân đối với thanh cao */
+    }
+
+    .accordion-button:not(.collapsed)::after {
+        filter: brightness(0) invert(1);
+    }
+</style>
