@@ -149,7 +149,6 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_DanhMucSanPham");
-            entity.Property(e => e.AnhDanhMuc).HasColumnType("image");
             entity.Property(e => e.ThoiGianCapNhatDm)
                 .HasColumnType("datetime")
                 .HasColumnName("ThoiGianCapNhatDM");
@@ -176,8 +175,9 @@ public partial class ScentoryPtudContext : DbContext
                 .IsFixedLength()
                 .HasColumnName("ID_DonViVanChuyen");
             entity.Property(e => e.IdMaGiamGia)
-                .HasMaxLength(10)
+                .HasMaxLength(5)
                 .IsUnicode(false)
+                .IsFixedLength()
                 .HasColumnName("ID_MaGiamGia");
             entity.Property(e => e.IdNguoiDung)
                 .HasMaxLength(5)
@@ -256,17 +256,19 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<MaGiamGium>(entity =>
         {
-            entity.HasKey(e => e.IdMaGiamGia).HasName("PK__MaGiamGi__3BDA8EB05E8F7B5B");
+            entity.HasKey(e => e.IdMaGiamGia).HasName("pk_MaGiamGia");
 
             entity.Property(e => e.IdMaGiamGia)
-                .HasMaxLength(10)
+                .HasMaxLength(5)
                 .IsUnicode(false)
+                .IsFixedLength()
                 .HasColumnName("ID_MaGiamGia");
             entity.Property(e => e.GiaGiamToiDa).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.GiaTriGiam).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.GiaTriToiThieu).HasColumnType("decimal(18, 0)");
-            entity.Property(e => e.LoaiGiam).HasMaxLength(1);
-            entity.Property(e => e.MoTa).HasMaxLength(1);
+            entity.Property(e => e.LoaiGiam).HasMaxLength(3);
+            entity.Property(e => e.ThoiGianBatDau).HasColumnType("datetime");
+            entity.Property(e => e.ThoiGianKetThuc).HasColumnType("datetime");
         });
 
         modelBuilder.Entity<NguoiDung>(entity =>
@@ -304,7 +306,6 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_SanPham");
-            entity.Property(e => e.AnhSanPham).HasColumnType("image");
             entity.Property(e => e.GiaNiemYet).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.IdDanhMucSanPham)
                 .HasMaxLength(5)

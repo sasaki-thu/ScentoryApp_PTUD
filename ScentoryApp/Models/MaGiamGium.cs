@@ -15,11 +15,11 @@ public partial class MaGiamGium
 
     public decimal GiaTriToiThieu { get; set; }
 
-    public decimal GiaGiamToiDa { get; set; }
+    public decimal? GiaGiamToiDa { get; set; }
 
-    public DateOnly NgayBatDau { get; set; }
+    public DateTime ThoiGianBatDau { get; set; }
 
-    public DateOnly NgayKetThuc { get; set; }
+    public DateTime ThoiGianKetThuc { get; set; }
 
     public int GioiHanSuDung { get; set; }
 

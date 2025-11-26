@@ -1,0 +1,342 @@
+﻿@model IEnumerable<ScentoryApp.Models.MaGiamGium>
+
+@{
+    ViewData["Title"] = "Quản lý mã giảm giá";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+
+<style>
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .dataTables_filter {
+        display: none;
+    }
+
+    #dataTable-1 thead th {
+        color: #007bff;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý mã giảm giá</h2>
+                </div>
+                <div class="col-auto">
+                    <div class="form-inline">
+                        <div class="form-group mr-2">
+                            <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm kiếm mã..." style="min-width: 250px;">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="addCouponBtn">
+                            <i class="fe fe-plus fe-16"></i> Thêm mã mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row my-4">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <table class="table datatables" id="dataTable-1">
+                                <thead>
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Mô tả</th>
+                                        <th>Giá trị giảm</th>
+                                        <th>Đơn tối thiểu</th>
+                                        <th>Bắt đầu</th>
+                                        <th>Kết thúc</th>
+                                        <th>Giới hạn</th>
+                                        <th>Tác vụ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="couponTableBody">
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="row-@item.IdMaGiamGia.Trim()">
+                                                <td><strong>@item.IdMaGiamGia</strong></td>
+                                                <td>@item.MoTa</td>
+
+                                                <td>
+                                                    @if (item.LoaiGiam == "VND")
+                                                    {
+                                                        <span class="text-success font-weight-bold">Giảm @item.GiaTriGiam.ToString("N0") VNĐ</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-info font-weight-bold">Giảm @item.GiaTriGiam.ToString("0")%</span>
+                                                        <br />
+                                                        <small class="text-muted">(Tối đa: @(item.GiaGiamToiDa.HasValue? item.GiaGiamToiDa.Value.ToString("N0") : "0") đ)</small>
+                                                    }
+                                                </td>
+
+                                                <td>@item.GiaTriToiThieu.ToString("N0") đ</td>
+
+                                                <td>@item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</td>
+                                                <td>@item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</td>
+
+                                                <td>@item.GioiHanSuDung</td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
+                                                            <span class="text-muted sr-only">Action</span>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdMaGiamGia.Trim()">Chi tiết</a>
+                                                            <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdMaGiamGia.Trim()">Chỉnh sửa</a>
+                                                            <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdMaGiamGia.Trim()">Xóa</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="couponModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thông tin mã giảm giá</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="couponForm">
+                    <fieldset id="couponFieldset">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label>Mã Coupon (*)</label>
+                                <input type="text" class="form-control" id="IdMaGiamGia" name="IdMaGiamGia" required>
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label>Mô tả ngắn</label>
+                                <input type="text" class="form-control" id="MoTa" name="MoTa" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Loại giảm giá</label>
+                                <select class="form-control" id="LoaiGiam" name="LoaiGiam">
+                                    <option value="VND">Số tiền cố định (VNĐ)</option>
+                                    <option value="%">Phần trăm (%)</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Giá trị giảm</label>
+                                <input type="number" class="form-control" id="GiaTriGiam" name="GiaTriGiam">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Đơn hàng tối thiểu</label>
+                                <input type="number" class="form-control" id="GiaTriToiThieu" name="GiaTriToiThieu" value="0">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Giảm tối đa (Nếu là %)</label>
+                                <input type="number" class="form-control" id="GiaGiamToiDa" name="GiaGiamToiDa" value="0">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Thời gian bắt đầu</label>
+                                <input type="datetime-local" class="form-control" id="ThoiGianBatDau" name="ThoiGianBatDau">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Thời gian kết thúc</label>
+                                <input type="datetime-local" class="form-control" id="ThoiGianKetThuc" name="ThoiGianKetThuc">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Số lượng giới hạn</label>
+                            <input type="number" class="form-control" id="GioiHanSuDung" name="GioiHanSuDung">
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btnSave">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Bạn có muốn xóa mã <strong id="deleteName"></strong> không?
+                <input type="hidden" id="deleteId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
+    <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // 1. DATATABLES
+            var table = $('#dataTable-1').DataTable({
+                autoWidth: true,
+                "lengthChange": false,
+                "searching": true,
+                "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
+                "language": {
+                    "sProcessing":   "Đang xử lý...",
+                    "sZeroRecords":  "Không tìm thấy mã nào",
+                    "sInfo":         "Hiển thị _START_ đến _END_ trong _TOTAL_ mã",
+                    "sInfoEmpty":    "Hiển thị 0 đến 0 trong 0 mã",
+                    "sInfoFiltered": "(lọc từ _MAX_ mã)",
+                    "sSearch":       "Tìm kiếm:",
+                    "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
+                }
+            });
+
+            $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
+
+            // 2. HÀM RESET FORM
+            function resetForm() {
+                $('#couponForm')[0].reset();
+                $('#IdMaGiamGia').prop('readonly', false);
+                $('#couponFieldset').prop('disabled', false);
+                $('#btnSave').show();
+            }
+
+            // 3. THÊM MỚI
+            $('#addCouponBtn').click(function () {
+                resetForm();
+                $('#modalTitle').text('Thêm mã giảm giá mới');
+                $('#couponModal').modal('show');
+            });
+
+            // 4. SỬA & CHI TIẾT
+            $('body').on('click', '.btn-edit, .btn-details', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                var isDetail = $(this).hasClass('btn-details');
+
+                $.ajax({
+                    url: '/Admin/AdminCoupons/GetById',
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            var d = res.data;
+                            resetForm();
+
+                            // --- MAP DỮ LIỆU ---
+                            $('#IdMaGiamGia').val(d.idMaGiamGia).prop('readonly', true);
+                            $('#MoTa').val(d.moTa);
+                            $('#LoaiGiam').val(d.loaiGiam);
+                            $('#GiaTriGiam').val(d.giaTriGiam);
+                            $('#GiaTriToiThieu').val(d.giaTriToiThieu);
+                            $('#GiaGiamToiDa').val(d.giaGiamToiDa);
+                            $('#GioiHanSuDung').val(d.gioiHanSuDung);
+                            $('#ThoiGianBatDau').val(d.thoiGianBatDau);
+                            $('#ThoiGianKetThuc').val(d.thoiGianKetThuc);
+
+                            if (isDetail) {
+                                $('#modalTitle').text('Chi tiết mã giảm giá');
+                                $('#couponFieldset').prop('disabled', true);
+                                $('#btnSave').hide();
+                            } else {
+                                $('#modalTitle').text('Cập nhật mã giảm giá');
+                            }
+                            $('#couponModal').modal('show');
+                        } else {
+                            alert(res.message);
+                        }
+                    },
+                    error: function() { alert("Lỗi kết nối!"); }
+                });
+            });
+
+            // 5. LƯU (SAVE)
+            $('#btnSave').click(function () {
+                if (!$('#IdMaGiamGia').val()) { alert('Vui lòng nhập Mã giảm giá!'); return; }
+
+                var formData = new FormData($('#couponForm')[0]);
+
+                $.ajax({
+                    url: '/Admin/AdminCoupons/Save',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, processData: false,
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            alert("Lỗi: " + res.message);
+                        }
+                    },
+                    error: function () { alert("Lỗi hệ thống!"); }
+                });
+            });
+
+            // 6. XÓA
+            $('body').on('click', '.btn-delete', function () {
+                var id = $(this).data('id');
+                $('#deleteName').text(id);
+                $('#deleteId').val(id);
+                $('#deleteModal').modal('show');
+            });
+
+            $('#btnConfirmDelete').click(function () {
+                var id = $('#deleteId').val();
+                $.ajax({
+                    url: '/Admin/AdminCoupons/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            $('#deleteModal').modal('hide');
+                            var t = $('#dataTable-1').DataTable();
+                            t.row($('#row-' + id)).remove().draw();
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
