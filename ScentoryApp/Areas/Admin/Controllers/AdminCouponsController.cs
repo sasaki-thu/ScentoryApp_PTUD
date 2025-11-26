@@ -47,8 +47,8 @@ namespace ScentoryApp.Areas.Admin.Controllers
                     giaTriToiThieu = coupon.GiaTriToiThieu,
                     giaGiamToiDa = coupon.GiaGiamToiDa, // Có thể null
                     gioiHanSuDung = coupon.GioiHanSuDung,
-                    thoiGianBatDau = coupon.ThoiGianBatDau.ToString("dd-MM-yyyy HH:mm"),
-                    thoiGianKetThuc = coupon.ThoiGianKetThuc.ToString("dd-MM-yyyy HH:mm")
+                    thoiGianBatDau = coupon.ThoiGianBatDau.ToString("yyyy-MM-ddTHH:mm"),
+                    thoiGianKetThuc = coupon.ThoiGianKetThuc.ToString("yyyy-MM-ddTHH:mm")
                 }
             });
         }
