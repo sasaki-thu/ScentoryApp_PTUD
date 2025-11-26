@@ -1,20 +1,59 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<section class="video py-5 overflow-hidden">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="video-content open-up" data-aos="zoom-out">
-                <div class="video-bg">
-                    <img src="~/assets/images/banner trang trí.png" alt="video" class="video-image img-fluid">
-                </div>
-                <div class="video-player">
-                    <img src="~/assets/images/chữ xoay vòng.png" alt="pattern" class="text-rotate">
-                </div>
-            </div>
+
+<section style="position:relative;width:100%;height:auto;overflow:hidden;margin:0;padding:0;">
+        <!-- Slides wrapper -->
+        <div id="slides" style="display:flex;width:100%;height:100%;transition:transform 0.5s ease;">
+            <img src="~/assets/images/banner 4 nước hoa.png" style="min-width:100%;height:100%;object-fit:cover;" alt="banner 4 chai nước hoa">
+            <img src="~/assets/images/banner 4 tinh dầu.png" style="min-width:100%;height:100%;object-fit:cover;" alt="banner 4 chai tinh dầu">
         </div>
-    </div>
-</section>
+
+    <!-- Button qua về -->
+         <button onclick="prev()" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:30px;background:rgba(0,0,0,0.3);color:white;border:none;padding:10px 15px;cursor:pointer;border-radius:6px;z-index:10">&#10094;</button>
+         <button onclick="next()" style="position:absolute;right:15px;top:50%;transform:translateY(-50%);font-size:30px;background:rgba(0,0,0,0.3);color:white;border:none;padding:10px 15px;cursor:pointer;border-radius:6px;z-index:10">&#10095;</button>
+
+        <!-- Dots -->
+        <div id="dots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10"></div>
+
+        <!-- JS -->
+        <script>
+            let index = 0;
+            const banners = ["banner 4 nước hoa.png", "banner 4 tinh dầu.png"];
+            const slidesEl = document.getElementById("slides");
+            const dotsEl = document.getElementById("dots");
+            const total = banners.length;
+
+            // tạo dots
+            banners.forEach((_, i) => {
+              let dot = document.createElement("span");
+              dot.onclick = () => { index = i; update(); };
+              dot.style = "width:12px;height:12px;background:rgba(255,255,255,0.5);border-radius:50%;cursor:pointer;transition:0.3s";
+              dot.id = "dot"+i;
+              dotsEl.appendChild(dot);
+            });
+
+            function update(){
+              slidesEl.style.transform = `translateX(${-index * 100}%)`;
+              banners.forEach((_,i)=>{
+                document.getElementById("dot"+i).style.background = i===index ? "white" : "rgba(255,255,255,0.5)";
+                document.getElementById("dot"+i).style.transform = i===index ? "scale(1.3)" : "scale(1)";
+              });
+            }
+
+            function next(){ index = (index + 1) % total; update(); }
+            function prev(){ index = (index - 1 + total) % total; update(); }
+
+            // autoplay 3s
+            let autoPlay = setInterval(next, 3000);
+            // hover pause
+            slidesEl.parentElement?.addEventListener("mouseenter", ()=> clearInterval(autoPlay));
+            slidesEl.parentElement?.addEventListener("mouseleave", ()=> autoPlay = setInterval(next, 3000));
+
+            update();
+        </script>
+    </section>
+
 
 <section id="billboard" class="bg-light py-5">
     <div class="container">
@@ -58,7 +97,7 @@
     <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 mb-3">
             <h4 class="text-uppercase">Hàng mới về</h4>
-            <a href="index.html" class="btn-link">Xem tất cả sản phẩm</a>
+            <a href="https://localhost:7125/Home/Shop" class="btn-link">Xem tất cả sản phẩm</a>
         </div>
         <div class="swiper product-swiper open-up" data-aos="zoom-out">
             <div class="swiper-wrapper d-flex">
@@ -179,22 +218,22 @@
 </section>
 
 <section class="collection bg-light position-relative py-5">
-    <div class="container">
+    <div class="container" data-aos="fade-in">
         <div class="row">
-            <div class="title-xlarge text-uppercase txt-fx domino">Collection</div>
+
             <div class="collection-item d-flex flex-wrap my-5">
                 <div class="col-md-6 column-container">
-                    <div class="image-holder">
+                    <div class="image-holder" data-aos="fade-up">
                         <img src="~/assets/images/eclipse có bg.png "alt="collection" class="product-image img-fluid">
                     </div>
                 </div>
                 <div class="col-md-6 column-container bg-white">
                     <div class="collection-content p-5 m-0 m-md-5">
-                        <h3 class="element-title text-uppercase">Câu chuyện Scentory</h3>
+                        <h3 class="element-title text-uppercase txt-fx domino">Câu chuyện Scentory</h3>
                         <p>
                             Xuất phát từ niềm đam mê với thế giới hương thơm, Scentory ra đời với mong muốn mang đến những trải nghiệm khứu giác độc đáo và tinh tế. Chúng tôi tin rằng hương thơm không chỉ là một phần của phong cách sống, mà còn là nguồn cảm hứng giúp cuộc sống thêm đẹp, mỗi ngày thêm thi vị, và mỗi khoảnh khắc đều trở nên đáng nhớ.
                         </p>
-                        <a href="#" class="btn btn-dark text-uppercase mt-3">Tìm hiểu thêm</a>
+                        <a href="https://localhost:7125/Home/About" class="btn btn-dark text-uppercase mt-3">Tìm hiểu thêm</a>
                     </div>
                 </div>
             </div>
@@ -262,10 +301,10 @@
 <section class="blog py-5 bg-light">
     <div class="container">
         <div class="d-flex flex-wrap justify-content-between align-items-center mt-5 mb-3">
-            <h4 class="text-uppercase">BÀI VIẾT DÀNH CHO BẠN</h4>
+            <h4 class="text-uppercase" data-aos="fade-up">BÀI VIẾT DÀNH CHO BẠN </h4>
             <a href="index.html" class="btn-link">Xem tất cả</a>
         </div>
-        <div class="row">
+        <div class="row" data-aos="zoom-out">
             <div class="col-md-4">
                 <article class="post-item">
                     <div class="post-image">
