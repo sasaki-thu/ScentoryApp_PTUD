@@ -305,6 +305,8 @@
 </head>
 <body>
     <div class="container">
+
+
         <!-- Role Selection Screen -->
         <div id="roleSelection">
             <div class="header">
@@ -355,6 +357,7 @@
             </div>
             <div class="auth-card">
                 <div class="form-container">
+                    <input type="hidden" name="ReturnUrl" value="@ViewData["ReturnUrl"]" />
                     <div class="form-group">
                         <label class="form-label">Tên đăng nhập *</label>
                         <input type="text" class="form-input" id="loginUsername" placeholder="Nhập tên đăng nhập" required>
@@ -443,21 +446,33 @@
             return isValid;
         }
 
-        function handleLogin() {
-            if (!validateLogin()) {
-                return;
-            }
+        async function handleLogin() {
+            if (!validateLogin()) return;
 
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
+            const returnUrl = "@ViewData["ReturnUrl"]";   // lấy returnUrl từ server
 
-            console.log('Login attempt:', { username, password, role: selectedRole });
-            alert(`Đăng nhập với vai trò ${selectedRole} và tài khoản: ${username}`);
+            const payload = {
+                username: username,
+                password: password,
+                role: selectedRole,
+                returnUrl: returnUrl
+            };
 
-            if (selectedRole === 'Admin') {
-                 window.location.href = '/Admin/Home/Index';
+            const response = await fetch('/Home/LoginApi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                // Đăng nhập thành công → redirect đúng ReturnUrl
+                window.location.href = result.returnUrl;
             } else {
-                 window.location.href = '/Home/Index';
+                alert(result.message || "Đăng nhập thất bại!");
             }
         }
     </script>

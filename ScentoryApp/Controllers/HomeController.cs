@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ScentoryApp.Models;
 using System.Security.Claims;
@@ -16,86 +16,115 @@ namespace ScentoryApp.Controllers
         {
             _logger = logger;
         }
-
+        [Authorize]
         public IActionResult Index()
         {
             return View();
         }
 
+        [Authorize]
         public IActionResult About()
         {
             return View();
         }
 
+        [Authorize]
         public IActionResult Shop()
         {
             return View();
         }
 
+        [Authorize]
         public IActionResult Perfumes()
         {
             return View();
         }
+        [Authorize]
         public IActionResult Oils()
         {
             return View();
         }
-
+        [Authorize]
         public IActionResult Contact()
         {
             return View();
         }
-
+        [Authorize]
         public IActionResult CS_Banhang()
         {
             return View();
         }
+        [Authorize]
         public IActionResult CS_Giaohang()
         {
             return View();
         }
+        [Authorize]
         public IActionResult CS_Doitra()
         {
             return View();
         }
+        [Authorize]
         public IActionResult CS_Baomat()
         {
             return View();
         }
-
+        [Authorize]
         public IActionResult Blog()
         {
             return View();
         }
 
-        public IActionResult Login()
-        {
-            return View();
-        }
 
-        [HttpPost]
-        public async Task<IActionResult> Login(TaiKhoan model)
+        [AllowAnonymous] // ==== cho phép truy cập không cần login ====
+        public IActionResult Login(string returnUrl = "/")
         {
-            // This is a dummy login for demonstration.
-            // In a real application, you would validate the user's credentials against a database.
-            if (!string.IsNullOrEmpty(model.TenDangNhap) && !string.IsNullOrEmpty(model.MatKhau))
+            if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, model.TenDangNhap),
-                };
-
-                var claimsIdentity = new ClaimsIdentity(
-                    claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
-
                 return RedirectToAction("Index", "Home");
             }
 
-            return View(model);
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
+        }
+
+        public async Task<IActionResult> LoginApi([FromBody] LoginRequest req)
+        {
+            // Giả lập validate (sau này bạn thay bằng DB)
+            if (string.IsNullOrEmpty(req.Username) || string.IsNullOrEmpty(req.Password))
+            {
+                return Json(new { success = false, message = "Thông tin không hợp lệ." });
+            }
+
+            // ===== TẠO COOKIE LOGIN =====
+            Console.WriteLine("123");
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, req.Username),
+                new Claim("Role", req.Role)
+            };
+
+            var claimsIdentity = new ClaimsIdentity(
+                claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            // Validate ReturnUrl
+            var returnUrl = req.ReturnUrl;
+            if (string.IsNullOrEmpty(returnUrl) || !Url.IsLocalUrl(returnUrl))
+                returnUrl = "/";
+
+            return Json(new { success = true, returnUrl });
+        }
+
+        public class LoginRequest
+        {
+            public string Username { get; set; }
+            public string Password { get; set; }
+            public string Role { get; set; }
+            public string ReturnUrl { get; set; }
         }
 
         [Authorize]
@@ -122,4 +151,3 @@ namespace ScentoryApp.Controllers
         }
     }
 }
-
