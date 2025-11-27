@@ -9,7 +9,7 @@ public partial class DanhGiaSanPham
 
     public string IdSanPham { get; set; } = null!;
 
-    public string IdNguoiDung { get; set; } = null!;
+    public string IdKhachHang { get; set; } = null!;
 
     public int SoSao { get; set; }
 
@@ -17,7 +17,7 @@ public partial class DanhGiaSanPham
 
     public DateTime ThoiGianDanhGia { get; set; }
 
-    public virtual NguoiDung IdNguoiDungNavigation { get; set; } = null!;
+    public virtual KhachHang IdKhachHangNavigation { get; set; } = null!;
 
     public virtual SanPham IdSanPhamNavigation { get; set; } = null!;
 }

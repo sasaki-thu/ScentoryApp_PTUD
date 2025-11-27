@@ -7,7 +7,7 @@ public partial class DonHang
 {
     public string IdDonHang { get; set; } = null!;
 
-    public string IdNguoiDung { get; set; } = null!;
+    public string IdKhachHang { get; set; } = null!;
 
     public DateTime ThoiGianDatHang { get; set; }
 
@@ -33,7 +33,7 @@ public partial class DonHang
 
     public virtual DonViVanChuyen IdDonViVanChuyenNavigation { get; set; } = null!;
 
-    public virtual MaGiamGium IdMaGiamGiaNavigation { get; set; } = null!;
+    public virtual KhachHang IdKhachHangNavigation { get; set; } = null!;
 
-    public virtual NguoiDung IdNguoiDungNavigation { get; set; } = null!;
+    public virtual MaGiamGium IdMaGiamGiaNavigation { get; set; } = null!;
 }

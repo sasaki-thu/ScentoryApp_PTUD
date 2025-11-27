@@ -1,0 +1,330 @@
+﻿@model IEnumerable<ScentoryApp.Models.TaiKhoan>
+
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<style>
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .dataTables_filter {
+        display: none;
+    }
+
+    #dataTable-1 thead th {
+        color: #007bff;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý tài khoản</h2>
+                </div>
+                <div class="col-auto">
+                    <div class="form-inline">
+                        <div class="form-group mr-2">
+                            <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm kiếm..." style="min-width: 250px;">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="addAccountBtn">
+                            <i class="fe fe-plus fe-16"></i> Thêm tài khoản mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row my-1">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <table class="table datatables" id="dataTable-1">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên đăng nhập</th>
+                                        <th>Vai trò</th>
+                                        <th>Trạng thái sử dụng</th>
+                                        <th>Tác vụ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accountsTableBody">
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="row-@item.IdTaiKhoan.Trim()">
+                                                <td>@item.IdTaiKhoan</td>
+                                                <td>@item.TenDangNhap</td>
+                                                <td>
+                                                    @if (item.VaiTro == "Admin")
+                                                    {
+                                                        <span class="badge badge-danger">Admin</span>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <span class="badge badge-primary">Khách hàng</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @{
+                                                        var owner = item.KhachHangs.FirstOrDefault();
+                                                    }
+                                                    @if (owner != null)
+                                                    {
+                                                        <span class="text-success">Đang dùng bởi: @owner.HoTen</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">-</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
+                                                            <span class="text-muted sr-only">Action</span>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdTaiKhoan.Trim()">Chi tiết</a>
+                                                            <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdTaiKhoan.Trim()">Chỉnh sửa</a>
+                                                            <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdTaiKhoan.Trim()">Xóa</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="accountModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thông tin tài khoản</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="accountForm">
+                    <div class="form-group">
+                        <label>ID Tài khoản (*)</label>
+                        <input type="text" class="form-control" id="IdTaiKhoan" name="IdTaiKhoan" placeholder="VD: TK001" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tên đăng nhập (*)</label>
+                        <input type="text" class="form-control" id="TenDangNhap" name="TenDangNhap" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mật khẩu</label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="MatKhau" name="MatKhau">
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                    <i class="fe fe-eye"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <small class="form-text text-muted" id="passwordHelp">Để trống nếu không muốn đổi mật khẩu.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Vai trò</label>
+                        <select class="form-control" id="VaiTro" name="VaiTro">
+                            <option value="User">Khách hàng</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" id="btnSave">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa tài khoản <strong id="deleteName"></strong> không?
+                <input type="hidden" id="deleteId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
+    <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            var table = $('#dataTable-1').DataTable({
+                autoWidth: true,
+                "lengthChange": false,
+                "searching": true,
+                "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
+                "language": {
+                    "sProcessing":   "Đang xử lý...",
+                    "sZeroRecords":  "Không tìm thấy tài khoản nào",
+                    "sInfo":         "Hiển thị _START_ đến _END_ trong _TOTAL_ tài khoản",
+                    "sInfoEmpty":    "Hiển thị 0 đến 0 trong 0 tài khoản",
+                    "sInfoFiltered": "(lọc từ _MAX_ tài khoản)",
+                    "sSearch":       "Tìm kiếm:",
+                    "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
+                }
+            });
+
+            $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
+
+            function resetForm() {
+                $('#accountForm')[0].reset();
+                $('#IdTaiKhoan').prop('readonly', false);
+                $('#accountForm input, #accountForm select').prop('disabled', false);
+                $('#btnSave').show();
+                $('#MatKhau').attr('type', 'password');
+            }
+
+            $('#addAccountBtn').click(function () {
+                resetForm();
+                $('#modalTitle').text('Thêm tài khoản mới');
+                $('#accountModal').modal('show');
+            });
+
+            $('body').on('click', '.btn-edit, .btn-details', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                var isDetail = $(this).hasClass('btn-details');
+
+                $.ajax({
+                    url: '/Admin/AdminAccounts/GetById',
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            var d = res.data;
+                            resetForm();
+
+                            $('#IdTaiKhoan').val(d.idTaiKhoan).prop('readonly', true);
+                            $('#TenDangNhap').val(d.tenDangNhap);
+                            $('#MatKhau').val(d.matKhau);
+                            $('#VaiTro').val(d.vaiTro);
+
+                            if (isDetail) {
+                                $('#modalTitle').text('Chi tiết tài khoản');
+                                $('#accountForm input, #accountForm select').prop('disabled', true);
+                                $('#btnSave').hide();
+                                $('#passwordHelp').hide();
+                            } else {
+                                $('#modalTitle').text('Cập nhật tài khoản');
+                            }
+                            $('#accountModal').modal('show');
+                        } else {
+                            alert(res.message);
+                        }
+                    },
+                    error: function() { alert("Lỗi kết nối!"); }
+                });
+            });
+
+            $('#btnSave').click(function () {
+                var id = $('#IdTaiKhoan').val().trim();
+                var username = $('#TenDangNhap').val().trim();
+                var password = $('#MatKhau').val();
+                var isEdit = $('#IdTaiKhoan').prop('readonly');
+
+                if (!id) { alert('Vui lòng nhập ID tài khoản!'); return; }
+                if (!username) { alert('Vui lòng nhập tên đăng nhập!'); return; }
+                if (!isEdit && !password) { alert('Vui lòng nhập mật khẩu cho tài khoản mới!'); return; }
+
+                // Regex
+                const validationRegex = /^[a-zA-Z0-9_.-]+$/;
+                if (!validationRegex.test(username)) {
+                    alert("Tên đăng nhập không hợp lệ (Không dấu, không khoảng trắng)!");
+                    return;
+                }
+
+                var formData = new FormData($('#accountForm')[0]);
+
+                $.ajax({
+                    url: '/Admin/AdminAccounts/Save',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, processData: false,
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            alert("Lỗi: " + res.message);
+                        }
+                    },
+                    error: function () { alert("Lỗi hệ thống!"); }
+                });
+            });
+
+            $('body').on('click', '.btn-delete', function () {
+                var id = $(this).data('id');
+                $('#deleteName').text(id);
+                $('#deleteId').val(id);
+                $('#deleteModal').modal('show');
+            });
+
+            $('#btnConfirmDelete').click(function () {
+                var id = $('#deleteId').val();
+                $.ajax({
+                    url: '/Admin/AdminAccounts/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            $('#deleteModal').modal('hide');
+                            var t = $('#dataTable-1').DataTable();
+                            t.row($('#row-' + id)).remove().draw();
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+
+            $('#togglePassword').click(function() {
+                var input = $('#MatKhau');
+                var icon = $(this).find('i');
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.removeClass('fe-eye').addClass('fe-eye-off');
+                } else {
+                    input.attr('type', 'password');
+                    icon.removeClass('fe-eye-off').addClass('fe-eye');
+                }
+            });
+        });
+    </script>
+}

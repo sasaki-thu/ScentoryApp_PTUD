@@ -13,7 +13,5 @@ public partial class TaiKhoan
 
     public string VaiTro { get; set; } = null!;
 
-    public string IdNguoiDung { get; set; } = null!;
-
-    public virtual NguoiDung IdNguoiDungNavigation { get; set; } = null!;
+    public virtual ICollection<KhachHang> KhachHangs { get; set; } = new List<KhachHang>();
 }

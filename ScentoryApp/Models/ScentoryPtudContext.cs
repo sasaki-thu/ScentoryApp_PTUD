@@ -29,9 +29,9 @@ public partial class ScentoryPtudContext : DbContext
 
     public virtual DbSet<GioHang> GioHangs { get; set; }
 
-    public virtual DbSet<MaGiamGium> MaGiamGia { get; set; }
+    public virtual DbSet<KhachHang> KhachHangs { get; set; }
 
-    public virtual DbSet<NguoiDung> NguoiDungs { get; set; }
+    public virtual DbSet<MaGiamGium> MaGiamGia { get; set; }
 
     public virtual DbSet<SanPham> SanPhams { get; set; }
 
@@ -112,25 +112,24 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_DanhGia");
-            entity.Property(e => e.IdNguoiDung)
+            entity.Property(e => e.IdKhachHang)
                 .HasMaxLength(5)
                 .IsUnicode(false)
                 .IsFixedLength()
-                .HasColumnName("ID_NguoiDung");
+                .HasColumnName("ID_KhachHang");
             entity.Property(e => e.IdSanPham)
                 .HasMaxLength(5)
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_SanPham");
-            entity.Property(e => e.NoiDung).HasMaxLength(1);
             entity.Property(e => e.ThoiGianDanhGia)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
 
-            entity.HasOne(d => d.IdNguoiDungNavigation).WithMany(p => p.DanhGiaSanPhams)
-                .HasForeignKey(d => d.IdNguoiDung)
+            entity.HasOne(d => d.IdKhachHangNavigation).WithMany(p => p.DanhGiaSanPhams)
+                .HasForeignKey(d => d.IdKhachHang)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK10_ND_DG");
+                .HasConstraintName("FK10_KH_DG");
 
             entity.HasOne(d => d.IdSanPhamNavigation).WithMany(p => p.DanhGiaSanPhams)
                 .HasForeignKey(d => d.IdSanPham)
@@ -174,16 +173,16 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_DonViVanChuyen");
+            entity.Property(e => e.IdKhachHang)
+                .HasMaxLength(5)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("ID_KhachHang");
             entity.Property(e => e.IdMaGiamGia)
                 .HasMaxLength(5)
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_MaGiamGia");
-            entity.Property(e => e.IdNguoiDung)
-                .HasMaxLength(5)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("ID_NguoiDung");
             entity.Property(e => e.PhiVanChuyen).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.ThoiGianCapNhat).HasColumnType("datetime");
             entity.Property(e => e.ThoiGianDatHang)
@@ -199,15 +198,15 @@ public partial class ScentoryPtudContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK11_DVVC_DH");
 
+            entity.HasOne(d => d.IdKhachHangNavigation).WithMany(p => p.DonHangs)
+                .HasForeignKey(d => d.IdKhachHang)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK6_KH_GH");
+
             entity.HasOne(d => d.IdMaGiamGiaNavigation).WithMany(p => p.DonHangs)
                 .HasForeignKey(d => d.IdMaGiamGia)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK12_DH_MGG");
-
-            entity.HasOne(d => d.IdNguoiDungNavigation).WithMany(p => p.DonHangs)
-                .HasForeignKey(d => d.IdNguoiDung)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK6_ND_GH");
         });
 
         modelBuilder.Entity<DonViVanChuyen>(entity =>
@@ -221,7 +220,6 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_DonViVanChuyen");
-            entity.Property(e => e.TenDonViVanChuyen).HasMaxLength(1);
         });
 
         modelBuilder.Entity<GioHang>(entity =>
@@ -235,11 +233,11 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_GioHang");
-            entity.Property(e => e.IdNguoiDung)
+            entity.Property(e => e.IdKhachHang)
                 .HasMaxLength(5)
                 .IsUnicode(false)
                 .IsFixedLength()
-                .HasColumnName("ID_NguoiDung");
+                .HasColumnName("ID_KhachHang");
             entity.Property(e => e.ThoiGianCapNhatGh)
                 .HasColumnType("datetime")
                 .HasColumnName("ThoiGianCapNhatGH");
@@ -248,10 +246,43 @@ public partial class ScentoryPtudContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("ThoiGianTaoGH");
 
-            entity.HasOne(d => d.IdNguoiDungNavigation).WithMany(p => p.GioHangs)
-                .HasForeignKey(d => d.IdNguoiDung)
+            entity.HasOne(d => d.IdKhachHangNavigation).WithMany(p => p.GioHangs)
+                .HasForeignKey(d => d.IdKhachHang)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK3_ND_GH");
+                .HasConstraintName("FK3_KH_GH");
+        });
+
+        modelBuilder.Entity<KhachHang>(entity =>
+        {
+            entity.HasKey(e => e.IdKhachHang).HasName("pk_KhachHang");
+
+            entity.ToTable("KhachHang");
+
+            entity.Property(e => e.IdKhachHang)
+                .HasMaxLength(5)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("ID_KhachHang");
+            entity.Property(e => e.DiaChi).HasMaxLength(100);
+            entity.Property(e => e.Email)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.GioiTinh).HasMaxLength(3);
+            entity.Property(e => e.HoTen).HasMaxLength(50);
+            entity.Property(e => e.IdTaiKhoan)
+                .HasMaxLength(5)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("ID_TaiKhoan");
+            entity.Property(e => e.Sdt)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("SDT");
+
+            entity.HasOne(d => d.IdTaiKhoanNavigation).WithMany(p => p.KhachHangs)
+                .HasForeignKey(d => d.IdTaiKhoan)
+                .HasConstraintName("FK2_TK_KH");
         });
 
         modelBuilder.Entity<MaGiamGium>(entity =>
@@ -269,30 +300,6 @@ public partial class ScentoryPtudContext : DbContext
             entity.Property(e => e.LoaiGiam).HasMaxLength(3);
             entity.Property(e => e.ThoiGianBatDau).HasColumnType("datetime");
             entity.Property(e => e.ThoiGianKetThuc).HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<NguoiDung>(entity =>
-        {
-            entity.HasKey(e => e.IdNguoiDung).HasName("PK__NguoiDun__5282D3EB88980677");
-
-            entity.ToTable("NguoiDung");
-
-            entity.Property(e => e.IdNguoiDung)
-                .HasMaxLength(5)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("ID_NguoiDung");
-            entity.Property(e => e.DiaChi).HasMaxLength(1);
-            entity.Property(e => e.Email)
-                .HasMaxLength(1)
-                .IsUnicode(false);
-            entity.Property(e => e.GioiTinh).HasMaxLength(3);
-            entity.Property(e => e.HoTen).HasMaxLength(1);
-            entity.Property(e => e.Sdt)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("SDT");
         });
 
         modelBuilder.Entity<SanPham>(entity =>
@@ -336,23 +343,11 @@ public partial class ScentoryPtudContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength()
                 .HasColumnName("ID_TaiKhoan");
-            entity.Property(e => e.IdNguoiDung)
-                .HasMaxLength(5)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasColumnName("ID_NguoiDung");
-            entity.Property(e => e.MatKhau)
-                .HasMaxLength(1)
-                .IsUnicode(false);
+            entity.Property(e => e.MatKhau).IsUnicode(false);
             entity.Property(e => e.TenDangNhap)
-                .HasMaxLength(1)
+                .HasMaxLength(20)
                 .IsUnicode(false);
-            entity.Property(e => e.VaiTro).HasMaxLength(1);
-
-            entity.HasOne(d => d.IdNguoiDungNavigation).WithMany(p => p.TaiKhoans)
-                .HasForeignKey(d => d.IdNguoiDung)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK2_ND_TK");
+            entity.Property(e => e.VaiTro).HasMaxLength(20);
         });
 
         OnModelCreatingPartial(modelBuilder);

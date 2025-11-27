@@ -1,0 +1,388 @@
+﻿@model IEnumerable<ScentoryApp.Models.KhachHang>
+
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+
+<style>
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .dataTables_filter {
+        display: none;
+    }
+
+    #dataTable-1 thead th {
+        color: #007bff;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý khách hàng</h2>
+                </div>
+                <div class="col-auto">
+                    <div class="form-inline">
+                        <div class="form-group mr-2">
+                            <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm kiếm..." style="min-width: 250px;">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="addUserBtn">
+                            <i class="fe fe-plus fe-16"></i> Thêm khách hàng
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row my-1">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <table class="table datatables" id="dataTable-1">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Họ tên</th>
+                                        <th>Email</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Giới tính</th>
+                                        <th>Ngày sinh</th>
+                                        <th>Tài khoản</th>
+                                        <th>Tác vụ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody">
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="row-@item.IdKhachHang.Trim()">
+                                                <td>@item.IdKhachHang</td>
+                                                <td>@item.HoTen</td>
+                                                <td>@item.Email</td>
+                                                <td>@item.Sdt</td>
+                                                <td>
+                                                    @if (item.GioiTinh == "Nam")
+                                                    {
+                                                        <span class="badge badge-info">Nam</span>
+                                                    }
+                                                    else if (item.GioiTinh == "Nữ")
+                                                    {
+
+                                                        <span class="badge badge-warning text-white">Nữ</span>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <span class="badge badge-secondary">Khác</span>
+                                                    }
+                                                </td>
+                                                <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    @if (item.IdTaiKhoanNavigation != null)
+                                                    {
+                                                        <span>@item.IdTaiKhoanNavigation.TenDangNhap</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted font-italic">Chưa liên kết</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
+                                                            <span class="text-muted sr-only">Action</span>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdKhachHang.Trim()">Chi tiết</a>
+                                                            <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdKhachHang.Trim()">Chỉnh sửa</a>
+                                                            <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdKhachHang.Trim()">Xóa</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thông tin khách hàng</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <fieldset id="userFieldset">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label>ID Khách hàng (*)</label>
+                                <input type="text" class="form-control" id="IdKhachHang" name="IdKhachHang" placeholder="KH00x" required>
+                            </div>
+                            <div class="form-group col-md-8">
+                                <label>Họ và Tên (*)</label>
+                                <input type="text" class="form-control" id="HoTen" name="HoTen" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Email</label>
+                                <input type="email" class="form-control" id="Email" name="Email" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Số điện thoại</label>
+                                <input type="text" class="form-control" id="Sdt" name="Sdt" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Giới tính</label>
+                                <select class="form-control" id="GioiTinh" name="GioiTinh" required>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Ngày sinh</label>
+                                <input type="date" class="form-control" id="NgaySinh" name="NgaySinh" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tài khoản liên kết</label>
+                            <select class="form-control" id="IdTaiKhoan" name="IdTaiKhoan" asp-items="ViewBag.ListTaiKhoan">
+                                <option value="">-- Chưa liên kết tài khoản --</option>
+                            </select>
+                            <small class="form-text text-muted">Chọn tài khoản đăng nhập cho khách hàng này (nếu có).</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Địa chỉ</label>
+                            <textarea class="form-control" id="DiaChi" name="DiaChi" required rows="2"></textarea>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btnSave">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa khách hàng <strong id="deleteName"></strong> không?
+                <input type="hidden" id="deleteId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
+    <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // 1. DATATABLES
+            var table = $('#dataTable-1').DataTable({
+                autoWidth: true,
+                "lengthChange": false,
+                "searching": true,
+                "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
+                "language": {
+                    "sProcessing":   "Đang xử lý...",
+                    "sZeroRecords":  "Không tìm thấy khách hàng nào",
+                    "sInfo":         "Đang hiển thị _START_ đến _END_ trong _TOTAL_ khách hàng",
+                    "sInfoEmpty":    "Đang hiển thị 0 đến 0 trong 0 khách hàng",
+                    "sInfoFiltered": "(lọc từ _MAX_ khách hàng)",
+                    "sSearch":       "Tìm kiếm:",
+                    "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
+                }
+            });
+
+            $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
+
+            // 2. RESET
+            function resetForm() {
+                $('#userForm')[0].reset();
+                $('#IdKhachHang').prop('readonly', false);
+                $('#userFieldset').prop('disabled', false);
+                $('#btnSave').show();
+            }
+
+            // 3. THÊM MỚI
+            $('#addUserBtn').click(function () {
+                resetForm();
+                $('#modalTitle').text('Thêm khách hàng mới');
+                $('#userModal').modal('show');
+            });
+
+            // 4. SỬA & CHI TIẾT
+            $('body').on('click', '.btn-edit, .btn-details', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                var isDetail = $(this).hasClass('btn-details');
+
+                $.ajax({
+                    url: '/Admin/AdminUsers/GetById', // Gọi AdminUsersController
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            var d = res.data;
+                            resetForm();
+
+                            // Map dữ liệu
+                            $('#IdKhachHang').val(d.idKhachHang).prop('readonly', true);
+                            $('#HoTen').val(d.hoTen);
+                            $('#Email').val(d.email);
+                            $('#Sdt').val(d.sdt);
+                            $('#GioiTinh').val(d.gioiTinh);
+                            $('#NgaySinh').val(d.ngaySinh);
+                            $('#DiaChi').val(d.diaChi);
+
+                            // Chọn tài khoản trong Dropdown (Nếu có)
+                            $('#IdTaiKhoan').val(d.idTaiKhoan);
+
+                            if (isDetail) {
+                                $('#modalTitle').text('Chi tiết khách hàng');
+                                $('#userFieldset').prop('disabled', true);
+                                $('#btnSave').hide();
+                            } else {
+                                $('#modalTitle').text('Cập nhật khách hàng');
+                            }
+                            $('#userModal').modal('show');
+                        } else {
+                            alert(res.message);
+                        }
+                    },
+                    error: function() { alert("Lỗi kết nối!"); }
+                });
+            });
+
+            // 5. LƯU (Đã tích hợp Logic SĐT sạch)
+            $('#btnSave').click(function () {
+                // A. Lấy dữ liệu thô
+                var id = $('#IdKhachHang').val().trim();
+                var name = $('#HoTen').val().trim();
+                var email = $('#Email').val().trim();
+                var birthday = $('#NgaySinh').val();
+                var address = $('#DiaChi').val().trim();
+                var rawPhone = $('#Sdt').val().trim();
+
+                var errors = [];
+
+                // B. Validate cơ bản
+                if (!id) errors.push("Vui lòng nhập ID Khách hàng.");
+                if (!name) errors.push("Vui lòng nhập Họ và tên.");
+                if (!email) errors.push("Vui lòng nhập Email.");
+                if (!birthday) errors.push("Vui lòng chọn Ngày sinh.");
+                if (!address) errors.push("Vui lòng nhập Địa chỉ.");
+
+                // C. XỬ LÝ SỐ ĐIỆN THOẠI (Quan trọng)
+                var cleanPhone = rawPhone.replace(/\D/g, '');
+                if (cleanPhone.length === 9) { cleanPhone = '0' + cleanPhone; }
+
+                if (cleanPhone.length !== 10) {
+                    errors.push("Số điện thoại không hợp lệ (Phải đúng 10 số).");
+                } else {
+                    $('#Sdt').val(cleanPhone); // Gán lại số sạch vào input
+                }
+
+                // D. Validate Email
+                var emailRegex = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (email !== "" && !emailRegex.test(email)) {
+                    errors.push("Email không đúng định dạng.");
+                }
+
+                // E. Dừng nếu có lỗi
+                if (errors.length > 0) {
+                    alert(errors.join("\n"));
+                    return;
+                }
+
+                // F. Gửi AJAX
+                // Lưu ý: FormData sẽ lấy giá trị từ các thẻ input (bao gồm cả SĐT đã được làm sạch ở trên)
+                var formData = new FormData($('#userForm')[0]);
+
+                $.ajax({
+                    url: '/Admin/AdminUsers/Save',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            alert("Lỗi từ hệ thống: " + res.message);
+                        }
+                    },
+                    error: function () {
+                        alert("Lỗi kết nối (Kiểm tra lại Server/Database)!");
+                    }
+                });
+            });
+
+            // 6. XÓA
+            $('body').on('click', '.btn-delete', function () {
+                var id = $(this).data('id');
+                $('#deleteName').text(id);
+                $('#deleteId').val(id);
+                $('#deleteModal').modal('show');
+            });
+
+            $('#btnConfirmDelete').click(function () {
+                var id = $('#deleteId').val();
+                $.ajax({
+                    url: '/Admin/AdminUsers/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            $('#deleteModal').modal('hide');
+                            var t = $('#dataTable-1').DataTable();
+                            t.row($('#row-' + id)).remove().draw();
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

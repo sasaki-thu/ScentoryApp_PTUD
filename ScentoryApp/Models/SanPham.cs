@@ -7,9 +7,9 @@ public partial class SanPham
 {
     public string IdSanPham { get; set; } = null!;
 
-    public string? TenSanPham { get; set; }
+    public string TenSanPham { get; set; } = null!;
 
-    public string? MoTaSanPham { get; set; }
+    public string MoTaSanPham { get; set; } = null!;
 
     public decimal GiaNiemYet { get; set; }
 

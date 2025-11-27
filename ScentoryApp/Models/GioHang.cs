@@ -11,9 +11,9 @@ public partial class GioHang
 
     public DateTime? ThoiGianCapNhatGh { get; set; }
 
-    public string IdNguoiDung { get; set; } = null!;
+    public string IdKhachHang { get; set; } = null!;
 
     public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();
 
-    public virtual NguoiDung IdNguoiDungNavigation { get; set; } = null!;
+    public virtual KhachHang IdKhachHangNavigation { get; set; } = null!;
 }

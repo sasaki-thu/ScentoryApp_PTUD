@@ -9,7 +9,7 @@ public partial class DanhMucSanPham
 
     public string? TenDanhMucSanPham { get; set; }
 
-    public string? MoTaDanhMuc { get; set; }
+    public string MoTaDanhMuc { get; set; } = null!;
 
     public bool TrangThaiDanhMuc { get; set; }
 
