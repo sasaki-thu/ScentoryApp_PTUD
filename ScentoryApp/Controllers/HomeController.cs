@@ -111,12 +111,23 @@ namespace ScentoryApp.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
 
-            // Validate ReturnUrl
-            var returnUrl = req.ReturnUrl;
-            if (string.IsNullOrEmpty(returnUrl) || !Url.IsLocalUrl(returnUrl))
-                returnUrl = "/";
+            // ======= PHÂN QUYỀN REDIRECT =========
+            string redirectUrl;
 
-            return Json(new { success = true, returnUrl });
+            if (req.Role == "Admin")
+            {
+                redirectUrl = "/Admin/Home/Index";   // luôn về Admin
+            }
+            else
+            {
+                // User → đi theo ReturnUrl nếu hợp lệ
+                if (!string.IsNullOrEmpty(req.ReturnUrl) && Url.IsLocalUrl(req.ReturnUrl))
+                    redirectUrl = req.ReturnUrl;
+                else
+                    redirectUrl = "/";  // về Home
+            }
+
+            return Json(new { success = true, returnUrl = redirectUrl });
         }
 
         public class LoginRequest
