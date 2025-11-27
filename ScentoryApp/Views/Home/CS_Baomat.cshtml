@@ -1,6 +1,191 @@
 ﻿@{
     ViewData["Title"] = "Chính sách bảo mật thông tin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<style>
+    .policy-container {
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 20px;
+        font-size: 16px;
+        line-height: 1.7;
+        color: #333;
+    }
+
+    .policy-header {
+        font-size: 32px;
+        font-weight: 700;
+        text-align: center;
+        color: #b2764e;
+        margin-bottom: 10px;
+    }
+
+    .policy-subtitle {
+        text-align: center;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .policy-law-buttons {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .policy-law-buttons a {
+            display: inline-block;
+            background: #c68a5c;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 5px 10px;
+            font-weight: 500;
+        }
+
+    .policy-section {
+        margin-top: 25px;
+    }
+
+    .policy-section-title {
+        font-weight: 600;
+        color: #000;
+        font-size: 18px;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        text-transform: none;
+    }
+
+    .policy-list {
+        margin-left: 22px;
+    }
+
+    .policy-note {
+        margin: 15px 0;
+    }
+</style>
+
+<div class="policy-container">
+    <h1 class="policy-header">CHÍNH SÁCH BẢO MẬT THÔNG TIN</h1>
+
+    <p class="policy-subtitle">
+        Cam kết bảo vệ thông tin cá nhân của quý khách theo quy định pháp luật Việt Nam
+    </p>
+
+    <div class="policy-law-buttons">
+        <a href="https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-an-ninh-mang-2018-351416.aspx">Luật An ninh mạng 2018</a>
+        <a href="https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Nghi-dinh-13-2023-ND-CP-bao-ve-du-lieu-ca-nhan-465185.aspx">Nghị định 13/2023/NĐ-CP</a>
+        <a href="https://thuvienphapluat.vn/van-ban/Thuong-mai/Nghi-dinh-85-2021-ND-CP-sua-doi-Nghi-dinh-52-2013-ND-CP-ve-thuong-mai-dien-tu-489272.aspx">Nghị định 85/2021</a>
+    </div>
+
+    <hr />
+
+    <p class="policy-note">
+        📍 Scentory tạo ra chính sách bảo mật này để quý khách hiểu rõ hơn về những cam kết mà Scentory thực hiện trong việc thu thập,
+        sử dụng và chia sẻ thông tin, cũng như việc bảo mật thông tin khách hàng.
+    </p>
+
+
+    <div class="policy-section">
+        <p class="policy-section-title">1. Thu thập thông tin khách hàng</p>
+
+        <p>
+            Chúng tôi thu thập thông tin để đảm bảo quy trình mua sắm, thanh toán, giao hàng diễn ra chính xác,
+            và cung cấp trải nghiệm tốt nhất cho quý khách. Một số thông tin chúng tôi sẽ thu thập:
+        </p>
+
+        <p><strong>📍 Thông tin bắt buộc:</strong></p>
+        <ul class="policy-list">
+            <li>Họ tên, email, số điện thoại, địa chỉ giao nhận hàng hóa và/hoặc thanh toán để xử lý đơn hàng.</li>
+            <li>Tài khoản ngân hàng và thông tin thanh toán.</li>
+            <li>Hình ảnh, video mở hàng/kiểm tra hàng.</li>
+        </ul>
+
+        <p><strong>📍 Thông tin tự động:</strong></p>
+        <ul class="policy-list">
+            <li>Dữ liệu nhập trên website (tìm kiếm, bình luận) hoặc gửi qua email/hotline.</li>
+            <li>Cookie và địa chỉ IP để cá nhân hóa gợi ý sản phẩm (ví dụ: đề xuất nước hoa hoặc tinh dầu phù hợp).</li>
+            <li>Thông tin từ tương tác: Qua cuộc gọi điện thoại (có thể ghi âm), email, ứng dụng mạng xã hội, thư từ, gặp gỡ trực tiếp.</li>
+            <li>Thông tin khi liên kết tài khoản Scentory với mạng xã hội hoặc tài khoản bên ngoài hoặc khi cung cấp ý kiến phản hồi/gửi khiếu nại.</li>
+        </ul>
+
+        <p><strong>📍 Thông tin giao dịch:</strong></p>
+        <ul class="policy-list">
+            <li>Lịch sử mua hàng, giá trị giao dịch, phương thức thanh toán, và vận chuyển để giải quyết tranh chấp hoặc hỗ trợ sau bán.</li>
+        </ul>
+
+        <p><strong>📍 Các trường hợp thu thập khác:</strong></p>
+        <ul class="policy-list">
+            <li>Các thông tin được cung cấp khi sử dụng dịch vụ liên kết, theo sự đồng ý của quý khách.</li>
+            <li><strong>Không</strong> thu thập thông tin cá nhân của trẻ em <strong>dưới 13 tuổi</strong> mà không có sự kiểm soát của cha mẹ hoặc người giám hộ. Nếu phát hiện, chúng tôi sẽ xóa thông tin mà không thông báo trước.</li>
+        </ul>
+
+        <p><strong>📍 Thời gian lưu trữ:</strong></p>
+        <ul class="policy-list">
+            <li>Tối đa 2 năm kể từ đơn hàng cuối cùng, trừ khi có yêu cầu xóa từ quý khách hoặc quy định pháp luật.</li>
+            <li>Trong trường hợp cần thiết, chúng tôi có thể tiêu hủy dữ liệu an toàn mà không thông báo trước.</li>
+        </ul>
+    </div>
+
+
+    <div class="policy-section">
+        <p class="policy-section-title">2. Sử dụng thông tin</p>
+
+        <p><strong>📍 Mục đích sử dụng:</strong></p>
+        <ul class="policy-list">
+            <li>Quản lý, điều hành, xem xét và xử lý đơn đặt hàng/giao dịch với Scentory hoặc bên thứ ba qua dịch vụ trung gian.</li>
+            <li>Hỗ trợ chăm sóc khách hàng và giải quyết yêu cầu.</li>
+            <li>Xác minh, đánh giá pháp lý hoặc nhận biết khách hàng.</li>
+            <li>Lập số liệu thống kê, nghiên cứu nội bộ để phát triển và nâng cao chất lượng phục vụ (ví dụ: phân tích sở thích về mùi hương).</li>
+            <li>Giải quyết tranh chấp liên quan đến giao dịch trên website.</li>
+            <li>Ngăn chặn hành vi vi phạm pháp luật Việt Nam (ví dụ: gian lận thanh toán).</li>
+            <li>Đáp ứng thủ tục pháp lý hoặc yêu cầu từ cơ quan nhà nước có thẩm quyền.</li>
+        </ul>
+    </div>
+
+
+    <div class="policy-section">
+        <p class="policy-section-title">3. Chia sẻ thông tin</p>
+
+        <p>Scentory cam kết không bán, trao đổi, hoặc chuyển giao thông tin cá nhân cho bên thứ ba, trừ các trường hợp được quy định rõ ràng để bảo vệ quyền lợi và tuân thủ pháp luật.</p>
+
+        <p><strong>📍 Trường hợp chia sẻ thông tin:</strong></p>
+        <ul class="policy-list">
+            <li>Với nhân viên và đối tác: Nhân viên Scentory, đối tác dịch vụ trung gian (vận chuyển như GHTK, thanh toán như Momo) 
+                để (i) tuân thủ pháp luật; (ii) thực thi hợp đồng/giao dịch; (iii) đáp ứng yêu cầu dịch vụ khách hàng; (iv) bảo vệ quyền, tài sản hoặc an toàn của Scentory và quý khách.</li>
+            <li>Bảo vệ quyền lợi: Cung cấp thông tin khi cần thiết để bảo vệ Scentory, khách hàng, hoặc bên thứ ba, theo đúng quy định pháp luật.</li>
+            <li>Yêu cầu pháp lý: Tuân thủ yêu cầu từ cơ quan chính phủ, tòa án hoặc quy định pháp luật Việt Nam.</li>
+            <li>Hợp tác vận chuyển, khuyến mãi: Chia sẻ thông tin giao nhận (tên, địa chỉ, số điện thoại) cho đơn vị vận chuyển hoặc đối tác chương trình khuyến mãi, 
+                nhưng chỉ khi có sự đồng ý của quý khách. Đối tác cam kết chỉ sử dụng cho mục đích thực thi nghĩa vụ, không dùng thương mại mà không có đồng ý.</li>
+        </ul>
+    </div>
+
+
+    <div class="policy-section">
+        <p class="policy-section-title">4. Quyền lợi của quý khách</p>
+
+        <p><strong>📍 Quý khách hoàn toàn có quyền kiểm soát thông tin cá nhân của mình bằng cách:</strong></p>
+
+        <ul class="policy-list">
+            <li>Yêu cầu truy cập, chỉnh sửa hoặc xóa thông tin cá nhân qua email <strong>scentorynotes@gmail.com</strong>.</li>
+            <li>Rút đồng ý cung cấp thông tin hoặc nhận thông tin khuyến mãi bất kỳ lúc nào (qua văn bản, email, hoặc link hủy đăng ký). 
+                Lưu ý: Việc từ chối có thể ảnh hưởng đến giao dịch hoặc sử dụng dịch vụ.</li>
+            <li>Khiếu nại về việc sử dụng thông tin: Liên hệ chúng tôi hoặc cơ quan chức năng.</li>
+        </ul>
+    </div>
+
+
+    <div class="policy-section">
+        <p class="policy-section-title">5. Bảo mật thông tin</p>
+
+        <ul class="policy-list">
+            <li>Sử dụng mã hóa SSL để bảo vệ dữ liệu thanh toán. Không lưu trữ thông tin thẻ tín dụng.</li>
+            <li>Áp dụng các biện pháp kỹ thuật để ngăn chặn truy cập trái phép, chỉ cho phép nhân viên được quyền truy cập đặc biệt.</li>
+            <li>Không đảm bảo an ninh tuyệt đối, nhưng chúng tôi nỗ lực bảo mật và sẽ khắc phục sự cố nếu xảy ra, hạn chế rủi ro.</li>
+            <li>Cam kết tuân thủ pháp luật trong việc lưu trữ và xử lý dữ liệu.</li>
+        </ul>
+
+        <p><strong>📍 Chính sách này có hiệu lực từ ngày 05/09/2025 và có thể được cập nhật định kỳ. Quý khách vui lòng kiểm tra thường xuyên.</p>
+    </div>
+
+</div>
