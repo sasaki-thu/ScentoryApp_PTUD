@@ -74,6 +74,11 @@ namespace ScentoryApp.Controllers
         {
             return View();
         }
+        [Authorize]
+        public IActionResult ProductDetails()
+        {
+            return View();
+        }
 
 
         [AllowAnonymous] // ==== cho phép truy cập không cần login ====

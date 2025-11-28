@@ -1,0 +1,642 @@
+﻿@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="product-detail py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Cột trái - Hình ảnh sản phẩm -->
+            <div class="col-lg-6 col-md-6">
+                <div class="product-images">
+                    <!-- Hình ảnh chính -->
+                    <div class="main-image mb-3">
+                        <img src="~/assets/images/Box quà Eclipse.png" alt="Box quà đặc biệt Scentory x 20/10" class="img-fluid" id="mainImage">
+                        <button class="zoom-btn">
+                            <i class="fa fa-search-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Thumbnail gallery -->
+                    <div class="thumbnail-gallery">
+                        <div class="row g-2">
+                            <div class="col-3">
+                                <img src="~/assets/images/Box quà Eclipse.png" alt="Thumbnail 1" class="img-fluid thumbnail-img active" onclick="changeMainImage(this)">
+                            </div>
+                            <div class="col-3">
+                                <img src="~/assets/images/Box quà Horizon.png" alt="Thumbnail 2" class="img-fluid thumbnail-img" onclick="changeMainImage(this)">
+                            </div>
+                            <div class="col-3">
+                                <img src="~/assets/images/Box quà Eclipse.png" alt="Thumbnail 3" class="img-fluid thumbnail-img" onclick="changeMainImage(this)">
+                            </div>
+                            <div class="col-3">
+                                <img src="~/assets/images/Box quà Eclipse.png" alt="Thumbnail 4" class="img-fluid thumbnail-img" onclick="changeMainImage(this)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải - Thông tin sản phẩm -->
+            <div class="col-lg-6 col-md-6">
+                <div class="product-info-detail">
+                    <!-- Breadcrumb -->
+                    <nav aria-label="breadcrumb" class="mb-3">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
+                            <li class="breadcrumb-item"><a href="#">Box quà</a></li>
+                            <li class="breadcrumb-item active">Box quà đặc biệt Scentory x 20/10 | Scentory</li>
+                        </ol>
+                    </nav>
+
+                    <!-- Danh mục -->
+                    <p class="product-category">
+                        <a href="#">Box quà</a>
+                    </p>
+
+                    <!-- Tên sản phẩm -->
+                    <h1 class="product-name mb-3">Box quà đặc biệt Scentory x 20/10 | Scentory</h1>
+
+                    <!-- Giá -->
+                    <div class="product-price mb-4">
+                        <span class="current-price">719.000 ₫</span>
+                        <span class="old-price">799.000 ₫</span>
+                    </div>
+
+                    <!-- Mô tả ngắn -->
+                    <div class="product-short-desc mb-4">
+                        <p>Box quà nước hoa [Scentory x 20/10] – món quà tinh tế kết hợp nước hoa với hương thơm quyến rũ và ảnh cá nhân hóa độc quyền. Thiết kế sang trọng, ý nghĩa, tôn vinh vẻ đẹp và cảm xúc của phái nữ trong ngày đặc biệt.</p>
+                    </div>
+
+                    <!-- Chọn mùi hương -->
+                    <div class="product-options mb-4">
+                        <label class="option-label">Mùi hương</label>
+                        <select class="form-select">
+                            <option selected>Chọn một tùy chọn</option>
+                            <option value="1">Whisper (Thầm)</option>
+                            <option value="2">Horizon (Miên)</option>
+                            <option value="3">Eclipse (Huyền)</option>
+                            <option value="4">Aurora (Uyển)</option>
+                        </select>
+                    </div>
+
+                    <!-- Số lượng và nút thêm giỏ hàng -->
+                    <div class="product-actions mb-4">
+                        <div class="quantity-selector">
+                            <button class="qty-btn minus" onclick="decreaseQty()">-</button>
+                            <input type="number" class="qty-input" value="1" min="1" id="quantity">
+                            <button class="qty-btn plus" onclick="increaseQty()">+</button>
+                        </div>
+                        <button class="btn btn-add-to-cart">
+                            THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+
+                    <!-- Yêu thích -->
+                    <div class="wishlist-link mb-4">
+                        <a href="#"><i class="fa fa-heart-o"></i> Yêu thích</a>
+                    </div>
+
+                    <!-- Thông tin thêm -->
+                    <div class="product-meta">
+                        <p><strong>SKU:</strong> SC-B-SP-50</p>
+                        <p>
+                            <strong>Danh mục:</strong>
+                            <a href="#">Box quà</a>
+                        </p>
+                        <p>
+                            <strong>Thẻ:</strong>
+                            <a href="#">box quà</a>,
+                            <a href="#">nước hoa</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Đổi hình ảnh chính khi click thumbnail
+    function changeMainImage(thumbnail) {
+        document.getElementById('mainImage').src = thumbnail.src;
+
+        // Remove active class from all thumbnails
+        document.querySelectorAll('.thumbnail-img').forEach(img => {
+            img.classList.remove('active');
+        });
+
+        // Add active class to clicked thumbnail
+        thumbnail.classList.add('active');
+    }
+
+    // Tăng số lượng
+    function increaseQty() {
+        let qtyInput = document.getElementById('quantity');
+        qtyInput.value = parseInt(qtyInput.value) + 1;
+    }
+
+    // Giảm số lượng
+    function decreaseQty() {
+        let qtyInput = document.getElementById('quantity');
+        if (parseInt(qtyInput.value) > 1) {
+            qtyInput.value = parseInt(qtyInput.value) - 1;
+        }
+    }
+</script>
+
+<!-- Tabs Mô tả chi tiết sản phẩm -->
+<section class="product-tabs-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs product-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                            Mô tả
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="additional-tab" data-bs-toggle="tab" data-bs-target="#additional" type="button" role="tab">
+                            Thông tin bổ sung
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                            Đánh giá (0)
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tabs Content -->
+                <div class="tab-content product-tab-content">
+                    <!-- Tab Mô tả -->
+                    <div class="tab-pane fade show active" id="description" role="tabpanel">
+                        <div class="tab-inner-content">
+                            <h5 class="mb-3">Thông tin chung:</h5>
+
+                            <ul class="product-info-list">
+                                <li>Thương hiệu: Scentory</li>
+                                <li>Box quà đặc biệt 20/10: Combo nước hoa, 2 ảnh cá nhân hóa và 1 thiệp yêu thương</li>
+                                <li>Dung tích: 50ml</li>
+                            </ul>
+
+                            <p class="mt-4">
+                                Trao gửi yêu thương ngày 20/10 với <strong>box quà nước hoa Scentory</strong> – sự kết hợp hoàn hảo giữa
+                                <strong>mùi hương tinh tế và cảm xúc riêng biệt</strong>. Mỗi hộp quà được thiết kế sang trọng, kèm
+                                <strong>bức ảnh cá nhân hóa</strong> giúp món quà trở nên <em>ý nghĩa và độc nhất dành riêng cho người phụ nữ bạn yêu thương</em>.
+                            </p>
+
+                            <h6 class="mt-4 mb-3">
+                                <span class="highlight-icon">🌸</span> Điểm nổi bật:
+                            </h6>
+
+                            <ul class="feature-list">
+                                <li>Nước hoa lưu hương lâu, mùi hương thanh lịch – quyến rũ.</li>
+                                <li>Ảnh cá nhân hóa – lưu giữ khoảnh khắc đặc biệt.</li>
+                                <li>Hộp quà thiết kế cao cấp, rất thích hợp cho dịp đặc biệt 20/10</li>
+                            </ul>
+
+                            <p class="mt-4 note-text">
+                                Nếu các tình iu muốn gửi gắm yêu thương cho người đặc biệt, đừng ngại note vào phần "ghi chú" những lời chúc ý nghĩa nhé.
+                                Scentory sẽ giúp các tình iu trao gửi yêu thương.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Tab Thông tin bổ sung -->
+                    <div class="tab-pane fade" id="additional" role="tabpanel">
+                        <div class="tab-inner-content">
+                            <p>Thông tin bổ sung sẽ được cập nhật...</p>
+                        </div>
+                    </div>
+
+                    <!-- Tab Đánh giá -->
+                    <div class="tab-pane fade" id="reviews" role="tabpanel">
+                        <div class="tab-inner-content">
+                            <p>Chưa có đánh giá nào.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Product Detail Page Styles */
+    .product-detail {
+        background-color: #fff;
+    }
+
+    /* Hình ảnh sản phẩm */
+    .product-images {
+        position: sticky;
+        top: 20px;
+    }
+
+    .main-image {
+        position: relative;
+        background-color: #f8f8f8;
+        padding: 20px;
+        border: 1px solid #e5e5e5;
+    }
+
+        .main-image img {
+            width: 100%;
+            height: auto;
+        }
+
+    .zoom-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .zoom-btn:hover {
+            background: #C38154;
+            color: white;
+        }
+
+    /* Thumbnail gallery */
+    .thumbnail-gallery {
+        margin-top: 15px;
+    }
+
+    .thumbnail-img {
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 5px;
+        background: #f8f8f8;
+    }
+
+        .thumbnail-img:hover,
+        .thumbnail-img.active {
+            border-color: #C38154;
+        }
+
+    /* Breadcrumb */
+    .breadcrumb {
+        background: none;
+        padding: 0;
+        margin-bottom: 15px;
+        font-size: 14px;
+    }
+
+    .breadcrumb-item a {
+        color: #666;
+        text-decoration: none;
+    }
+
+        .breadcrumb-item a:hover {
+            color: #C38154;
+        }
+
+    .breadcrumb-item.active {
+        color: #999;
+    }
+
+    /* Product category */
+    .product-category {
+        color: #C38154;
+        font-size: 14px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+        .product-category a {
+            color: #C38154;
+            text-decoration: none;
+        }
+
+    /* Product name */
+    .product-name {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.4;
+    }
+
+    /* Product price */
+    .product-price {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .current-price {
+        font-size: 32px;
+        font-weight: bold;
+        color: #dc3545;
+    }
+
+    .old-price {
+        font-size: 20px;
+        color: #999;
+        text-decoration: line-through;
+    }
+
+    /* Product description */
+    .product-short-desc {
+        color: #666;
+        line-height: 1.8;
+        font-size: 15px;
+    }
+
+    /* Product options */
+    .product-options {
+        margin-bottom: 25px;
+    }
+
+    .option-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .product-options .form-select {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 15px;
+    }
+
+        .product-options .form-select:focus {
+            border-color: #C38154;
+            box-shadow: 0 0 0 0.2rem rgba(195, 129, 84, 0.25);
+        }
+
+    /* Quantity selector và Add to cart */
+    .product-actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .quantity-selector {
+        display: flex;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .qty-btn {
+        background: #f8f8f8;
+        border: none;
+        width: 45px;
+        height: 50px;
+        cursor: pointer;
+        font-size: 18px;
+        transition: all 0.3s ease;
+        color: #666;
+    }
+
+        .qty-btn:hover {
+            background: #C38154;
+            color: white;
+        }
+
+    .qty-input {
+        width: 70px;
+        height: 50px;
+        border: none;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 600;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+    }
+
+        .qty-input:focus {
+            outline: none;
+        }
+
+        /* Remove arrow buttons from number input */
+        .qty-input::-webkit-outer-spin-button,
+        .qty-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+    .btn-add-to-cart {
+        flex: 1;
+        background-color: #C38154;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+    }
+
+        .btn-add-to-cart:hover {
+            background-color: #a66b42;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(195, 129, 84, 0.3);
+        }
+
+    /* Wishlist */
+    .wishlist-link a {
+        color: #C38154;
+        text-decoration: none;
+        font-size: 15px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .wishlist-link a:hover {
+            color: #a66b42;
+        }
+
+    .wishlist-link i {
+        font-size: 18px;
+    }
+
+    /* Product meta */
+    .product-meta {
+        padding-top: 20px;
+        border-top: 1px solid #e5e5e5;
+        font-size: 14px;
+        color: #666;
+    }
+
+        .product-meta p {
+            margin-bottom: 8px;
+        }
+
+        .product-meta a {
+            color: #C38154;
+            text-decoration: none;
+        }
+
+            .product-meta a:hover {
+                text-decoration: underline;
+            }
+
+    /* Responsive
+    media (max-width: 768px) {
+        .product-name {
+            font-size: 22px;
+        }
+
+        .current-price {
+            font-size: 26px;
+        }
+
+        .product-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .quantity-selector {
+            justify-content: center;
+        }
+    } */
+
+    /* Product Tabs Section */
+    .product-tabs-section {
+        background-color: #fff;
+        border-top: 1px solid #e5e5e5;
+    }
+
+    /* Tabs Navigation */
+    .product-tabs {
+        border-bottom: 2px solid #e5e5e5;
+        gap: 0;
+    }
+
+        .product-tabs .nav-item {
+            margin-bottom: 0;
+        }
+
+        .product-tabs .nav-link {
+            border: none;
+            border-bottom: 3px solid transparent;
+            background: none;
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+            padding: 15px 30px;
+            transition: all 0.3s ease;
+            border-radius: 0;
+        }
+
+            .product-tabs .nav-link:hover {
+                color: #C38154;
+                border-bottom-color: #C38154;
+            }
+
+            .product-tabs .nav-link.active {
+                color: #C38154;
+                border-bottom-color: #C38154;
+                background: none;
+            }
+
+    /* Tab Content */
+    .product-tab-content {
+        padding: 40px 0;
+    }
+
+    .tab-inner-content {
+        max-width: 1400px;
+    }
+
+        .tab-inner-content h5 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .tab-inner-content h6 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+    .highlight-icon {
+        font-size: 20px;
+    }
+
+    /* Product Info List */
+    .product-info-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+        .product-info-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+            .product-info-list li:before {
+                content: "•";
+                color: #C38154;
+                font-weight: bold;
+                display: inline-block;
+                width: 20px;
+                margin-left: 0;
+            }
+
+    /* Feature List */
+    .feature-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+            position: relative;
+            padding-left: 25px;
+        }
+
+            .feature-list li:before {
+                content: "•";
+                color: #C38154;
+                font-weight: bold;
+                position: absolute;
+                left: 0;
+                top: 8px;
+            }
+
+    /* Text Styling */
+    .tab-inner-content p {
+        color: #666;
+        font-size: 15px;
+        line-height: 1.8;
+        margin-bottom: 15px;
+    }
+
+    .tab-inner-content strong {
+        color: #333;
+        font-weight: 600;
+    }
+
+    .note-text {
+        font-style: italic;
+        color: #777;
+    }
+</style>
