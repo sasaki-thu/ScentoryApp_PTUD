@@ -224,8 +224,98 @@
     </div>
 </section>
 
+<!-- Có thể bạn thích -->
+<section class="related-products-section py-5">
+    <div class="container">
+        <h2 class="section-title mb-4">Có thể bạn thích...</h2>
+
+        <div class="row">
+            <!-- SP 1 -->
+            <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="product-card-related">
+                    <div class="product-badge">-7%</div>
+                    <div class="product-img-wrap">
+                        <img src="~/assets/images/Horizon50ml.png" alt="Nước hoa Reminiscence – Horizon (Miên) 50ml" class="img-fluid">
+                    </div>
+                    <div class="product-info-related">
+                        <div class="price-wrap-related">
+                            <span class="sale-price-related">649.000 ₫</span>
+                            <span class="original-price-related">699.000 ₫</span>
+                        </div>
+                        <p class="product-title-related">Nước hoa Reminiscence – Horizon (Miên) 50ml | Scentory</p>
+                        <button class="btn btn-add-cart-related">
+                            THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SP 2 -->
+            <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="product-card-related">
+                    <div class="product-badge">-7%</div>
+                    <div class="product-img-wrap">
+                        <img src="~/assets/images/Aurora50ml.png" alt="Nước hoa Reminiscence – Aurora (Uyển) 50ml" class="img-fluid">
+                    </div>
+                    <div class="product-info-related">
+                        <div class="price-wrap-related">
+                            <span class="sale-price-related">649.000 ₫</span>
+                            <span class="original-price-related">699.000 ₫</span>
+                        </div>
+                        <p class="product-title-related">Nước hoa Reminiscence – Aurora (Uyển) 50ml | Scentory</p>
+                        <button class="btn btn-add-cart-related">
+                            THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SP 3 -->
+            <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="product-card-related">
+                    <div class="product-badge">-7%</div>
+                    @* <div class="product-status-badge">HẾT HÀNG</div> *@
+                    <div class="product-img-wrap">
+                        <img src="~/assets/images/Whisper50ml.png" alt="Nước hoa Reminiscence – Whisper (Thầm) 50ml" class="img-fluid">
+                    </div>
+                    <div class="product-info-related">
+                        <div class="price-wrap-related">
+                            <span class="sale-price-related">649.000 ₫</span>
+                            <span class="original-price-related">699.000 ₫</span>
+                        </div>
+                        <p class="product-title-related">Nước hoa Reminiscence – Whisper (Thầm) 50ml | Scentory</p>
+                        <button class="btn btn-read-more-related">
+                            THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SP 4 -->
+            <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="product-card-related">
+                    <div class="product-badge">-7%</div>
+                    <div class="product-img-wrap">
+                        <img src="~/assets/images/Eclipse50ml.png" alt="Nước hoa Reminiscence – Eclipse (Huyền) 50ml" class="img-fluid">
+                    </div>
+                    <div class="product-info-related">
+                        <div class="price-wrap-related">
+                            <span class="sale-price-related">649.000 ₫</span>
+                            <span class="original-price-related">699.000 ₫</span>
+                        </div>
+                        <p class="product-title-related">Nước hoa Reminiscence – Eclipse (Huyền) 50ml | Scentory</p>
+                        <button class="btn btn-add-cart-related">
+                            THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <style>
-    /* Product Detail Page Styles */
+    /* Custom Chi tiết sản phẩm */
     .product-detail {
         background-color: #fff;
     }
@@ -267,7 +357,7 @@
             color: white;
         }
 
-    /* Thumbnail gallery */
+    /* Thumbnail */
     .thumbnail-gallery {
         margin-top: 15px;
     }
@@ -306,7 +396,7 @@
         color: #999;
     }
 
-    /* Product category */
+    /* Danh mục sản phẩm */
     .product-category {
         color: #C38154;
         font-size: 14px;
@@ -319,7 +409,7 @@
             text-decoration: none;
         }
 
-    /* Product name */
+    /* Tên sản phẩm */
     .product-name {
         font-size: 28px;
         font-weight: 600;
@@ -327,7 +417,7 @@
         line-height: 1.4;
     }
 
-    /* Product price */
+    /* Giá sản phẩm */
     .product-price {
         display: flex;
         align-items: center;
@@ -346,14 +436,14 @@
         text-decoration: line-through;
     }
 
-    /* Product description */
+    /* Mô tả sản phẩm */
     .product-short-desc {
         color: #666;
         line-height: 1.8;
         font-size: 15px;
     }
 
-    /* Product options */
+    /* Tùy chọn sản phẩm */
     .product-options {
         margin-bottom: 25px;
     }
@@ -377,7 +467,7 @@
             box-shadow: 0 0 0 0.2rem rgba(195, 129, 84, 0.25);
         }
 
-    /* Quantity selector và Add to cart */
+    /* Số lượng và Thêm vào giỏ hàng */
     .product-actions {
         display: flex;
         gap: 15px;
@@ -449,7 +539,7 @@
             box-shadow: 0 4px 12px rgba(195, 129, 84, 0.3);
         }
 
-    /* Wishlist */
+    /* Yêu thích */
     .wishlist-link a {
         color: #C38154;
         text-decoration: none;
@@ -488,33 +578,13 @@
                 text-decoration: underline;
             }
 
-    /* Responsive
-    media (max-width: 768px) {
-        .product-name {
-            font-size: 22px;
-        }
-
-        .current-price {
-            font-size: 26px;
-        }
-
-        .product-actions {
-            flex-direction: column;
-            align-items: stretch;
-        }
-
-        .quantity-selector {
-            justify-content: center;
-        }
-    } */
-
     /* Product Tabs Section */
     .product-tabs-section {
         background-color: #fff;
         border-top: 1px solid #e5e5e5;
     }
 
-    /* Tabs Navigation */
+    /* Điều hướng */
     .product-tabs {
         border-bottom: 2px solid #e5e5e5;
         gap: 0;
@@ -639,4 +709,150 @@
         font-style: italic;
         color: #777;
     }
+
+    /* Có thể bạn thích */
+    .related-products-section {
+        background-color: #fff;
+        border-top: 1px solid #e5e5e5;
+    }
+
+    .section-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Product Card */
+    .product-card-related {
+        position: relative;
+        background: #fff;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .product-card-related:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+    /* Product Badge */
+    .product-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: #dc3545;
+        color: white;
+        padding: 5px 12px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 3px;
+        z-index: 2;
+    }
+
+    /* Product Status Badge (Hết hàng) */
+    .product-status-badge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #C38154;
+        color: white;
+        padding: 8px 20px;
+        font-size: 15px;
+        font-weight: bold;
+        border-radius: 3px;
+        z-index: 3;
+        text-transform: uppercase;
+    }
+
+    /* Ảnh sản phẩm */
+    .product-img-wrap {
+        position: relative;
+        padding: 10px;
+        background: #f8f8f8;
+        margin-bottom: 15px;
+    }
+
+        .product-img-wrap img {
+            width: 100%;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+    .product-card-related:hover .product-img-wrap img {
+        transform: scale(1.05);
+    }
+
+    /* Thông tin sản phẩm */
+    .product-info-related {
+        padding: 0 15px 20px;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .price-wrap-related {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .sale-price-related {
+        color: #dc3545;
+        font-size: 20px;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+
+    .original-price-related {
+        color: #999;
+        font-size: 16px;
+        text-decoration: line-through;
+    }
+
+    .product-title-related {
+        font-size: 15px;
+        color: #333;
+        font-weight: normal;
+        text-align: center;
+        margin-bottom: 15px;
+        min-height: 48px;
+        line-height: 1.5;
+    }
+
+    /* Nút ATC */
+    .btn-add-cart-related,
+    .btn-read-more-related {
+        width: 100%;
+        padding: 12px 15px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-radius: 3px;
+        transition: all 0.3s ease;
+        margin-top: auto;
+    }
+
+    .btn-add-cart-related {
+        background-color: #C38154;
+        color: white;
+    }
+
+        .btn-add-cart-related:hover {
+            background-color: #a66b42;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(195, 129, 84, 0.3);
+        }
+
+    .btn-read-more-related {
+        background-color: #C38154;
+        color: white;
+    }
+
+        .btn-read-more-related:hover {
+            background-color: #a66b42;
+        }
+
 </style>
