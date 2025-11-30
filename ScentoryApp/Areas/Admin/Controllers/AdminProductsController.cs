@@ -134,6 +134,16 @@ namespace ScentoryApp.Areas_Admin_Controllers
                     _context.Update(productToUpdate);
                 }
 
+                if (ImageFile != null)
+                {
+                    var ext = Path.GetExtension(ImageFile.FileName).ToLower();
+                    if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
+                        return Json(new { success = false, message = "Chỉ cho phép JPG hoặc PNG" });
+
+                    if (ImageFile.Length > 2 * 1024 * 1024)
+                        return Json(new { success = false, message = "Dung lượng ảnh tối đa 2MB" });
+                }
+
                 await _context.SaveChangesAsync();
                 return Json(new { success = true, message = "Lưu dữ liệu thành công!" });
             }

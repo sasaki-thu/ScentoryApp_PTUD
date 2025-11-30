@@ -277,8 +277,12 @@
             // ==========================================
 
             // Xử lý ảnh
-            $('#imageDropzone').click(function () {
-                if (!$('#categoryFieldset').prop('disabled')) $('#ImageFile').click();
+            $('#imageDropzone').off('click').on('click', function (e) {
+                e.stopPropagation();
+
+                if (!$('#categoryFieldset').prop('disabled')) {
+                    $('#ImageFile')[0].click();
+                }
             });
 
             $('#ImageFile').change(function () {
@@ -377,10 +381,10 @@
                     alert('Vui lòng nhập mô tả danh mục sản phẩm!');
                     return;
                 }
-                if (!$('#IdTrangThaiDanhMuc').val()) {
-                    alert('Vui lòng chọn trạng thái danh mục sản phẩm!');
-                    return;
-                }
+                // if (!$('#IdTrangThaiDanhMuc').val()) {
+                //     alert('Vui lòng chọn trạng thái danh mục sản phẩm!');
+                //     return;
+                // }
                 var formData = new FormData($('#categoryForm')[0]);
                 if (!$('#TrangThaiDanhMuc').is(':checked')) {
                     formData.set('TrangThaiDanhMuc', 'false');

@@ -19,7 +19,7 @@
         <ul class="navbar-nav flex-fill w-100 mb-2">
 
             <!-- 1. Dashboard -->
-            <li class="nav-item active">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
                 @* Đặt 'active' cho trang mặc định *@
                 <a class="nav-link" asp-area="Admin" asp-controller="Home" asp-action="Index">
                     <i class="fe fe-home fe-16"></i>
@@ -28,7 +28,7 @@
             </li>
 
             <!-- 2. Quản lý sản phẩm -->
-            <li class="nav-item">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminProducts" ? "active" : "")">
                 <a class="nav-link" asp-area="Admin" asp-controller="AdminProducts" asp-action="Index">
                     <i class="fe fe-box fe-16"></i>
                     <span class="ml-3 item-text">Quản lý sản phẩm</span>
@@ -36,7 +36,7 @@
             </li>
 
             <!-- 3. Quản lý danh mục sản phẩm -->
-            <li class="nav-item">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminCategories" ? "active" : "")">
                 <a class="nav-link" asp-area="Admin" asp-controller="AdminCategories" asp-action="Index">
                     <i class="fe fe-grid fe-16"></i>
                     <span class="ml-3 item-text">Quản lý danh mục sản phẩm</span>
@@ -44,7 +44,7 @@
             </li>
 
             <!-- 4. Quản lý đơn hàng -->
-            <li class="nav-item">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminOrders" ? "active" : "")">
                 <a class="nav-link" asp-area="Admin" asp-controller="AdminOrders" asp-action="Index">
                     <i class="fe fe-shopping-cart fe-16"></i>
                     <span class="ml-3 item-text">Quản lý đơn hàng</span>
@@ -52,7 +52,7 @@
             </li>
 
             <!-- 5. Quản lý khách hàng -->
-            <li class="nav-item">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminUsers" ? "active" : "")">
                 <a class="nav-link" asp-area="Admin" asp-controller="AdminUsers" asp-action="Index">
                     <i class="fe fe-users fe-16"></i>
                     <span class="ml-3 item-text">Quản lý khách hàng</span>
@@ -60,7 +60,7 @@
             </li>
 
             <!-- 6. Quản lý mã giảm giá -->
-            <li class="nav-item">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminCoupons" ? "active" : "")">
                 <a class="nav-link" asp-area="Admin" asp-controller="AdminCoupons" asp-action="Index">
                     <i class="fe fe-tag fe-16"></i>
                     <span class="ml-3 item-text">Quản lý mã giảm giá</span>
@@ -68,7 +68,7 @@
             </li>
 
             <!-- 7. Quản lý tài khoản -->
-            <li class="nav-item">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccounts" ? "active" : "")">
                 <a class="nav-link" asp-area="Admin" asp-controller="AdminAccounts" asp-action="Index">
                     <i class="fe fe-user fe-16"></i>
                     <span class="ml-3 item-text">Quản lý tài khoản</span>
@@ -78,7 +78,14 @@
 
     </nav>
 </aside>
-
+<style>
+    .nav-item.active > a.nav-link {
+        background: #e6f2ff;
+        color: #007bff !important;
+        border-radius: 6px;
+        font-weight: 600;
+    }
+</style>
 @*
 <aside class="sidebar-left border-right bg-white shadow" id="leftSidebar" data-simplebar>
     <a href="#" class="btn collapseSidebar toggle-btn d-lg-none text-muted ml-2 mt-3" data-toggle="toggle">

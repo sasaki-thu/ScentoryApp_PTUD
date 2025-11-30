@@ -151,7 +151,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="productForm">
+                <form id="productForm" enctype="multipart/form-data">
                     <fieldset id="productFieldset">
                         <div class="form-row">
                             <div class="form-group col-md-4">
@@ -283,23 +283,28 @@
             // --- CODE AJAX LOGIC ---
 
             // 1. XỬ LÝ ẢNH
-            $('#imageDropzone').click(function () {
-                if (!$('#productFieldset').prop('disabled')) $('#ImageFile').click();
+            $('#imageDropzone').off('click').on('click', function (e) {
+                e.stopPropagation();
+
+                if (!$('#productFieldset').prop('disabled')) {
+                    $('#ImageFile')[0].click();
+                }
             });
 
-            $('#ImageFile').change(function () {
+            $('#ImageFile').off('change').on('change', function () {
                 if (this.files && this.files[0]) {
                     var reader = new FileReader();
                     reader.onload = function (e) {
                         $('#previewImg').attr('src', e.target.result);
                         $('#imagePreview').css('display', 'flex');
                         $('#imageDropzone').hide();
-                    }
+                    };
                     reader.readAsDataURL(this.files[0]);
                 }
             });
 
-            $('#removeImageBtn').click(function () {
+            // remove image
+            $('#removeImageBtn').off('click').on('click', function () {
                 $('#ImageFile').val('');
                 $('#previewImg').attr('src', '');
                 $('#imagePreview').hide();
@@ -310,7 +315,11 @@
             function resetForm() {
                 $('#productForm')[0].reset();
                 $('#IdSanPham').prop('readonly', false);
-                $('#removeImageBtn').click();
+                // reset ảnh
+                $('#ImageFile').val('');
+                $('#previewImg').attr('src', '');
+                $('#imagePreview').hide();
+                $('#imageDropzone').show();
                 $('#productFieldset').prop('disabled', false);
                 $('#btnSave').show();
                 $('#TrangThaiSp').prop('checked', true);
