@@ -30,6 +30,7 @@
         .logo-full {
             display: inline-block;
         }
+
         .logo-icon {
             display: none;
         }
@@ -37,6 +38,7 @@
         body.collapsed .logo-full {
             display: none;
         }
+
         body.collapsed .logo-icon {
             display: inline-block;
         }
@@ -72,6 +74,7 @@
                         <a class="dropdown-item" href="#">Profile</a>
                         <a class="dropdown-item" href="#">Settings</a>
                         <a class="dropdown-item" href="#">Activities</a>
+                        <a class="dropdown-item" href="#" id="admin-logout-link">Logout</a>
                     </div>
                 </li>
             </ul>
@@ -79,12 +82,30 @@
         <!-- side bar -->
         @await Html.PartialAsync("_SidebarPartial.cshtml")
         <!-- side bar end -->
-
         <!-- main content -->
         <main role="main" class="main-content">
             @RenderBody()
         </main> <!-- main -->
     </div> <!-- .wrapper -->
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="adminLogoutModal" tabindex="-1" aria-labelledby="adminLogoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adminLogoutModalLabel">Xác nhận đăng xuất</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc chắn muốn đăng xuất?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="admin-confirm-logout-button">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="~/Adminassets/js/jquery.min.js"></script>
     <script src="~/Adminassets/js/popper.min.js"></script>
     <script src="~/Adminassets/js/moment.min.js"></script>
@@ -117,6 +138,28 @@
     <script src='~/Adminassets/js/dropzone.min.js'></script>
     <script src='~/Adminassets/js/uppy.min.js'></script>
     <script src='~/Adminassets/js/quill.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var logoutLink = document.getElementById('admin-logout-link');
+            var logoutModal = new bootstrap.Modal(document.getElementById('adminLogoutModal'), {
+                keyboard: false
+            });
+            var confirmLogoutButton = document.getElementById('admin-confirm-logout-button');
+
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    logoutModal.show();
+                });
+            }
+
+            if (confirmLogoutButton) {
+                confirmLogoutButton.addEventListener('click', function (e) {
+                    window.location.href = '/Admin/AdminAccounts/Logout';
+                });
+            }
+        });
+    </script>
     <script>
         $('.select2').select2(
         {
@@ -334,7 +377,7 @@
         gtag('config', 'UA-56159088-1');
 
     </script>
-    @await Component.InvokeAsync("Notyf") 
+    @await Component.InvokeAsync("Notyf")
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

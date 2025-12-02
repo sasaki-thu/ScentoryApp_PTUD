@@ -77,8 +77,8 @@
 
 
             <!-- 8. Quản lý tài khoản -->
-            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccounts" ? "active" : "")">
-                <a class="nav-link" asp-area="Admin" asp-controller="AdminAccounts" asp-action="Index">
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Accounts" ? "active" : "")">
+                <a class="nav-link" asp-area="Admin" asp-controller="Accounts" asp-action="Index">
                     <i class="fe fe-user fe-16"></i>
                     <span class="ml-3 item-text">Quản lý tài khoản</span>
                 </a>
