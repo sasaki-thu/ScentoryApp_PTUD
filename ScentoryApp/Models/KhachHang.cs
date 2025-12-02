@@ -19,7 +19,7 @@ public partial class KhachHang
 
     public DateOnly NgaySinh { get; set; }
 
-    public string? IdTaiKhoan { get; set; }
+    public string IdTaiKhoan { get; set; } = null!;
 
     public virtual ICollection<DanhGiaSanPham> DanhGiaSanPhams { get; set; } = new List<DanhGiaSanPham>();
 
@@ -27,5 +27,5 @@ public partial class KhachHang
 
     public virtual ICollection<GioHang> GioHangs { get; set; } = new List<GioHang>();
 
-    public virtual TaiKhoan? IdTaiKhoanNavigation { get; set; }
+    public virtual TaiKhoan IdTaiKhoanNavigation { get; set; } = null!;
 }

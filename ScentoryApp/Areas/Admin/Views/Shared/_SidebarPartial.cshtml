@@ -67,7 +67,16 @@
                 </a>
             </li>
 
-            <!-- 7. Quản lý tài khoản -->
+            <!-- 7. Quản lý Blog -->
+            <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminBlogs" ? "active" : "")">
+                <a class="nav-link" asp-area="Admin" asp-controller="AdminBlogs" asp-action="Index">
+                    <i class="fe fe-book-open fe-16"></i>
+                    <span class="ml-3 item-text">Quản lý Blog</span>
+                </a>
+            </li>
+
+
+            <!-- 8. Quản lý tài khoản -->
             <li class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "AdminAccounts" ? "active" : "")">
                 <a class="nav-link" asp-area="Admin" asp-controller="AdminAccounts" asp-action="Index">
                     <i class="fe fe-user fe-16"></i>

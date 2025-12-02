@@ -15,6 +15,8 @@ public partial class ScentoryPtudContext : DbContext
     {
     }
 
+    public virtual DbSet<Blog> Blogs { get; set; }
+
     public virtual DbSet<ChiTietDonHang> ChiTietDonHangs { get; set; }
 
     public virtual DbSet<ChiTietGioHang> ChiTietGioHangs { get; set; }
@@ -38,11 +40,34 @@ public partial class ScentoryPtudContext : DbContext
     public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
         => optionsBuilder.UseSqlServer("Server=DAT;Database=ScentoryPTUD;Integrated Security=true;Encrypt=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Blog>(entity =>
+        {
+            entity.HasKey(e => e.IdBlog).HasName("PK__Blog__F1F67AB819C6C8E6");
+
+            entity.ToTable("Blog", tb => tb.HasTrigger("trg_Blog_UpdateTimestamp"));
+
+            entity.Property(e => e.IdBlog)
+                .HasMaxLength(5)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasColumnName("ID_Blog");
+            entity.Property(e => e.Alias).HasMaxLength(255);
+            entity.Property(e => e.DanhMucBlog).HasMaxLength(50);
+            entity.Property(e => e.MetaDesc).HasMaxLength(255);
+            entity.Property(e => e.MetaKey).HasMaxLength(255);
+            entity.Property(e => e.NoiDungNgan).HasMaxLength(255);
+            entity.Property(e => e.TenBlog).HasMaxLength(255);
+            entity.Property(e => e.ThoiGianCapNhatBlog).HasColumnType("datetime");
+            entity.Property(e => e.ThoiGianTaoBlog)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+        });
+
         modelBuilder.Entity<ChiTietDonHang>(entity =>
         {
             entity.HasKey(e => new { e.IdDonHang, e.IdSanPham }).HasName("PK__ChiTietD__AFA0CC00374D76B1");
@@ -282,6 +307,7 @@ public partial class ScentoryPtudContext : DbContext
 
             entity.HasOne(d => d.IdTaiKhoanNavigation).WithMany(p => p.KhachHangs)
                 .HasForeignKey(d => d.IdTaiKhoan)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK2_TK_KH");
         });
 

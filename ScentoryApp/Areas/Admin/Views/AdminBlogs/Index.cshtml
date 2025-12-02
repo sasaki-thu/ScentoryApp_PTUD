@@ -1,0 +1,517 @@
+﻿@model IEnumerable<ScentoryApp.Models.Blog>
+
+@{
+    ViewData["Title"] = "Quản lý bài viết (Blog)";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- CSS -->
+<link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<style>
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    .dataTables_filter {
+        display: none;
+    }
+
+    #dataTable-1 thead th {
+        color: #007bff;
+    }
+
+    /* CSS cho vùng upload ảnh */
+    .image-upload-area {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        background: #fff;
+    }
+
+        .image-upload-area:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+
+    #imagePreview img {
+        max-width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    /* CSS cho Tabs trong Modal */
+    .nav-tabs .nav-link {
+        cursor: pointer;
+    }
+
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+    .tab-content {
+        padding-top: 20px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="row align-items-center mb-2">
+                <div class="col">
+                    <h2 class="h2 page-title">Quản lý bài viết (Blog)</h2>
+                </div>
+                <div class="col-auto">
+                    <div class="form-inline">
+                        <div class="form-group mr-2">
+                            <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm kiếm bài viết..." style="min-width: 250px;">
+                        </div>
+                        <button type="button" class="btn btn-primary" id="addBlogBtn">
+                            <i class="fe fe-plus fe-16"></i> Thêm bài viết
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng dữ liệu -->
+            <div class="row my-4">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <table class="table datatables" id="dataTable-1">
+                                <thead>
+                                    <tr>
+                                        <th>ID Blog</th>
+                                        <th>Tiêu đề Blog</th>
+                                        <th>Danh mục</th>
+                                        <th>Trạng thái</th>
+                                        <th>Lượt xem</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Tác vụ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blogTableBody">
+                                    @if (Model != null && Model.Any())
+                                    {
+                                        foreach (var item in Model)
+                                        {
+                                            <tr id="row-@item.IdBlog.Trim()">
+                                                <td><strong>@item.IdBlog</strong></td>
+                                                <td>
+                                                    @if (item.TenBlog.Length > 50)
+                                                    {
+                                                        @item.TenBlog.Substring(0, 50)
+                                                        <span>...</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @item.TenBlog
+                                                    }
+                                                </td>
+                                                <td>@item.DanhMucBlog</td>
+                                                <td>
+                                                    @if (item.TrangThai == 1)
+                                                    {
+                                                        <span class="badge badge-success">Đã đăng</span>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <span class="badge badge-secondary">Nháp/Ẩn</span>
+                                                    }
+                                                </td>
+                                                <td>@item.Views</td>
+                                                <td>@item.ThoiGianTaoBlog.ToString("dd/MM/yyyy")</td>
+                                                <td>
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
+                                                            <span class="text-muted sr-only">Action</span>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right">
+                                                            <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdBlog.Trim()">Chi tiết</a>
+                                                            <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdBlog.Trim()">Sửa</a>
+                                                            <a class="dropdown-item btn-delete" href="javascript:void(0)" data-id="@item.IdBlog.Trim()">Xóa</a>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Form Nhập Liệu (3 TAB) -->
+<div class="modal fade" id="blogModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <!-- Modal XL cho rộng rãi -->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thông tin bài viết</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="blogForm">
+                    <!-- NAV TABS -->
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="info-tab" data-toggle="tab" href="#info" role="tab" aria-controls="info" aria-selected="true">THÔNG TIN TIN TỨC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="desc-tab" data-toggle="tab" href="#desc" role="tab" aria-controls="desc" aria-selected="false">MÔ TẢ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="seo-tab" data-toggle="tab" href="#seo" role="tab" aria-controls="seo" aria-selected="false">THÔNG TIN SEO</a>
+                        </li>
+                    </ul>
+
+                    <!-- TAB CONTENT -->
+                    <div class="tab-content" id="myTabContent">
+
+                        <!-- TAB 1: THÔNG TIN CHUNG -->
+                        <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
+                            <div class="form-row">
+                                <div class="form-group col-md-4">
+                                    <label>ID Blog</label>
+                                    <input type="text" class="form-control" id="IdBlog" name="IdBlog" placeholder="BL00x" required>
+                                </div>
+                                <div class="form-group col-md-8">
+                                    <label>Tiêu đề</label>
+                                    <input type="text" class="form-control" id="TenBlog" name="TenBlog" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Danh mục</label>
+                                    <select class="form-control" id="DanhMucBlog" name="DanhMucBlog" required>
+                                        <option value="Thương hiệu">Thương hiệu</option>
+                                        <option value="Sản phẩm">Sản phẩm</option>
+                                        <option value="HDSD">HDSD</option>
+                                        <option value="Kiến thức">Kiến thức</option>
+                                        <option value="Mẹo">Mẹo</option>
+                                        <option value="Storytelling">Storytelling</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Tags</label>
+                                    <input type="text" class="form-control" id="Tag" name="Tag" placeholder="vd: nuoc-hoa, thom-lau..." required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ảnh Blog</label>
+                                <div id="imageDropzone" class="image-upload-area p-4 text-center">
+                                    <input type="file" id="ImageFile" name="ImageFile" accept="image/*" class="d-none">
+                                    <i class="fe fe-upload fe-24 text-muted"></i>
+                                    <p class="mt-2 text-muted">Nhấp để chọn ảnh</p>
+                                </div>
+                                <div id="imagePreview" class="mt-2 text-center" style="display:none;">
+                                    <img id="previewImg" src="" alt="Preview">
+                                    <br />
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="removeImageBtn">Xóa ảnh</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Trạng thái</label>
+                                <div class="custom-control custom-switch" required>
+                                    <!-- Value 1 = Published, 0 = Draft -->
+                                    <input type="checkbox" class="custom-control-input" id="TrangThaiSwitch" checked>
+                                    <label class="custom-control-label" for="TrangThaiSwitch">Đăng ngay (Published)</label>
+                                    <input type="hidden" id="TrangThai" name="TrangThai" value="1">
+                                </div>
+                            </div>
+
+                            <!-- Thông tin ngày tháng (Readonly) -->
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label>Thời gian tạo</label>
+                                    <input type="text" class="form-control" id="ThoiGianTaoSp" readonly placeholder="Tự động cập nhật...">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label>Cập nhật lần cuối</label>
+                                    <input type="text" class="form-control" id="ThoiGianCapNhat" readonly placeholder="Chưa cập nhật">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB 2: MÔ TẢ (NỘI DUNG) -->
+                        <div class="tab-pane fade" id="desc" role="tabpanel" aria-labelledby="desc-tab">
+                            <div class="form-group">
+                                <label>Nội dung ngắn</label>
+                                <textarea class="form-control" id="NoiDungNgan" name="NoiDungNgan" rows="3" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Nội dung chi tiết (Full)</label>
+                                <textarea class="form-control" id="NoiDung" name="NoiDung" rows="15" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- TAB 3: SEO -->
+                        <div class="tab-pane fade" id="seo" role="tabpanel" aria-labelledby="seo-tab">
+                            <div class="form-group">
+                                <label>Meta Keywords</label>
+                                <input type="text" class="form-control" id="MetaKey" name="MetaKey" placeholder="Từ khóa SEO...">
+                            </div>
+                            <div class="form-group">
+                                <label>Meta Description</label>
+                                <textarea class="form-control" id="MetaDesc" name="MetaDesc" rows="3" placeholder="Mô tả SEO..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Alias (URL)</label>
+                                <input type="text" class="form-control" id="Alias" name="Alias" placeholder="tu-dong-tao-tu-tieu-de">
+                            </div>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="btnSave">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DELETE -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+                Bạn có chắc chắn muốn xóa bài viết <strong id="deleteName"></strong>?
+                <input type="hidden" id="deleteId" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
+    <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+        CKEDITOR.replace('NoiDung', {
+            versionCheck: false
+        });
+            // 1. DATATABLES
+            var table = $('#dataTable-1').DataTable({
+                autoWidth: true,
+                "lengthChange": false,
+                "searching": true,
+                "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
+                "language": {
+                    "sProcessing": "Đang xử lý...", "sZeroRecords": "Không tìm thấy bài viết",
+                    "sInfo": "Hiển thị _START_ đến _END_ trong _TOTAL_ bài",
+                    "sInfoEmpty": "Hiển thị 0 đến 0 trong 0 bài", "sInfoFiltered": "(lọc từ _MAX_ bài)",
+                    "sSearch": "Tìm kiếm:",
+                    "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
+                }
+            });
+            $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
+
+            // 2. LOGIC ẢNH
+            // 1. XỬ LÝ ẢNH
+            $('#imageDropzone').off('click').on('click', function (e) {
+                e.stopPropagation();
+
+                if (!$('#productFieldset').prop('disabled')) {
+                    $('#ImageFile')[0].click();
+                }
+            });
+
+            $('#ImageFile').off('change').on('change', function () {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#previewImg').attr('src', e.target.result);
+                        $('#imagePreview').css('display', 'flex');
+                        $('#imageDropzone').hide();
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // remove image
+            $('#removeImageBtn').off('click').on('click', function () {
+                $('#ImageFile').val('');
+                $('#previewImg').attr('src', '');
+                $('#imagePreview').hide();
+                $('#imageDropzone').show();
+            });
+            // 3. RESET FORM
+            function resetForm() {
+                $('#blogForm')[0].reset();
+                $('#IdBlog').prop('readonly', false);
+                $('#removeImageBtn').click();
+
+                // Mặc định chọn Tab 1
+                $('#myTab a[href="#info"]').tab('show');
+
+                // Reset Switch trạng thái
+                $('#TrangThaiSwitch').prop('checked', true);
+                $('#TrangThai').val('1');
+
+                $('#ThoiGianTaoInfo').text('--');
+                $('#ThoiGianCapNhatInfo').text('--');
+
+                // Unlock fields
+                $('#blogForm input, #blogForm textarea, #blogForm select').prop('disabled', false);
+                $('#btnSave').show();
+            }
+
+            // 4. THÊM MỚI
+            $('#addBlogBtn').click(function () {
+                resetForm();
+                $('#modalTitle').text('Thêm bài viết mới');
+                $('#blogModal').modal('show');
+            });
+
+            // 5. GET BY ID (SỬA / CHI TIẾT)
+            $('body').on('click', '.btn-edit, .btn-details', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                var isDetail = $(this).hasClass('btn-details');
+
+                $.ajax({
+                    url: '/Admin/AdminBlogs/GetById',
+                    type: 'GET',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            var d = res.data;
+                            resetForm();
+
+                            // Map dữ liệu vào Tab 1
+                            $('#IdBlog').val(d.idBlog).prop('readonly', true);
+                            $('#TenBlog').val(d.tenBlog);
+                            $('#DanhMucBlog').val(d.danhMucBlog);
+                            $('#Tag').val(d.tag);
+
+                            // Map ảnh
+                            if (d.anhBase64) {
+                                $('#previewImg').attr('src', d.anhBase64);
+                                $('#imagePreview').show(); $('#imageDropzone').hide();
+                            }
+
+                            // Map trạng thái
+                            if(d.trangThai == 1) { $('#TrangThaiSwitch').prop('checked', true); $('#TrangThai').val('1'); }
+                            else { $('#TrangThaiSwitch').prop('checked', false); $('#TrangThai').val('0'); }
+
+                            // Map dữ liệu Tab 2
+                            $('#NoiDungNgan').val(d.noiDungNgan);
+                            $('#NoiDung').val(d.noiDung);
+                            if (CKEDITOR.instances['NoiDung']) {
+                                CKEDITOR.instances['NoiDung'].setData(d.noiDung);
+                            }
+
+                            // Map dữ liệu Tab 3
+                            $('#MetaKey').val(d.metaKey);
+                            $('#MetaDesc').val(d.metaDesc);
+                            $('#Alias').val(d.alias);
+
+                            // Info ngày tháng
+                            $('#ThoiGianTaoInfo').text(d.thoiGianTaoBlog);
+                            $('#ThoiGianCapNhatInfo').text(d.thoiGianCapNhatBlog);
+
+                            if (isDetail) {
+                                $('#modalTitle').text('Chi tiết bài viết');
+                                $('#blogForm input, #blogForm textarea, #blogForm select').prop('disabled', true);
+                                $('#btnSave').hide();
+                                $('#removeImageBtn').hide();
+                            } else {
+                                $('#modalTitle').text('Cập nhật bài viết');
+                            }
+                            $('#blogModal').modal('show');
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+
+            // 6. LOGIC SWITCH TRẠNG THÁI
+            $('#TrangThaiSwitch').change(function() {
+                if(this.checked) $('#TrangThai').val('1');
+                else $('#TrangThai').val('0');
+            });
+
+            // 7. SAVE
+            $('#btnSave').click(function () {
+                // chỉnh validate sau
+
+                if (errors.length > 0) {
+                    alert(errors.join("\n"));
+                    return;
+                }
+                var formData = new FormData($('#blogForm')[0]);
+
+                $.ajax({
+                    url: '/Admin/AdminBlogs/Save',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false, processData: false,
+                    success: function (res) {
+                        if (res.success) {
+                            alert(res.message);
+                            location.reload();
+                        } else {
+                            alert("Lỗi: " + res.message);
+                        }
+                    },
+                    error: function () { alert("Lỗi hệ thống!"); }
+                });
+            });
+
+            // 8. DELETE
+            $('body').on('click', '.btn-delete', function () {
+                var id = $(this).data('id');
+                $('#deleteName').text(id);
+                $('#deleteId').val(id);
+                $('#deleteModal').modal('show');
+            });
+
+            $('#btnConfirmDelete').click(function () {
+                var id = $('#deleteId').val();
+                $.ajax({
+                    url: '/Admin/AdminBlogs/Delete',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function (res) {
+                        if (res.success) {
+                            $('#deleteModal').modal('hide');
+                            var t = $('#dataTable-1').DataTable();
+                            t.row($('#row-' + id)).remove().draw();
+                        } else {
+                            alert(res.message);
+                        }
+                    }
+                });
+            });
+
+        });
+    </script>
+}
