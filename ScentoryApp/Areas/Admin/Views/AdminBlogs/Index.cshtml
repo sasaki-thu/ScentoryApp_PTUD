@@ -1,12 +1,13 @@
 ﻿@model IEnumerable<ScentoryApp.Models.Blog>
 
 @{
-    ViewData["Title"] = "Quản lý bài viết (Blog)";
+    ViewData["Title"] = "Quản lý Blog";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 }
 
 <!-- CSS -->
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="~/Adminassets/css/quill.snow.css">
 <style>
     .page-item.active .page-link {
         background-color: #007bff;
@@ -55,6 +56,12 @@
     .tab-content {
         padding-top: 20px;
     }
+
+    /* CSS cho QL editor */
+    .ql-editor {
+        min-height: 300px;
+        background-color: white;
+    }
 </style>
 
 <div class="container-fluid">
@@ -78,7 +85,7 @@
             </div>
 
             <!-- Bảng dữ liệu -->
-            <div class="row my-4">
+            <div class="row my-1">
                 <div class="col-md-12">
                     <div class="card shadow">
                         <div class="card-body">
@@ -253,10 +260,11 @@
                                 <label>Nội dung ngắn</label>
                                 <textarea class="form-control" id="NoiDungNgan" name="NoiDungNgan" rows="3" required></textarea>
                             </div>
-
                             <div class="form-group">
-                                <label>Nội dung chi tiết (Full)</label>
-                                <textarea class="form-control" id="NoiDung" name="NoiDung" rows="15" required></textarea>
+                                <label>Nội dung chi tiết</label>
+                                <div id="quillEditor" style="min-height: 200px;"></div>
+
+                                <input type="hidden" id="NoiDung" name="NoiDung">
                             </div>
                         </div>
 
@@ -271,7 +279,7 @@
                                 <textarea class="form-control" id="MetaDesc" name="MetaDesc" rows="3" placeholder="Mô tả SEO..."></textarea>
                             </div>
                             <div class="form-group">
-                                <label>Alias (URL)</label>
+                                <label>Alias (URL thân thiện)</label>
                                 <input type="text" class="form-control" id="Alias" name="Alias" placeholder="tu-dong-tao-tu-tieu-de">
                             </div>
                         </div>
@@ -308,15 +316,36 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-        CKEDITOR.replace('NoiDung', {
-            versionCheck: false
-        });
+            //0. Quill
+            var quill;
+
+            $(document).ready(function () {
+            if ($("#quillEditor").length) {
+                var toolbarOptions = [
+                  [{ 'font': [] }],
+                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  ['blockquote', 'code-block'],
+                  [{ 'header': 1 }, { 'header': 2 }],
+                  [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                  [{ 'script': 'sub' }, { 'script': 'super' }],
+                  [{ 'indent': '-1' }, { 'indent': '+1' }],
+                  [{ 'direction': 'rtl' }],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': [] }],
+                  ['clean']
+                ];
+
+                quill = new Quill('#quillEditor', {
+                    modules: { toolbar: toolbarOptions },
+                    theme: 'snow'
+                });
+            }
             // 1. DATATABLES
             var table = $('#dataTable-1').DataTable({
                 autoWidth: true,
@@ -381,6 +410,9 @@
                 // Unlock fields
                 $('#blogForm input, #blogForm textarea, #blogForm select').prop('disabled', false);
                 $('#btnSave').show();
+
+                // Reset Quill về rỗng
+                if(quill) quill.root.innerHTML = '';
             }
 
             // 4. THÊM MỚI
@@ -437,17 +469,21 @@
                             $('#ThoiGianTaoInfo').text(d.thoiGianTaoBlog);
                             $('#ThoiGianCapNhatInfo').text(d.thoiGianCapNhatBlog);
 
+                            // --- MAP NỘI DUNG VÀO QUILL ---
+                            if(quill) {
+                                quill.root.innerHTML = d.noiDung || ''; // Đổ HTML vào editor
+                            }
+
                             if (isDetail) {
                                 $('#modalTitle').text('Chi tiết bài viết');
-                                $('#blogForm input, #blogForm textarea, #blogForm select').prop('disabled', true);
+                                $('#blogForm input, #blogForm select, #blogForm textarea').prop('disabled', true);
+                                quill.enable(false); // Khóa Quill lại
                                 $('#btnSave').hide();
-                                $('#removeImageBtn').hide();
                             } else {
                                 $('#modalTitle').text('Cập nhật bài viết');
+                                quill.enable(true); // Mở khóa Quill
                             }
                             $('#blogModal').modal('show');
-                        } else {
-                            alert(res.message);
                         }
                     }
                 });
@@ -461,12 +497,13 @@
 
             // 7. SAVE
             $('#btnSave').click(function () {
-                // chỉnh validate sau
-
-                if (errors.length > 0) {
-                    alert(errors.join("\n"));
+                if (!$('#IdBlog').val() || !$('#TenBlog').val()) {
+                    alert('Vui lòng nhập ID và Tiêu đề bài viết!');
                     return;
                 }
+                var noiDungHtml = quill.root.innerHTML;
+                $('#NoiDung').val(noiDungHtml);
+
                 var formData = new FormData($('#blogForm')[0]);
 
                 $.ajax({
