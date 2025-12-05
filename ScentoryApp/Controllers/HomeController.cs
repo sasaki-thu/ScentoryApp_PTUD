@@ -1,20 +1,23 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using ScentoryApp.Models;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using ScentoryApp.Models;
+using System.Diagnostics;
+using System.Security.Claims;
 
 namespace ScentoryApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly ScentoryPtudContext _context;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, ScentoryPtudContext context)
         {
             _logger = logger;
+            _context = context;
         }
         [Authorize]
         public IActionResult Index()
@@ -29,9 +32,35 @@ namespace ScentoryApp.Controllers
         }
 
         [Authorize]
-        public IActionResult Shop()
+        public async Task<IActionResult> Shop(int page = 1)
         {
-            return View();
+            const int pageSize = 10;
+
+            if (page < 1) page = 1;
+
+            var query = _context.SanPhams
+                .Include(p => p.IdDanhMucSanPhamNavigation)
+                .Where(p => p.TrangThaiSp)                      // chỉ lấy sp đang active
+                .OrderByDescending(p => p.ThoiGianTaoSp);       // mới nhất lên trước
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages == 0) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new ShopViewModel
+            {
+                Products = products,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
+
+            return View(vm);
         }
 
         [Authorize]
@@ -75,9 +104,23 @@ namespace ScentoryApp.Controllers
             return View();
         }
         [Authorize]
-        public IActionResult ProductDetails()
+        public async Task<IActionResult> ProductDetails(string id)
         {
-            return View();
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            var product = await _context.SanPhams
+                .Include(p => p.IdDanhMucSanPhamNavigation)
+                .FirstOrDefaultAsync(p => p.IdSanPham == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
         }
 
 

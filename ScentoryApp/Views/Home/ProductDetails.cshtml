@@ -1,6 +1,19 @@
-﻿@{
+﻿@model ScentoryApp.Models.SanPham
+
+@{
     ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    string mainImgSrc;
+    if (Model.AnhSanPham != null && Model.AnhSanPham.Length > 0)
+    {
+        var base64 = Convert.ToBase64String(Model.AnhSanPham);
+        mainImgSrc = $"data:image/jpeg;base64,{base64}";
+    }
+    else
+    {
+        mainImgSrc = Url.Content("~/assets/images/placeholder-product.png");
+    }
 }
 
 <section class="product-detail py-5">
@@ -11,27 +24,24 @@
                 <div class="product-images">
                     <!-- Hình ảnh chính -->
                     <div class="main-image mb-3">
-                        <img src="~/assets/images/Box quà Eclipse.png" alt="Box quà đặc biệt Scentory x 20/10" class="img-fluid" id="mainImage">
+                        <img src="@mainImgSrc" alt="@Model.TenSanPham" class="img-fluid" id="mainImage">
                         <button class="zoom-btn">
                             <i class="fa fa-search-plus"></i>
                         </button>
                     </div>
 
-                    <!-- Thumbnail gallery -->
+                    <!-- Thumbnail gallery (tạm dùng cùng 1 ảnh) -->
                     <div class="thumbnail-gallery">
                         <div class="row g-2">
-                            <div class="col-3">
-                                <img src="~/assets/images/Box quà Eclipse.png" alt="Thumbnail 1" class="img-fluid thumbnail-img active" onclick="changeMainImage(this)">
-                            </div>
-                            <div class="col-3">
-                                <img src="~/assets/images/Box quà Horizon.png" alt="Thumbnail 2" class="img-fluid thumbnail-img" onclick="changeMainImage(this)">
-                            </div>
-                            <div class="col-3">
-                                <img src="~/assets/images/Box quà Eclipse.png" alt="Thumbnail 3" class="img-fluid thumbnail-img" onclick="changeMainImage(this)">
-                            </div>
-                            <div class="col-3">
-                                <img src="~/assets/images/Box quà Eclipse.png" alt="Thumbnail 4" class="img-fluid thumbnail-img" onclick="changeMainImage(this)">
-                            </div>
+                            @for (int i = 0; i < 4; i++)
+                            {
+                                <div class="col-3">
+                                    <img src="@mainImgSrc"
+                                         alt="Thumbnail @(i + 1)"
+                                         class="img-fluid thumbnail-img @(i == 0 ? "active" : "")"
+                                         onclick="changeMainImage(this)">
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -43,32 +53,42 @@
                     <!-- Breadcrumb -->
                     <nav aria-label="breadcrumb" class="mb-3">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="#">Trang chủ</a></li>
-                            <li class="breadcrumb-item"><a href="#">Box quà</a></li>
-                            <li class="breadcrumb-item active">Box quà đặc biệt Scentory x 20/10 | Scentory</li>
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Index", "Home")">Trang chủ</a>
+                            </li>
+                            <li class="breadcrumb-item">
+                                <a href="@Url.Action("Shop", "Home")">
+                                    @(Model.IdDanhMucSanPhamNavigation?.TenDanhMucSanPham ?? "Danh mục")
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">@Model.TenSanPham</li>
                         </ol>
                     </nav>
 
                     <!-- Danh mục -->
                     <p class="product-category">
-                        <a href="#">Box quà</a>
+                        <a href="@Url.Action("Shop", "Home")">
+                            @(Model.IdDanhMucSanPhamNavigation?.TenDanhMucSanPham ?? "Danh mục")
+                        </a>
                     </p>
 
                     <!-- Tên sản phẩm -->
-                    <h1 class="product-name mb-3">Box quà đặc biệt Scentory x 20/10 | Scentory</h1>
+                    <h1 class="product-name mb-3">@Model.TenSanPham</h1>
 
                     <!-- Giá -->
                     <div class="product-price mb-4">
-                        <span class="current-price">719.000 ₫</span>
-                        <span class="old-price">799.000 ₫</span>
+                        <span class="current-price">@Model.GiaNiemYet.ToString("N0") ₫</span>
+                        @{
+                            var oldPrice = Model.GiaNiemYet * 1.1m; // Demo, sau này thay bằng giá gốc thực tế
+                        }
+                        <span class="old-price">@oldPrice.ToString("N0") ₫</span>
                     </div>
 
                     <!-- Mô tả ngắn -->
                     <div class="product-short-desc mb-4">
-                        <p>Box quà nước hoa [Scentory x 20/10] – món quà tinh tế kết hợp nước hoa với hương thơm quyến rũ và ảnh cá nhân hóa độc quyền. Thiết kế sang trọng, ý nghĩa, tôn vinh vẻ đẹp và cảm xúc của phái nữ trong ngày đặc biệt.</p>
+                        <p>@Model.MoTaSanPham</p>
                     </div>
 
-                    <!-- Chọn mùi hương -->
                     <div class="product-options mb-4">
                         <label class="option-label">Mùi hương</label>
                         <select class="form-select">
@@ -99,15 +119,16 @@
 
                     <!-- Thông tin thêm -->
                     <div class="product-meta">
-                        <p><strong>SKU:</strong> SC-B-SP-50</p>
+                        <p><strong>SKU:</strong> @Model.IdSanPham</p>
                         <p>
                             <strong>Danh mục:</strong>
-                            <a href="#">Box quà</a>
+                            <a href="@Url.Action("Shop", "Home")">
+                                @(Model.IdDanhMucSanPhamNavigation?.TenDanhMucSanPham ?? "Danh mục")
+                            </a>
                         </p>
                         <p>
                             <strong>Thẻ:</strong>
-                            <a href="#">box quà</a>,
-                            <a href="#">nước hoa</a>
+                            <a href="#">@(Model.IdDanhMucSanPhamNavigation?.TenDanhMucSanPham ?? "tag")</a>
                         </p>
                     </div>
                 </div>
@@ -117,26 +138,21 @@
 </section>
 
 <script>
-    // Đổi hình ảnh chính khi click thumbnail
     function changeMainImage(thumbnail) {
         document.getElementById('mainImage').src = thumbnail.src;
 
-        // Remove active class from all thumbnails
         document.querySelectorAll('.thumbnail-img').forEach(img => {
             img.classList.remove('active');
         });
 
-        // Add active class to clicked thumbnail
         thumbnail.classList.add('active');
     }
 
-    // Tăng số lượng
     function increaseQty() {
         let qtyInput = document.getElementById('quantity');
         qtyInput.value = parseInt(qtyInput.value) + 1;
     }
 
-    // Giảm số lượng
     function decreaseQty() {
         let qtyInput = document.getElementById('quantity');
         if (parseInt(qtyInput.value) > 1) {
@@ -145,12 +161,10 @@
     }
 </script>
 
-<!-- Tabs Mô tả chi tiết sản phẩm -->
 <section class="product-tabs-section py-5">
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <!-- Tabs Navigation -->
                 <ul class="nav nav-tabs product-tabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
@@ -169,144 +183,30 @@
                     </li>
                 </ul>
 
-                <!-- Tabs Content -->
                 <div class="tab-content product-tab-content">
-                    <!-- Tab Mô tả -->
                     <div class="tab-pane fade show active" id="description" role="tabpanel">
                         <div class="tab-inner-content">
                             <h5 class="mb-3">Thông tin chung:</h5>
-
                             <ul class="product-info-list">
                                 <li>Thương hiệu: Scentory</li>
-                                <li>Box quà đặc biệt 20/10: Combo nước hoa, 2 ảnh cá nhân hóa và 1 thiệp yêu thương</li>
-                                <li>Dung tích: 50ml</li>
+                                <li>Dung tích: 50ml (ví dụ)</li>
                             </ul>
-
                             <p class="mt-4">
-                                Trao gửi yêu thương ngày 20/10 với <strong>box quà nước hoa Scentory</strong> – sự kết hợp hoàn hảo giữa
-                                <strong>mùi hương tinh tế và cảm xúc riêng biệt</strong>. Mỗi hộp quà được thiết kế sang trọng, kèm
-                                <strong>bức ảnh cá nhân hóa</strong> giúp món quà trở nên <em>ý nghĩa và độc nhất dành riêng cho người phụ nữ bạn yêu thương</em>.
-                            </p>
-
-                            <h6 class="mt-4 mb-3">
-                                <span class="highlight-icon">🌸</span> Điểm nổi bật:
-                            </h6>
-
-                            <ul class="feature-list">
-                                <li>Nước hoa lưu hương lâu, mùi hương thanh lịch – quyến rũ.</li>
-                                <li>Ảnh cá nhân hóa – lưu giữ khoảnh khắc đặc biệt.</li>
-                                <li>Hộp quà thiết kế cao cấp, rất thích hợp cho dịp đặc biệt 20/10</li>
-                            </ul>
-
-                            <p class="mt-4 note-text">
-                                Nếu các tình iu muốn gửi gắm yêu thương cho người đặc biệt, đừng ngại note vào phần "ghi chú" những lời chúc ý nghĩa nhé.
-                                Scentory sẽ giúp các tình iu trao gửi yêu thương.
+                                @Model.MoTaSanPham
                             </p>
                         </div>
                     </div>
 
-                    <!-- Tab Thông tin bổ sung -->
                     <div class="tab-pane fade" id="additional" role="tabpanel">
                         <div class="tab-inner-content">
                             <p>Thông tin bổ sung sẽ được cập nhật...</p>
                         </div>
                     </div>
 
-                    <!-- Tab Đánh giá -->
                     <div class="tab-pane fade" id="reviews" role="tabpanel">
                         <div class="tab-inner-content">
                             <p>Chưa có đánh giá nào.</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Có thể bạn thích -->
-<section class="related-products-section py-5">
-    <div class="container">
-        <h2 class="section-title mb-4">Có thể bạn thích...</h2>
-
-        <div class="row">
-            <!-- SP 1 -->
-            <div class="col-lg-3 col-md-6 col-6 mb-4">
-                <div class="product-card-related">
-                    <div class="product-badge">-7%</div>
-                    <div class="product-img-wrap">
-                        <img src="~/assets/images/Horizon50ml.png" alt="Nước hoa Reminiscence – Horizon (Miên) 50ml" class="img-fluid">
-                    </div>
-                    <div class="product-info-related">
-                        <div class="price-wrap-related">
-                            <span class="sale-price-related">649.000 ₫</span>
-                            <span class="original-price-related">699.000 ₫</span>
-                        </div>
-                        <p class="product-title-related">Nước hoa Reminiscence – Horizon (Miên) 50ml | Scentory</p>
-                        <button class="btn btn-add-cart-related">
-                            THÊM VÀO GIỎ HÀNG
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SP 2 -->
-            <div class="col-lg-3 col-md-6 col-6 mb-4">
-                <div class="product-card-related">
-                    <div class="product-badge">-7%</div>
-                    <div class="product-img-wrap">
-                        <img src="~/assets/images/Aurora50ml.png" alt="Nước hoa Reminiscence – Aurora (Uyển) 50ml" class="img-fluid">
-                    </div>
-                    <div class="product-info-related">
-                        <div class="price-wrap-related">
-                            <span class="sale-price-related">649.000 ₫</span>
-                            <span class="original-price-related">699.000 ₫</span>
-                        </div>
-                        <p class="product-title-related">Nước hoa Reminiscence – Aurora (Uyển) 50ml | Scentory</p>
-                        <button class="btn btn-add-cart-related">
-                            THÊM VÀO GIỎ HÀNG
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SP 3 -->
-            <div class="col-lg-3 col-md-6 col-6 mb-4">
-                <div class="product-card-related">
-                    <div class="product-badge">-7%</div>
-                    @* <div class="product-status-badge">HẾT HÀNG</div> *@
-                    <div class="product-img-wrap">
-                        <img src="~/assets/images/Whisper50ml.png" alt="Nước hoa Reminiscence – Whisper (Thầm) 50ml" class="img-fluid">
-                    </div>
-                    <div class="product-info-related">
-                        <div class="price-wrap-related">
-                            <span class="sale-price-related">649.000 ₫</span>
-                            <span class="original-price-related">699.000 ₫</span>
-                        </div>
-                        <p class="product-title-related">Nước hoa Reminiscence – Whisper (Thầm) 50ml | Scentory</p>
-                        <button class="btn btn-read-more-related">
-                            THÊM VÀO GIỎ HÀNG
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SP 4 -->
-            <div class="col-lg-3 col-md-6 col-6 mb-4">
-                <div class="product-card-related">
-                    <div class="product-badge">-7%</div>
-                    <div class="product-img-wrap">
-                        <img src="~/assets/images/Eclipse50ml.png" alt="Nước hoa Reminiscence – Eclipse (Huyền) 50ml" class="img-fluid">
-                    </div>
-                    <div class="product-info-related">
-                        <div class="price-wrap-related">
-                            <span class="sale-price-related">649.000 ₫</span>
-                            <span class="original-price-related">699.000 ₫</span>
-                        </div>
-                        <p class="product-title-related">Nước hoa Reminiscence – Eclipse (Huyền) 50ml | Scentory</p>
-                        <button class="btn btn-add-cart-related">
-                            THÊM VÀO GIỎ HÀNG
-                        </button>
                     </div>
                 </div>
             </div>
