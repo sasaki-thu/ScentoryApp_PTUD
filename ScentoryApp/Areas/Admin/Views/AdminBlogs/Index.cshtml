@@ -62,6 +62,14 @@
         min-height: 300px;
         background-color: white;
     }
+
+    /* Chỉnh màu chữ thông báo lỗi thành màu đỏ */
+    label.error {
+        color: red;
+        font-size: 13px;
+        display: block;
+        margin-top: 5px;
+    }
 </style>
 
 <div class="container-fluid">
@@ -132,7 +140,7 @@
                                                     }
                                                 </td>
                                                 <td>@item.Views</td>
-                                                <td>@item.ThoiGianTaoBlog.ToString("dd/MM/yyyy")</td>
+                                                <td>@item.ThoiGianTaoBlog.ToString("dd/MM/yyyy HH:mm")</td>
                                                 <td>
                                                     <div class="dropdown">
                                                         <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
@@ -203,6 +211,7 @@
                                 <div class="form-group col-md-6">
                                     <label>Danh mục</label>
                                     <select class="form-control" id="DanhMucBlog" name="DanhMucBlog" required>
+                                        <option value="">-- Chọn danh mục --</option>
                                         <option value="Thương hiệu">Thương hiệu</option>
                                         <option value="Sản phẩm">Sản phẩm</option>
                                         <option value="HDSD">HDSD</option>
@@ -245,11 +254,11 @@
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>Thời gian tạo</label>
-                                    <input type="text" class="form-control" id="ThoiGianTaoSp" readonly placeholder="Tự động cập nhật...">
+                                    <input type="text" class="form-control" id="ThoiGianTaoBlog" readonly placeholder="Tự động cập nhật...">
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label>Cập nhật lần cuối</label>
-                                    <input type="text" class="form-control" id="ThoiGianCapNhat" readonly placeholder="Chưa cập nhật">
+                                    <input type="text" class="form-control" id="ThoiGianCapNhatBlog" readonly placeholder="Chưa cập nhật">
                                 </div>
                             </div>
                         </div>
@@ -316,28 +325,25 @@
 </div>
 
 @section Scripts {
-
+    <script src="~/Adminassets/js/quill.min.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Adminassets/js/jquery.validate.min.js"></script>
 
     <script>
-            //0. Quill
-            var quill;
+        var quill;
 
-            $(document).ready(function () {
+        $(document).ready(function () {
+
+            // --- 1. KHỞI TẠO QUILL ---
             if ($("#quillEditor").length) {
                 var toolbarOptions = [
-                  [{ 'font': [] }],
-                  [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                  [{ 'header': [1, 2, 3, false] }],
                   ['bold', 'italic', 'underline', 'strike'],
                   ['blockquote', 'code-block'],
-                  [{ 'header': 1 }, { 'header': 2 }],
                   [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                  [{ 'script': 'sub' }, { 'script': 'super' }],
-                  [{ 'indent': '-1' }, { 'indent': '+1' }],
-                  [{ 'direction': 'rtl' }],
-                  [{ 'color': [] }, { 'background': [] }],
                   [{ 'align': [] }],
+                  ['link', 'image'],
                   ['clean']
                 ];
 
@@ -345,88 +351,133 @@
                     modules: { toolbar: toolbarOptions },
                     theme: 'snow'
                 });
+
+                // [QUAN TRỌNG] Đồng bộ dữ liệu từ Quill sang Input ẩn khi gõ
+                quill.on('text-change', function() {
+                    var html = quill.root.innerHTML;
+                    // Quill mặc định có thẻ <p><br></p> khi trống, cần xóa đi để validate hoạt động đúng
+                    if (html === '<p><br></p>') html = '';
+                    $('#NoiDung').val(html);
+
+                    // Kích hoạt validate lại ô này để xóa lỗi nếu đã nhập
+                    $('#NoiDung').valid();
+                });
             }
-            // 1. DATATABLES
+
+            // --- 2. CẤU HÌNH VALIDATE ---
+            $("#blogForm").validate({
+                ignore: [], // QUAN TRỌNG: Cho phép validate input ẩn (#NoiDung)
+                rules: {
+                    IdBlog: { required: true, minlength: 5, maxlength: 5 },
+                    TenBlog: { required: true },
+                    DanhMucBlog: { required: true },
+                    Tag: { required: true },
+                    NoiDungNgan: { required: true },
+                    NoiDung: { required: true } // Validate ô input ẩn này
+                },
+                messages: {
+                    IdBlog: {
+                        required: "Vui lòng nhập ID Blog",
+                        minlength: "ID phải có 5 ký tự",
+                        maxlength: "ID phải có 5 ký tự"
+                    },
+                    TenBlog: "Tiêu đề không được để trống",
+                    Tag: "Tags không được để trống",
+                    DanhMucBlog: "Hãy chọn một danh mục",
+                    NoiDungNgan: "Mô tả ngắn không được để trống",
+                    NoiDung: "Nội dung bài viết không được để trống"
+                },
+                errorPlacement: function(error, element) {
+                    // Chỉnh vị trí hiện lỗi cho đẹp
+                    if (element.attr("name") == "NoiDung") {
+                        // Với Quill, hiện lỗi bên dưới khung soạn thảo
+                        error.insertAfter("#quillEditor");
+                    } else {
+                        error.insertAfter(element);
+                    }
+                }
+            });
+
+            // --- 3. DATATABLES ---
             var table = $('#dataTable-1').DataTable({
-                autoWidth: true,
                 "lengthChange": false,
                 "searching": true,
                 "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
-                "language": {
-                    "sProcessing": "Đang xử lý...", "sZeroRecords": "Không tìm thấy bài viết",
-                    "sInfo": "Hiển thị _START_ đến _END_ trong _TOTAL_ bài",
-                    "sInfoEmpty": "Hiển thị 0 đến 0 trong 0 bài", "sInfoFiltered": "(lọc từ _MAX_ bài)",
-                    "sSearch": "Tìm kiếm:",
-                    "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
-                }
+                "language": { "sProcessing": "Đang xử lý...", "sZeroRecords": "Không tìm thấy bài viết", "sInfo": "Hiển thị _START_ đến _END_ trong _TOTAL_ bài", "sSearch": "Tìm kiếm:", "oPaginate": { "sNext": "Tiếp", "sPrevious": "Trước" } }
             });
             $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
 
-            // 2. LOGIC ẢNH
-            // 1. XỬ LÝ ẢNH
-            $('#imageDropzone').off('click').on('click', function (e) {
-                e.stopPropagation();
+            // --- 4. LOGIC ẢNH ---
+                    $('#imageDropzone').off('click').on('click', function (e) {
+            e.stopPropagation();
 
-                if (!$('#productFieldset').prop('disabled')) {
-                    $('#ImageFile')[0].click();
-                }
-            });
+            if (!$('#productFieldset').prop('disabled')) {
+                $('#ImageFile')[0].click();
+            }
+        });
 
-            $('#ImageFile').off('change').on('change', function () {
-                if (this.files && this.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $('#previewImg').attr('src', e.target.result);
-                        $('#imagePreview').css('display', 'flex');
-                        $('#imageDropzone').hide();
-                    };
-                    reader.readAsDataURL(this.files[0]);
-                }
-            });
+        $('#ImageFile').off('change').on('change', function () {
+            if (this.files && this.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#previewImg').attr('src', e.target.result);
+                    $('#imagePreview').css('display', 'flex');
+                    $('#imageDropzone').hide();
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
 
-            // remove image
-            $('#removeImageBtn').off('click').on('click', function () {
-                $('#ImageFile').val('');
-                $('#previewImg').attr('src', '');
-                $('#imagePreview').hide();
-                $('#imageDropzone').show();
-            });
-            // 3. RESET FORM
+        // remove image
+        $('#removeImageBtn').off('click').on('click', function () {
+            $('#ImageFile').val('');
+            $('#previewImg').attr('src', '');
+            $('#imagePreview').hide();
+            $('#imageDropzone').show();
+        });
+
+            // --- 5. RESET FORM ---
             function resetForm() {
+                var validator = $("#blogForm").validate();
+                validator.resetForm(); // Xóa thông báo lỗi cũ
+                $('.error').removeClass('error'); // Xóa class lỗi
+
                 $('#blogForm')[0].reset();
                 $('#IdBlog').prop('readonly', false);
                 $('#removeImageBtn').click();
-
-                // Mặc định chọn Tab 1
                 $('#myTab a[href="#info"]').tab('show');
+                $('#TrangThaiSwitch').prop('checked', true); $('#TrangThai').val('1');
+                $('#ThoiGianTaoBlog').val(''); 
+                $('#ThoiGianCapNhatBlog').val('');
 
-                // Reset Switch trạng thái
-                $('#TrangThaiSwitch').prop('checked', true);
-                $('#TrangThai').val('1');
-
-                $('#ThoiGianTaoInfo').text('--');
-                $('#ThoiGianCapNhatInfo').text('--');
-
-                // Unlock fields
                 $('#blogForm input, #blogForm textarea, #blogForm select').prop('disabled', false);
                 $('#btnSave').show();
 
-                // Reset Quill về rỗng
-                if(quill) quill.root.innerHTML = '';
+                // Reset Quill
+                if(quill) {
+                    quill.root.innerHTML = '';
+                    quill.enable(true);
+                    $('#NoiDung').val(''); 
+                }
             }
 
-            // 4. THÊM MỚI
+            // --- CÁC NÚT BẤM ---
             $('#addBlogBtn').click(function () {
                 resetForm();
                 $('#modalTitle').text('Thêm bài viết mới');
+                var now = new Date().toLocaleString();
+                $('#ThoiGianTaoBlog').val(now);
                 $('#blogModal').modal('show');
             });
 
-            // 5. GET BY ID (SỬA / CHI TIẾT)
             $('body').on('click', '.btn-edit, .btn-details', function (e) {
                 e.preventDefault();
                 var id = $(this).data('id');
                 var isDetail = $(this).hasClass('btn-details');
+                // Reset form để xóa lỗi cũ trước khi load data mới
+                var validator = $("#blogForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
 
                 $.ajax({
                     url: '/Admin/AdminBlogs/GetById',
@@ -435,53 +486,45 @@
                     success: function (res) {
                         if (res.success) {
                             var d = res.data;
-                            resetForm();
-
-                            // Map dữ liệu vào Tab 1
                             $('#IdBlog').val(d.idBlog).prop('readonly', true);
                             $('#TenBlog').val(d.tenBlog);
                             $('#DanhMucBlog').val(d.danhMucBlog);
                             $('#Tag').val(d.tag);
+                            $('#Alias').val(d.alias);
+                            $('#MetaKey').val(d.metaKey);
+                            $('#MetaDesc').val(d.metaDesc);
+                            $('#NoiDungNgan').val(d.noiDungNgan);
 
-                            // Map ảnh
                             if (d.anhBase64) {
                                 $('#previewImg').attr('src', d.anhBase64);
                                 $('#imagePreview').show(); $('#imageDropzone').hide();
+                            } else {
+                                $('#removeImageBtn').click();
                             }
 
-                            // Map trạng thái
                             if(d.trangThai == 1) { $('#TrangThaiSwitch').prop('checked', true); $('#TrangThai').val('1'); }
                             else { $('#TrangThaiSwitch').prop('checked', false); $('#TrangThai').val('0'); }
 
-                            // Map dữ liệu Tab 2
-                            $('#NoiDungNgan').val(d.noiDungNgan);
-                            $('#NoiDung').val(d.noiDung);
-                            if (CKEDITOR.instances['NoiDung']) {
-                                CKEDITOR.instances['NoiDung'].setData(d.noiDung);
-                            }
+                            $('#ThoiGianTaoBlog').val(d.thoiGianTaoBlog);
+                            $('#ThoiGianCapNhatBlog').val(d.thoiGianCapNhatBlog);
 
-                            // Map dữ liệu Tab 3
-                            $('#MetaKey').val(d.metaKey);
-                            $('#MetaDesc').val(d.metaDesc);
-                            $('#Alias').val(d.alias);
-
-                            // Info ngày tháng
-                            $('#ThoiGianTaoInfo').text(d.thoiGianTaoBlog);
-                            $('#ThoiGianCapNhatInfo').text(d.thoiGianCapNhatBlog);
-
-                            // --- MAP NỘI DUNG VÀO QUILL ---
-                            if(quill) {
-                                quill.root.innerHTML = d.noiDung || ''; // Đổ HTML vào editor
+                            // Map Quill
+                            if (quill) {
+                                quill.root.innerHTML = d.noiDung || '';
+                                $('#NoiDung').val(d.noiDung); // Cập nhật luôn input ẩn
                             }
 
                             if (isDetail) {
                                 $('#modalTitle').text('Chi tiết bài viết');
-                                $('#blogForm input, #blogForm select, #blogForm textarea').prop('disabled', true);
-                                quill.enable(false); // Khóa Quill lại
-                                $('#btnSave').hide();
+                                $('#blogForm input, #blogForm textarea, #blogForm select').prop('disabled', true);
+                                if(quill) quill.enable(false);
+                                $('#btnSave').hide(); $('#removeImageBtn').hide();
                             } else {
                                 $('#modalTitle').text('Cập nhật bài viết');
-                                quill.enable(true); // Mở khóa Quill
+                                $('#blogForm input, #blogForm textarea, #blogForm select').prop('disabled', false);
+                                if(quill) quill.enable(true);
+                                $('#btnSave').show();
+                                $('#removeImageBtn').show();
                             }
                             $('#blogModal').modal('show');
                         }
@@ -489,66 +532,57 @@
                 });
             });
 
-            // 6. LOGIC SWITCH TRẠNG THÁI
-            $('#TrangThaiSwitch').change(function() {
-                if(this.checked) $('#TrangThai').val('1');
-                else $('#TrangThai').val('0');
-            });
-
-            // 7. SAVE
+            // --- 6. NÚT LƯU (CÓ VALIDATE) ---
             $('#btnSave').click(function () {
-                if (!$('#IdBlog').val() || !$('#TenBlog').val()) {
-                    alert('Vui lòng nhập ID và Tiêu đề bài viết!');
-                    return;
+                if(quill) {
+                    var html = quill.root.innerHTML;
+                    if (html === '<p><br></p>') html = '';
+                    $('#NoiDung').val(html);
                 }
-                var noiDungHtml = quill.root.innerHTML;
-                $('#NoiDung').val(noiDungHtml);
 
-                var formData = new FormData($('#blogForm')[0]);
+                // Kiểm tra Validate
+                if ($("#blogForm").valid()) {
+                    var formData = new FormData($('#blogForm')[0]);
 
-                $.ajax({
-                    url: '/Admin/AdminBlogs/Save',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false, processData: false,
-                    success: function (res) {
-                        if (res.success) {
-                            alert(res.message);
-                            location.reload();
-                        } else {
-                            alert("Lỗi: " + res.message);
-                        }
-                    },
-                    error: function () { alert("Lỗi hệ thống!"); }
-                });
+                    $.ajax({
+                        url: '/Admin/AdminBlogs/Save',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false, processData: false,
+                        success: function (res) {
+                            if (res.success) {
+                                alert(res.message);
+                                location.reload();
+                            } else {
+                                alert("Lỗi: " + res.message);
+                            }
+                        },
+                        error: function () { alert("Lỗi hệ thống!"); }
+                    });
+                } else {
+                    // Nếu form lỗi, focus vào tab đầu tiên có lỗi
+                    var firstError = $("#blogForm").validate().errorList[0].element;
+                    var tabId = $(firstError).closest('.tab-pane').attr('id');
+                    if(tabId) {
+                        $('.nav-tabs a[href="#' + tabId + '"]').tab('show');
+                    }
+                }
             });
 
-            // 8. DELETE
+            // Xóa
             $('body').on('click', '.btn-delete', function () {
-                var id = $(this).data('id');
-                $('#deleteName').text(id);
-                $('#deleteId').val(id);
+                $('#deleteId').val($(this).data('id'));
                 $('#deleteModal').modal('show');
             });
-
             $('#btnConfirmDelete').click(function () {
-                var id = $('#deleteId').val();
                 $.ajax({
                     url: '/Admin/AdminBlogs/Delete',
                     type: 'POST',
-                    data: { id: id },
-                    success: function (res) {
-                        if (res.success) {
-                            $('#deleteModal').modal('hide');
-                            var t = $('#dataTable-1').DataTable();
-                            t.row($('#row-' + id)).remove().draw();
-                        } else {
-                            alert(res.message);
-                        }
-                    }
+                    data: { id: $('#deleteId').val() },
+                    success: function(res){ if(res.success) location.reload(); }
                 });
             });
-
+            $('#TrangThaiSwitch').change(function() { $('#TrangThai').val(this.checked ? '1' : '0'); });
         });
     </script>
 }
