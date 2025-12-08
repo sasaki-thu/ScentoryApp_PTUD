@@ -38,6 +38,10 @@
                         <div class="form-group mr-2">
                             <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm đơn hàng..." style="min-width: 250px;">
                         </div>
+                        <!-- lọc -->
+                        <button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#filterModal">
+                            <i class="fe fe-filter fe-16"></i> Lọc đơn hàng
+                        </button>
                         <button type="button" class="btn btn-outline-secondary" onclick="location.reload()">
                             <i class="fe fe-refresh-cw fe-16"></i> Làm mới
                         </button>
@@ -198,6 +202,58 @@
     </div>
 </div>
 
+<!-- thêm lọc -->
+<div class="modal fade modal-slide" id="filterModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bộ lọc đơn hàng</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="p-2">
+                    <div class="form-group my-3">
+                        <label class="font-weight-bold">Khách hàng / Mã KH</label>
+                        <input type="text" id="filterName" class="form-control" placeholder="Nhập tên hoặc ID...">
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label class="font-weight-bold">Trạng thái đơn hàng</label>
+                        <select class="form-control" id="filterStatus">
+                            <option value="">-- Tất cả --</option>
+                            <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
+                            <option value="Đang giao">Đang giao</option>
+                            <option value="Đã giao">Đã giao</option>
+                            <option value="Hoàn tất">Hoàn tất</option>
+                            <option value="Đã hủy">Đã hủy</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label class="font-weight-bold">Ngày đặt hàng</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <small>Từ ngày:</small>
+                                <input type="date" id="minDate" class="form-control">
+                            </div>
+                            <div class="col-6">
+                                <small>Đến ngày:</small>
+                                <input type="date" id="maxDate" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary btn-block" id="btnApplyFilter">Áp dụng</button>
+                <button type="button" class="btn btn-secondary btn-block" id="btnResetFilter">Đặt lại</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -241,6 +297,86 @@
                     "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
                 }
             });
+
+            // LOGIC LỌC ĐƠN HÀNG
+
+            // Hàm chuyển đổi chuỗi ngày "dd/MM/yyyy HH:mm" thành đối tượng Date
+            function parseDateVN(dateString) {
+                if (!dateString) return null;
+                // Cắt bỏ giờ phút, chỉ lấy ngày dd/MM/yyyy
+                var parts = dateString.split(' ')[0].split('/');
+                if (parts.length === 3) {
+                    return new Date(parts[2], parts[1] - 1, parts[0]);
+                }
+                return null;
+            }
+
+            // Đăng ký hàm lọc với DataTables
+            $.fn.dataTable.ext.search.push(
+                function(settings, data, dataIndex) {
+                    // 1. Lấy giá trị input
+                    var filterName = $('#filterName').val().toLowerCase();
+                    var filterStatus = $('#filterStatus').val();
+                    var minDateVal = $('#minDate').val(); // yyyy-mm-dd
+                    var maxDateVal = $('#maxDate').val(); // yyyy-mm-dd
+
+                    // 2. Lấy dữ liệu từ dòng hiện tại
+                    // data[1]: Cột Khách hàng (Nhưng data[] lấy cả HTML, nên ta dùng jquery để lấy text thuần)
+                    var customerText = $(table.row(dataIndex).node()).find('td:eq(1)').text().toLowerCase().trim();
+
+                    // data[2]: Ngày đặt (Format: 25/12/2025 10:30)
+                    var orderDateRaw = data[2];
+
+                    // data[4]: Trạng thái (Lấy text trong badge)
+                    var statusText = $(table.row(dataIndex).node()).find('td:eq(4)').text().trim();
+
+
+                    // 3. Logic kiểm tra
+
+                    // -- Kiểm tra Tên Khách hàng
+                    if (filterName && !customerText.includes(filterName)) {
+                        return false;
+                    }
+
+                    // -- Kiểm tra Trạng thái (So sánh chính xác)
+                    if (filterStatus && statusText !== filterStatus) {
+                        return false;
+                    }
+
+                    // -- Kiểm tra Ngày tháng
+                    var orderDate = parseDateVN(orderDateRaw);
+
+                    if (minDateVal) {
+                        var minDate = new Date(minDateVal);
+                        // Reset giờ của orderDate về 0 để so sánh chính xác theo ngày
+                        if (orderDate < minDate) return false;
+                    }
+
+                    if (maxDateVal) {
+                        var maxDate = new Date(maxDateVal);
+                        if (orderDate > maxDate) return false;
+                    }
+
+                    return true;
+                }
+            );
+
+            // Xử lý sự kiện click "Áp dụng"
+            $('#btnApplyFilter').click(function() {
+                table.draw();
+                $('#filterModal').modal('hide');
+            });
+
+            // Xử lý sự kiện click "Đặt lại"
+            $('#btnResetFilter').click(function() {
+                $('#filterName').val('');
+                $('#filterStatus').val('');
+                $('#minDate').val('');
+                $('#maxDate').val('');
+
+                table.draw(); // Vẽ lại bảng (về mặc định)
+            });
+            // KẾT THÚC LỌC ĐƠN HÀNG
 
             $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
 

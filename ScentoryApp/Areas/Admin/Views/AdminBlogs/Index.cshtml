@@ -100,7 +100,7 @@
                             <table class="table datatables" id="dataTable-1">
                                 <thead>
                                     <tr>
-                                        <th>ID Blog</th>
+                                        <th>ID</th>
                                         <th>Tiêu đề Blog</th>
                                         <th>Danh mục</th>
                                         <th>Trạng thái</th>
@@ -115,7 +115,7 @@
                                         foreach (var item in Model)
                                         {
                                             <tr id="row-@item.IdBlog.Trim()">
-                                                <td><strong>@item.IdBlog</strong></td>
+                                                <td>@item.IdBlog</td>
                                                 <td>
                                                     @if (item.TenBlog.Length > 50)
                                                     {
