@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Phudu:wght@400;600;700&family=Questrial&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/toast.css">
     <style>
         * {
             margin: 0;
@@ -37,7 +38,8 @@
                 right: 0;
                 bottom: 0;
                 background: rgba(0, 0, 0, 0.4);
-                z-index: 1;
+                    z-index: 1;
+                    pointer-events: none;
             }
 
         .container {
@@ -496,10 +498,10 @@
             return isValid;
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             if (!validateStep(1) || !validateStep(2)) {
                  if (!validateStep(1)) changeStep(-1);
-                 alert('Vui lòng điền đầy đủ và chính xác thông tin.');
+                 showToast('Vui lòng điền đầy đủ và chính xác thông tin.', 'error');
                  return;
             }
 
@@ -515,11 +517,26 @@
                 role: 'User'
             };
 
-            console.log('Register:', userData);
-            alert(`Đăng ký thành công!\nTài khoản: ${userData.username}\nVai trò: ${userData.role}`);
-
-            window.location.href = '/Home/Login';
+            try {
+                const res = await fetch('/Home/RegisterApi', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(userData)
+                });
+                const result = await res.json();
+                if (result.success) {
+                    // if server provided a returnUrl (we auto-login), redirect there
+                    const redirect = result.returnUrl || '/';
+                    window.location.href = redirect;
+                    } else {
+                    showToast(result.message || 'Đăng ký thất bại.', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Có lỗi trong quá trình đăng ký.', 'error');
+            }
         }
     </script>
+    <script src="~/js/toast.js"></script>
 </body>
 </html>

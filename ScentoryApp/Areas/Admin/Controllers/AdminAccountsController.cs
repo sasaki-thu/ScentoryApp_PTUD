@@ -67,11 +67,36 @@ namespace ScentoryApp.Areas.Admin.Controllers
                     {
                         return Json(new { success = false, message = "Tên đăng nhập đã tồn tại!" });
                     }
+                    // Normalize role value
+                    if (!string.IsNullOrWhiteSpace(model.VaiTro) && model.VaiTro.Equals("User", StringComparison.OrdinalIgnoreCase))
+                        model.VaiTro = "Khách hàng";
+
+                    // Ensure IdTaiKhoan uses TK### format; if not provided or not starting with TK, generate one
+                    if (string.IsNullOrWhiteSpace(model.IdTaiKhoan) || !model.IdTaiKhoan.StartsWith("TK", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // generate next TK id
+                        var existing = await _context.TaiKhoans
+                            .Where(t => t.IdTaiKhoan.StartsWith("TK"))
+                            .Select(t => t.IdTaiKhoan.Substring(2))
+                            .ToListAsync();
+                        int max = 0;
+                        foreach (var s in existing)
+                        {
+                            if (int.TryParse(s, out var n))
+                                max = Math.Max(max, n);
+                        }
+                        model.IdTaiKhoan = "TK" + (max + 1).ToString("D3");
+                    }
+
                     _context.Add(model);
                 }
                 else
                 {
                     // === CẬP NHẬT ===
+                    // Normalize role on update as well
+                    if (!string.IsNullOrWhiteSpace(model.VaiTro) && model.VaiTro.Equals("User", StringComparison.OrdinalIgnoreCase))
+                        model.VaiTro = "Khách hàng";
+
                     _context.Update(model);
                 }
 

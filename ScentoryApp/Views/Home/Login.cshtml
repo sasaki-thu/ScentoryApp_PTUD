@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Phudu:wght@400;600;700&family=Questrial&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/toast.css">
     <style>
         * {
             margin: 0;
@@ -357,7 +358,7 @@
             </div>
             <div class="auth-card">
                 <div class="form-container">
-                    <input type="hidden" name="ReturnUrl" value="@ViewData["ReturnUrl"]" />
+                    <input type="hidden" name="ReturnUrl" value="@(ViewData["ReturnUrl"] ?? "/")" />
                     <div class="form-group">
                         <label class="form-label">Tên đăng nhập *</label>
                         <input type="text" class="form-input" id="loginUsername" placeholder="Nhập tên đăng nhập" required>
@@ -451,7 +452,7 @@
 
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
-            const returnUrl = "@ViewData["ReturnUrl"]";   // lấy returnUrl từ server
+            const returnUrl = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewData["ReturnUrl"] ?? "/"));   // lấy returnUrl từ server (JSON-encoded)
 
             const payload = {
                 username: username,
@@ -469,12 +470,31 @@
             const result = await response.json();
 
             if (result.success) {
-                // Đăng nhập thành công → redirect đúng ReturnUrl
-                window.location.href = result.returnUrl;
+                // show success toast then redirect to ReturnUrl
+                const redirect = result.returnUrl || '/';
+                showToast('Đăng nhập thành công', 'success');
+                setTimeout(function(){ window.location.href = redirect; }, 800);
             } else {
-                alert(result.message || "Đăng nhập thất bại!");
+                // show styled toast instead of alert
+                showToast(result.message || "Đăng nhập thất bại!", 'error');
             }
         }
+
+        // Allow pressing Enter in username/password fields to submit login
+        (function enableEnterToSubmit() {
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
+            [usernameInput, passwordInput].forEach(input => {
+                if (!input) return;
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleLogin();
+                    }
+                });
+            });
+        })();
     </script>
+        <script src="~/js/toast.js"></script>
 </body>
 </html>
