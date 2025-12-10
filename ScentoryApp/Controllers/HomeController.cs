@@ -71,15 +71,69 @@ namespace ScentoryApp.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult Perfumes()
+        public async Task<IActionResult> Perfumes(int page = 1)
         {
-            return View();
+            const int pageSize = 10;
+
+            if (page < 1) page = 1;
+
+            var query = _context.SanPhams
+                .Include(p => p.IdDanhMucSanPhamNavigation)
+                .Where(p => p.IdDanhMucSanPham == "DM001" && p.TrangThaiSp)              // Lọc sản phẩm nước hoa
+                .OrderByDescending(p => p.ThoiGianTaoSp);       // mới nhất lên trước
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages == 0) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new ShopViewModel
+            {
+                Products = products,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
+
+            return View(vm);
         }
+
         [AllowAnonymous]
-        public IActionResult Oils()
+        public async Task<IActionResult> Oils(int page = 1)
         {
-            return View();
+            const int pageSize = 10;
+
+            if (page < 1) page = 1;
+
+            var query = _context.SanPhams
+                .Include(p => p.IdDanhMucSanPhamNavigation)
+                .Where(p => p.IdDanhMucSanPham == "DM002" && p.TrangThaiSp)              // Lọc sản phẩm nước hoa
+                .OrderByDescending(p => p.ThoiGianTaoSp);       // mới nhất lên trước
+
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            if (totalPages == 0) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var products = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new ShopViewModel
+            {
+                Products = products,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
+
+            return View(vm);
         }
+
         [AllowAnonymous]
         public IActionResult Contact()
         {

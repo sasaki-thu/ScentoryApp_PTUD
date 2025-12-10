@@ -40,16 +40,16 @@ public partial class ScentoryPtudContext : DbContext
     public virtual DbSet<TaiKhoan> TaiKhoans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=DAT;Database=ScentoryPTUD;Integrated Security=true;Encrypt=False;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=ONION\\SQLEXPRESS;Database=ScentoryPTUD;Integrated Security=true;Encrypt=False;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Blog>(entity =>
         {
-            entity.HasKey(e => e.IdBlog).HasName("PK__Blog__F1F67AB819C6C8E6");
+            entity.HasKey(e => e.IdBlog).HasName("PK__Blog__F1F67AB860B8F2CD");
 
-            entity.ToTable("Blog", tb => tb.HasTrigger("trg_Blog_UpdateTimestamp"));
+            entity.ToTable("Blog");
 
             entity.Property(e => e.IdBlog)
                 .HasMaxLength(5)
@@ -70,7 +70,7 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<ChiTietDonHang>(entity =>
         {
-            entity.HasKey(e => new { e.IdDonHang, e.IdSanPham }).HasName("PK__ChiTietD__AFA0CC00374D76B1");
+            entity.HasKey(e => new { e.IdDonHang, e.IdSanPham }).HasName("PK__ChiTietD__AFA0CC0043BDF397");
 
             entity.ToTable("ChiTietDonHang");
 
@@ -100,7 +100,7 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<ChiTietGioHang>(entity =>
         {
-            entity.HasKey(e => new { e.IdGioHang, e.IdSanPham }).HasName("PK__ChiTietG__F624402EF5628835");
+            entity.HasKey(e => new { e.IdGioHang, e.IdSanPham }).HasName("PK__ChiTietG__F624402EEB07E92E");
 
             entity.ToTable("ChiTietGioHang");
 
@@ -128,7 +128,7 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<DanhGiaSanPham>(entity =>
         {
-            entity.HasKey(e => e.IdDanhGia).HasName("PK__DanhGiaS__6C898AE15C3A2D5B");
+            entity.HasKey(e => e.IdDanhGia).HasName("PK__DanhGiaS__6C898AE1F93A7132");
 
             entity.ToTable("DanhGiaSanPham");
 
@@ -164,9 +164,9 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<DanhMucSanPham>(entity =>
         {
-            entity.HasKey(e => e.IdDanhMucSanPham).HasName("PK__DanhMucS__95D6C4EF0E8DF4DB");
+            entity.HasKey(e => e.IdDanhMucSanPham).HasName("PK__DanhMucS__95D6C4EF87CE35DE");
 
-            entity.ToTable("DanhMucSanPham", tb => tb.HasTrigger("trg_DM_UpdateTimestamp"));
+            entity.ToTable("DanhMucSanPham");
 
             entity.Property(e => e.IdDanhMucSanPham)
                 .HasMaxLength(5)
@@ -184,9 +184,9 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<DonHang>(entity =>
         {
-            entity.HasKey(e => e.IdDonHang).HasName("PK__DonHang__99B72639FA2F4692");
+            entity.HasKey(e => e.IdDonHang).HasName("PK__DonHang__99B72639077C4BC6");
 
-            entity.ToTable("DonHang", tb => tb.HasTrigger("trg_DonHang_Update"));
+            entity.ToTable("DonHang");
 
             entity.Property(e => e.IdDonHang)
                 .HasMaxLength(5)
@@ -236,7 +236,7 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<DonViVanChuyen>(entity =>
         {
-            entity.HasKey(e => e.IdDonViVanChuyen).HasName("PK__DonViVan__54421B6470EDEEA2");
+            entity.HasKey(e => e.IdDonViVanChuyen).HasName("PK__DonViVan__54421B64F12C0592");
 
             entity.ToTable("DonViVanChuyen");
 
@@ -249,9 +249,9 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<GioHang>(entity =>
         {
-            entity.HasKey(e => e.IdGioHang).HasName("PK__GioHang__C033AA174E3D4ABD");
+            entity.HasKey(e => e.IdGioHang).HasName("PK__GioHang__C033AA17B2C09F1C");
 
-            entity.ToTable("GioHang", tb => tb.HasTrigger("trg_GioHang_UpdateTimestamp"));
+            entity.ToTable("GioHang");
 
             entity.Property(e => e.IdGioHang)
                 .HasMaxLength(5)
@@ -330,9 +330,9 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<SanPham>(entity =>
         {
-            entity.HasKey(e => e.IdSanPham).HasName("PK__SanPham__617EA392C31436A7");
+            entity.HasKey(e => e.IdSanPham).HasName("PK__SanPham__617EA3922F572B66");
 
-            entity.ToTable("SanPham", tb => tb.HasTrigger("trg_SanPham_UpdateTimestamp"));
+            entity.ToTable("SanPham");
 
             entity.Property(e => e.IdSanPham)
                 .HasMaxLength(5)
@@ -360,7 +360,7 @@ public partial class ScentoryPtudContext : DbContext
 
         modelBuilder.Entity<TaiKhoan>(entity =>
         {
-            entity.HasKey(e => e.IdTaiKhoan).HasName("PK__TaiKhoan__0E3EC2101597A738");
+            entity.HasKey(e => e.IdTaiKhoan).HasName("PK__TaiKhoan__0E3EC210B37C8C0D");
 
             entity.ToTable("TaiKhoan");
 
