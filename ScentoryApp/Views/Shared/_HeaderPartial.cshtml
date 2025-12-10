@@ -4,7 +4,10 @@
 
         <form role="search" method="get" class="form-group" action="">
             <input type="search" id="search-form" class="form-control border-0 border-bottom"
-                   placeholder="Type and press enter" value="" name="s" />
+                   placeholder="Tìm kiếm sản phẩm..." value="" name="s" />
+
+            <div id="search-results" class="search-results"></div>
+
             <button type="submit" class="search-submit border-0 position-absolute bg-white"
                     style="top: 15px;right: 15px;">
                 <svg class="search" width="24" height="24">
@@ -13,34 +16,100 @@
             </button>
         </form>
 
-        <h5 class="cat-list-title">Browse Categories</h5>
+        <h5 class="cat-list-title">Xem các danh mục</h5>
 
         <ul class="cat-list">
             <li class="cat-list-item">
-                <a href="#" title="Jackets">Jackets</a>
+                <a href="/Home/Perfumes#" title="Nước hoa">Nước hoa</a>
             </li>
             <li class="cat-list-item">
-                <a href="#" title="T-shirts">T-shirts</a>
+                <a href="/Home/Oils#" title="Tinh dầu">Tinh dầu</a>
             </li>
             <li class="cat-list-item">
-                <a href="#" title="Handbags">Handbags</a>
+                <a href="#" title="Box quà">Box quà</a>
             </li>
             <li class="cat-list-item">
-                <a href="#" title="Accessories">Accessories</a>
+                <a href="#" title="Hàng mới về">Hàng mới về</a>
             </li>
             <li class="cat-list-item">
-                <a href="#" title="Cosmetics">Cosmetics</a>
+                <a href="#" title="Nước hoa 10ml">Nước hoa 10ml</a>
             </li>
             <li class="cat-list-item">
-                <a href="#" title="Dresses">Dresses</a>
-            </li>
-            <li class="cat-list-item">
-                <a href="#" title="Jumpsuits">Jumpsuits</a>
+                <a href="#" title="Nước hoa 50ml">Nước hoa 50ml</a>
             </li>
         </ul>
 
     </div>
 </div>
+<style>
+    .search-results {
+        background: #fff;
+        border: 1px solid #ddd;
+        max-height: 250px;
+        overflow-y: auto;
+        display: none;
+        position: relative;
+        margin-top: 5px;
+        border-radius: 6px;
+        z-index: 9999;
+    }
+
+    .search-results div {
+        padding: 10px 15px;
+        cursor: pointer;
+     }
+
+     .search-results div:hover {
+     background: #f1f1f1;
+     }
+</style>
+<script>
+    // Danh sách sản phẩm mẫu 
+    const products = [
+        { 
+            name: "Nước hoa Reminiscence – Whisper (Thầm) 50ml",
+            url: "/Home/Perfumes?sp=whisper10",
+            price: 179000,
+        },
+        { 
+            name: "Nước hoa Reminiscence – Horizon (Miên) 50ml", 
+            url: "/Home/Perfumes?sp=horizon10" },
+        { name: "Nước hoa Eclipse 10ml", url: "/Home/Perfumes?sp=eclipse10" },
+        { name: "Box quà nước hoa Eclipse", url: "/Home/GiftBox?sp=eclipsebox" }
+    ];
+
+    const searchInput = document.getElementById("search-form");
+    const searchResults = document.getElementById("search-results");
+
+    searchInput.addEventListener("keyup", function () {
+        let keyword = this.value.toLowerCase();
+        searchResults.innerHTML = "";
+
+        if (keyword.length === 0) {
+            searchResults.style.display = "none";
+            return;
+        }
+
+        const filtered = products.filter(p =>
+            p.name.toLowerCase().includes(keyword)
+        );
+
+        if (filtered.length === 0) {
+            searchResults.style.display = "none";
+            return;
+        }
+
+        filtered.forEach(p => {
+            const item = document.createElement("div");
+            item.innerText = p.name;
+            item.onclick = () => window.location.href = p.url;
+            searchResults.appendChild(item);
+        });
+
+        searchResults.style.display = "block";
+    });
+</script>
+
 <!-- kết thúc màn hình tìm kiếm -->
 <!-- menu được chia làm 3 thẻ div: logo, menu chính và icon-->
 <nav class="navbar navbar-expand-lg bg-light text-uppercase fs-6 p-3 border-bottom align-items-center">
