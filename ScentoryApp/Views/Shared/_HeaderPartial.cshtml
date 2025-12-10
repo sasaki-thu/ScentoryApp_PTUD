@@ -26,56 +26,69 @@
                 <a href="/Home/Oils#" title="Tinh dầu">Tinh dầu</a>
             </li>
             <li class="cat-list-item">
-                <a href="#" title="Box quà">Box quà</a>
+                <a href="Home/ProductDetails/SP013" title="Box quà">Box quà</a>
             </li>
-            <li class="cat-list-item">
-                <a href="#" title="Hàng mới về">Hàng mới về</a>
-            </li>
-            <li class="cat-list-item">
-                <a href="#" title="Nước hoa 10ml">Nước hoa 10ml</a>
-            </li>
-            <li class="cat-list-item">
-                <a href="#" title="Nước hoa 50ml">Nước hoa 50ml</a>
-            </li>
+
         </ul>
 
     </div>
 </div>
 <style>
     .search-results {
+        position: absolute;
+        top: 55px;
+        left: 0;
+        width: 100%;
         background: #fff;
-        border: 1px solid #ddd;
-        max-height: 250px;
+        border: 1px solid #eee;
+        border-radius: 6px;
+        max-height: 400px;
         overflow-y: auto;
         display: none;
-        position: relative;
-        margin-top: 5px;
-        border-radius: 6px;
         z-index: 9999;
+        padding: 10px 0;
+        text-align: left;
+        color: black;
     }
 
-    .search-results div {
-        padding: 10px 15px;
+    .search-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
         cursor: pointer;
+        gap: 12px;
+    }
+
+    .search-item:hover {
+        background: #f7f7f7;
      }
 
-     .search-results div:hover {
-     background: #f1f1f1;
-     }
+    .search-item-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: black;
+    }
+
+    .search-results div:hover {
+        background: #f1f1f1;
+    }
 </style>
 <script>
-    // Danh sách sản phẩm mẫu 
+    // Danh sách sản phẩm
     const products = [
-        { 
-            name: "Nước hoa Reminiscence – Whisper (Thầm) 50ml",
-            url: "/Home/Perfumes?sp=whisper10",
-            price: 179000,
-        },
-        { 
-            name: "Nước hoa Reminiscence – Horizon (Miên) 50ml", 
-            url: "/Home/Perfumes?sp=horizon10" },
-        { name: "Nước hoa Eclipse 10ml", url: "/Home/Perfumes?sp=eclipse10" },
-        { name: "Box quà nước hoa Eclipse", url: "/Home/GiftBox?sp=eclipsebox" }
+        { name: "Nước hoa Reminiscence – Aurora (Uyển) 10ml | Scentory", url: "/Home/ProductDetails/SP008" },
+        { name: "Nước hoa Reminiscence – Eclipse (Huyền) 10ml | Scentory", url: "/Home/ProductDetails/SP007" },
+        { name: "Nước hoa Reminiscence – Horizon (Miên) 10ml | Scentory", url: "/Home/ProductDetails/SP006" },
+        { name: "Nước hoa Reminiscence – Whisper (Thầm) 10ml | Scentory", url: "/Home/ProductDetails/SP005" },
+        { name: "Nước hoa Reminiscence – Aurora (Uyển) 50ml | Scentory", url:"/Home/ProductDetails/SP004"},
+        { name: "Nước hoa Reminiscence – Eclipse (Huyền) 50ml | Scentory", url: "/Home/ProductDetails/SP003" },
+        { name: "Nước hoa Reminiscence – Horizon (Miên) 50ml | Scentory", url: "/Home/ProductDetails/SP002"},
+        { name: "Nước hoa Reminiscence – Whisper (Thầm) 50ml | Scentory", url: "/Home/ProductDetails/SP001" },
+        { name: "Tinh dầu Seviora – Winter (Đông) 50ml | Scentory", url: "/Home/ProductDetails/SP012"},
+        { name: "Tinh dầu Seviora – Atum (Thu) 50ml | Scentory", url: "/Home/ProductDetails/SP011" },
+        { name: "Tinh dầu Seviora – Summer (Hạ) 50ml | Scentory", url: "/Home/ProductDetails/SP010"},
+        { name: "Tinh dầu Seviora – Spring (Xuân) 50ml | Scentory", url: "/Home/ProductDetails/SP009"},
+        { name: "Box quà đặc biệt Scentory x 20/10 | Scentory", url:"/Home/ProductDetails/SP013"},
     ];
 
     const searchInput = document.getElementById("search-form");
@@ -109,6 +122,7 @@
         searchResults.style.display = "block";
     });
 </script>
+
 
 <!-- kết thúc màn hình tìm kiếm -->
 <!-- menu được chia làm 3 thẻ div: logo, menu chính và icon-->
