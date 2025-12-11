@@ -1,4 +1,4 @@
-﻿
+﻿@model ScentoryApp.Models.BlogViewModel
 @{
     ViewData["Title"] = "Blog";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -15,196 +15,121 @@
 
 <section>
     <div class="container">
-    <div class="row" data-aos="zoom-out">
-        <div class="col-md-4">
-            <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div class="post-image">
-                        <a href="index.html">
-                            <img src="~/assets/images/Tay cầm Whisper.png" alt="image" class="post-grid-image img-fluid">
-                        </a>
+        <div class="row" data-aos="zoom-out">
+
+            @if (Model.Blogs != null && Model.Blogs.Any())
+            {
+                foreach (var item in Model.Blogs)
+                {
+                    // --- XỬ LÝ ẢNH TỪ DATABASE ---
+                    string imgSrc = "";
+                    if (item.AnhBlog != null && item.AnhBlog.Length > 0)
+                    {
+                        var base64 = Convert.ToBase64String(item.AnhBlog);
+                        imgSrc = $"data:image/jpeg;base64,{base64}";
+                    }
+                    // ------------------------------------------------
+
+                    <div class="col-md-4 mb-4">
+                        <article class="post-item bg-light"
+                                 style="display:flex; flex-direction:column; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+                            <div class="post-image">
+                                <a href="@Url.Action("BlogDetails", "Home", new { id = item.IdBlog })">
+                                    <img src="@imgSrc" alt="@item.TenBlog" class="post-grid-image img-fluid w-100"
+                                         style="height: 100%; object-fit: cover;">
+                                </a>
+                            </div>
+
+                            <div class="post-content d-flex flex-column justify-content-between p-3 flex-grow-1">
+                                <div>
+                                    <div class="post-meta text-uppercase fs-6 text-secondary mb-2">
+                                        <span class="post-category fw-bold">@item.DanhMucBlog - </span>
+                                        <span class="meta-day"> @item.ThoiGianTaoBlog.ToString("dd/MM/yyyy")</span>
+                                    </div>
+                                    <h5 class="post-title mb-2">
+                                        <a href="@Url.Action("BlogDetails", "Home", new { id = item.IdBlog })" class="text-decoration-none text-dark">
+                                            @item.TenBlog
+                                        </a>
+                                    </h5>
+                                    <p class="card-text text-muted">
+                                        @if (!string.IsNullOrEmpty(item.NoiDungNgan) && item.NoiDungNgan.Length > 100)
+                                        {
+                                            @item.NoiDungNgan.Substring(0, 100)
+                                
+                                            <span>...</span>
+                                        }
+                                        else
+                                        {
+                                            @item.NoiDungNgan
+                                        }
+                                    </p>
+                                </div>
+                                <a href="@Url.Action("BlogDetails", "Home", new { id = item.IdBlog })" class="text-primary fw-bold mt-3 text-decoration-none">
+                                    Đọc thêm »
+                                </a>
+                            </div>
+                        </article>
                     </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
-                        <div class="post-meta text-uppercase fs-6 text-secondary">
-                            <span class="post-category">HDSD/</span>
-                            <span class="meta-day"> 30 tháng 11, 2025</span>
-                        </div>
-                        <h5 class="post-title">
-                            <a href="index.html">Bí quyết xịt nước hoa đúng cách: Xịt đúng – Lưu lâu</a>
-                        </h5>
-                        <p>Nước hoa đã trở thành một trong những thứ không thể thiếu trong cuộc sống. Xịt nước hoa không chỉ ...</p>
-                        <a href="#" style="font-weight:600;">Đọc thêm »</a>
-                    </div>
-             </article>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <p>Chưa có bài viết nào.</p>
+                </div>
+            }
         </div>
-        <div class="col-md-4">
-            <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                <div class="post-image">
-                    <a href="index.html">
-                        <img src="~/assets/images/Whisper có bg.png" alt="image" class="post-grid-image img-fluid">
-                    </a>
-                </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
-                    <div class="post-meta text-uppercase fs-6 text-secondary">
-                        <span class="post-category">Storytelling/</span>
-                        <span class="meta-day"> 24 tháng 11, 2025</span>
-                    </div>
-                    <h5 class="post-title">
-                        <a href="index.html">Whisper – Thầm: Lời thì thầm của hoa hồng và xạ hương dành cho tâm hồn mơ mộng</a>
-                    </h5>
-                        <p>Whisper – Thầm là sản phẩm nước hoa đầu tiên trong bộ sưu tập Reminiscence của Scentory.Mùi hương mở ra hành trình...</p>
-                    <a href="#" style="font-weight:600;">Đọc thêm »</a>
-                </div>
-            </article>
-        </div>
-        <div class="col-md-4">
-             <article class="post-item bg-light" 
-                style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                <div class="post-image">
-                    <a href="index.html">
-                        <img src="~/assets/images/Spring 50ml.png" alt="image" class="post-grid-image img-fluid">
-                    </a>
-                </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
-                    <div class="post-meta text-uppercase fs-6 text-secondary">
-                        <span class="post-category">HDSD/</span>
-                        <span class="meta-day"> 22 tháng 11, 2025</span>
-                    </div>
-                    <h5 class="post-title">
-                        <a href="index.html">Tinh dầu và không gian sống: Làm thế nào một giọt hương có thể thay đổi tâm trạng cả ngày?</a>
-                    </h5>
-                    <p>Mỗi căn nhà đều có mùi hương riêng. Có nhà thơm mùi nắng, có nhà vương chút hương gỗ trầm, ...</p>
-                    <a href="#" style="font-weight:600;"> Đọc thêm »</a>
-                </div>
-            </article>
-        </div>
-         <div class="col-md-4" style="margin-top:30px">
-             <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div class="post-image">
-                        <a href="index.html">
-                            <img src="~/assets/images/About us - hành trình.png" alt="image" class="post-grid-image img-fluid">
-                        </a>
-                    </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; margin-top:30px">
-                        <div class="post-meta text-uppercase fs-6 text-secondary">
-                            <span class="post-category">Mẹo/</span>
-                            <span class="meta-day"> 6 tháng 10, 2025</span>
-                        </div>
-                        <h5 class="post-title">
-                            <a href="index.html">Tặng mùi hương như thế nào để chạm đến trái tim người nhận?</a>
-                        </h5>
-                        <p>Bạn có bao giờ nhận được một món quà mà chỉ cần thoang thoảng mùi hương là nhớ ngay tới người tặng...</p>
-                        <a href="#" style="font-weight:600;"> Đọc thêm »</a>
-                    </div>
-             </article>
-         </div>
-          <div class="col-md-4" style="margin-top:30px">
-              <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div class="post-image">
-                        <a href="index.html">
-                            <img src="~/assets/images/Nốt hương.png" alt="image" class="post-grid-image img-fluid">
-                        </a>
-                    </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; margin-top:30px">
-                        <div class="post-meta text-uppercase fs-6 text-secondary">
-                            <span class="post-category">Kiến thức/</span>
-                            <span class="meta-day"> 4 tháng 10, 2025</span>
-                        </div>
-                        <h5 class="post-title">
-                            <a href="index.html">Giải mã tầng hương: Tại sao Top – Heart – Base notes có thể tạo nên cả một hành trình cảm xúc?</a>
-                        </h5>
-                        <p>Khi nhắc đến nước hoa, người ta thường nghĩ ngay đến mùi hương dễ chịu hay sức hút quyến rũ...</p>
-                        <a href="#" style="font-weight:600;"> Đọc thêm »</a>
-                    </div>
-              </article>
-          </div>
-          <div class="col-md-4" style="margin-top:30px">
-                <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div class="post-image">
-                        <a href="index.html">
-                            <img src="~/assets/images/Eclipse có bg.png" alt="image" class="post-grid-image img-fluid">
-                        </a>
-                    </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between;">
-                        <div class="post-meta text-uppercase fs-6 text-secondary">
-                            <span class="post-category">Sản phẩm/</span>
-                            <span class="meta-day"> 2 tháng 10, 2025</span>
-                        </div>
-                        <h5 class="post-title">
-                            <a href="index.html">Eclipse – Huyền: Khi mùi hương tái hiện sức mạnh huyền bí của nhật thực</a>
-                        </h5>
-                        <p>Eclipse – Huyền là nốt nhạc trầm sâu lắng trong bản giao hưởng hương thơm của bộ sưu tập Remiscence...</p>
-                        <a href="#" style="font-weight:600;"> Đọc thêm »</a>
-                    </div>
-                </article>
-          </div>
-          <div class="col-md-4" style="margin-top:30px">
-                <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div class="post-image">
-                        <a href="index.html">
-                            <img src="~/assets/images/Smer có bg.png" alt="image" class="post-grid-image img-fluid">
-                        </a>
-                    </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; margin-top:30px">
-                        <div class="post-meta text-uppercase fs-6 text-secondary">
-                            <span class="post-category">Sản phẩm/</span>
-                            <span class="meta-day"> 24 tháng 9, 2025</span>
-                        </div>
-                        <h5 class="post-title">
-                            <a href="index.html">Seviora – Tinh dầu bốn mùa: Hành trình tái sinh từ Xuân – Hạ – Thu – Đông trong từng giọt hương</a>
-                        </h5>
-                        <p>Vượt ra ngoài định nghĩa của một bộ sưu tập tinh dầu thơm phòng, bộ sưu tập Seviora đến đến từ Scentory còn là thứ dẫn dắt...</p>
-                        <a href="#" style="font-weight:600;"> Đọc thêm »</a>
-                    </div>
-                </article>
-           </div>
-           <div class="col-md-4" style="margin-top:30px">
-                <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div class="post-image">
-                        <a href="index.html">
-                            <img src="~/assets/images/Bìa Reminiscence ig.png" alt="image" class="post-grid-image img-fluid">
-                        </a>
-                    </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; margin-top:30px">
-                        <div class="post-meta text-uppercase fs-6 text-secondary">
-                            <span class="post-category">Sản phẩm/</span>
-                            <span class="meta-day"> 23 tháng 9, 2025</span>
-                        </div>
-                        <h5 class="post-title">
-                            <a href="index.html">Reminiscence – Bộ sưu tập nước hoa viết tiếp những kỷ niệm chưa bao giờ phai</a>
-                        </h5>
-                        <p>Bộ sưu tập Reminiscence của Scentory là lời mời gọi bạn bước vào thế giới hương thơm. Đây là nơi...</p>
-                        <a href="#" style="font-weight:600;"> Đọc thêm »</a>
-                    </div>
-                </article>
-           </div>
-           <div class="col-md-4" style="margin-top:30px">
-                <article class="post-item bg-light"
-                         style="display:flex; flex-direction:column; height:100%; border-radius:20px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-                    <div class="post-image">
-                        <a href="index.html">
-                            <img src="~/assets/images/hoa tulip.png" alt="image" class="post-grid-image img-fluid">
-                        </a>
-                    </div>
-                    <div class="post-content d-flex flex-wrap gap-2 my-3" style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; margin-top:30px">
-                        <div class="post-meta text-uppercase fs-6 text-secondary">
-                            <span class="post-category">thương hiệu/</span>
-                            <span class="meta-day"> 21 tháng 9, 2025</span>
-                        </div>
-                        <h5 class="post-title">
-                            <a href="index.html">Scentory: Khi mùi hương không chỉ là sản phẩm, mà là ký ức và câu chuyện cá nhân</a>
-                        </h5>
-                        <p>Có những mùi hương chỉ thoáng qua nhưng lại khắc sâu trong tâm trí, gợi về ký ức và cảm xúc tưởng chừng đã ngủ quên...</p>
-                        <a href="#" style="font-weight:600;"> Đọc thêm »</a>
-                    </div>
-                </article>
-           </div>
-    </div>
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="Page navigation" class="mt-5 mb-5">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Blog", new { page = Model.CurrentPage - 1 })"><span>&laquo;</span></a>
+                    </li>
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Blog", new { page = i })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Blog", new { page = Model.CurrentPage + 1 })"><span>&raquo;</span></a>
+                    </li>
+                </ul>
+            </nav>
+        }
     </div>
 </section>
+<style>
+    .post-item {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .post-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+        }
+
+    .post-title a:hover {
+        color: #C38154 !important;
+    }
+
+    .pagination .page-link {
+        color: #C38154;
+        border: 1px solid #C38154;
+        margin: 0 3px;
+        border-radius: 4px;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #C38154;
+        border-color: #C38154;
+        color: white;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #ccc;
+        border-color: #dee2e6;
+    }
+</style>

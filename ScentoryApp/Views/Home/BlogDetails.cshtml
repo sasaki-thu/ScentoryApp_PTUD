@@ -1,0 +1,305 @@
+﻿@model ScentoryApp.Models.Blog
+
+@{
+    ViewData["Title"] = Model.TenBlog;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var relatedBlogs = ViewBag.RelatedBlogs as List<ScentoryApp.Models.Blog>;
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-transparent p-0 mb-4">
+            <li class="breadcrumb-item"><a href="@Url.Action("Index", "Home")" class="text-muted">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="@Url.Action("Blog", "Home")" class="text-muted">Blog</a></li>
+            <li class="breadcrumb-item active text-primary text-truncate" style="max-width: 100%;" aria-current="page">@Model.TenBlog</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="text-center mb-5">
+                <h1 class="mb-3 font-weight-bold" style="font-size: 50px">@Model.TenBlog</h1>
+                <div class="text-muted d-flex align-items-center justify-content-center" style="font-size: 0.9rem;">
+                    <span class="mr-3"><i class="fe fe-calendar"></i> @Model.ThoiGianTaoBlog.ToString("dd/MM/yyyy")</span>
+                    <span class="mx-2">|</span>
+                    <span class="mr-3 text-uppercase font-weight-bold" style="color: #C38154;">@Model.DanhMucBlog</span>
+                    <span class="mx-2">|</span>
+                    <span><i class="fe fe-eye"></i> @Model.Views lượt xem</span>
+                </div>
+            </div>
+
+            <div id="toc-container" class="toc-box mb-4" style="display: none;">
+                <div class="toc-header d-flex justify-content-between align-items-center">
+                    <p class="m-0" style="font-family:'Phudu'; color: #c38154; font-size: 25px">Nội dung bài viết</p>
+                    <button class="btn btn-sm btn-light" id="toggle-toc"><i class="fe fe-list"></i></button>
+                </div>
+                <div id="toc-body" class="toc-body mt-2">
+                </div>
+            </div>
+
+            @if (Model.AnhBlog != null && Model.AnhBlog.Length > 0)
+            {
+                var base64 = Convert.ToBase64String(Model.AnhBlog);
+                <div class="mb-5 rounded overflow-hidden shadow-sm">
+                    <img src="data:image/jpeg;base64,@base64" class="img-fluid w-100" alt="@Model.TenBlog">
+                </div>
+            }
+
+            <div class="content-body text-justify" id="blog-content">
+                @Html.Raw(Model.NoiDung)
+            </div>
+
+            <div class="mt-5 pt-3 border-top">
+                <span class="font-weight-bold mr-2"><i class="fe fe-tag"></i> Tags:</span>
+
+                @if (!string.IsNullOrEmpty(Model.Tag))
+                {
+                    var tags = Model.Tag.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (var tag in tags)
+                    {
+                        <a href="#" class="badge badge-light p-2 text-muted border mr-2 mb-1 text-decoration-none">
+                            @tag.Trim()
+                        </a>
+                    }
+                }
+            </div>
+
+            <div class="related-section mt-5">
+                <p class="text-center mb-4 text-uppercase" style="font-family:'Phudu'; color: #c38154; font-size: 40px">Bài viết khác</p>
+
+                <div class="row">
+                    @if (relatedBlogs != null && relatedBlogs.Any())
+                    {
+                        foreach (var item in relatedBlogs)
+                        {
+                            string imgRelated = "~/assets/images/placeholder-blog.png";
+                            if (item.AnhBlog != null && item.AnhBlog.Length > 0)
+                            {
+                                var b64 = Convert.ToBase64String(item.AnhBlog);
+                                imgRelated = $"data:image/jpeg;base64,{b64}";
+                            }
+
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 border-0 shadow-sm post-item">
+                                    <a href="@Url.Action("BlogDetails", "Home", new { id = item.IdBlog })" class="overflow-hidden rounded-top">
+                                        <img src="@Url.Content(imgRelated)" class="card-img-top" alt="@item.TenBlog" style="height: 180px; object-fit: cover;">
+                                    </a>
+                                    <div class="card-body p-3">
+                                        <small class="text-uppercase text-muted" style="font-size: 11px;">@item.DanhMucBlog</small>
+                                        <h6 class="card-title mt-2 mb-0" style="line-height: 1.4;">
+                                            <a href="@Url.Action("BlogDetails", "Home", new { id = item.IdBlog })" class="text-dark text-decoration-none font-weight-bold" style="font-size: 1rem;">
+                                                @item.TenBlog
+                                            </a>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12 text-center"><p>Không có bài viết liên quan.</p></div>
+                    }
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="@Url.Action("Blog", "Home")" class="btn btn-outline-dark px-4 rounded-pill">
+                        Xem tất cả bài viết
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    
+    /* Style cho ảnh trong bài viết */
+    .content-body img {
+        max-width: 100% !important;
+        height: auto !important;
+        border-radius: 8px;
+        margin: 20px 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Style Header trong bài viết */
+    .content-body h2 {
+        color: #C38154;
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin-top: 40px;
+        margin-bottom: 15px;
+        scroll-margin-top: 100px; 
+    }
+
+    .content-body h3 {
+        color: #333;
+        font-size: 1.25rem;
+        font-weight: 500;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        scroll-margin-top: 100px;
+    }
+
+    /* --- KHUNG MỤC LỤC --- */
+    .toc-box {
+        background-color: #fcfcfc;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        max-width: 100%; 
+    }
+
+    .toc-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+        counter-reset: item; 
+    }
+
+        /* Cấp 1 (H2) */
+        .toc-list > li {
+            margin-bottom: 8px;
+        }
+
+            .toc-list > li > a {
+                font-weight: 600;
+                color: #333;
+                text-decoration: none;
+                font-size: 1rem;
+                display: block;
+            }
+
+                .toc-list > li > a:before {
+                    content: counter(item) ". ";
+                    counter-increment: item;
+                    color: #C38154;
+                    margin-right: 5px;
+                }
+
+    /* Cấp 2 (H3) */
+    .toc-sublist {
+        list-style: none;
+        padding-left: 20px;
+        margin-top: 5px;
+        counter-reset: subitem;
+    }
+
+        .toc-sublist li {
+            margin-bottom: 5px;
+        }
+
+            .toc-sublist li a {
+                color: #555;
+                font-size: 0.95rem;
+                text-decoration: none;
+                display: block;
+            }
+                /* Đánh số 1.1, 1.2... */
+                .toc-sublist li a:before {
+                    content: counter(item) "." counter(subitem) ". ";
+                    counter-increment: subitem;
+                    color: #888;
+                    margin-right: 5px;
+                }
+
+    .toc-list a:hover {
+        color: #C38154;
+        text-decoration: underline;
+    }
+
+    /* Hiệu ứng hover bài viết khác */
+    .post-item {
+        transition: transform 0.3s;
+    }
+
+        .post-item:hover {
+            transform: translateY(-5px);
+        }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const content = document.getElementById('blog-content');
+        const tocBody = document.getElementById('toc-body');
+        const tocContainer = document.getElementById('toc-container');
+
+        if (content && tocBody) {
+            // Tìm tất cả H2 và H3
+            const headers = content.querySelectorAll('h2, h3');
+
+            if (headers.length > 0) {
+                // Hiển thị khung TOC
+                tocContainer.style.display = 'block';
+
+                const ul = document.createElement('ul');
+                ul.className = 'toc-list';
+
+                let currentLi = null;
+                let subUl = null;
+
+                headers.forEach((header, index) => {
+                    // Tạo ID cho header nếu chưa có
+                    if (!header.id) header.id = 'toc-header-' + index;
+
+                    if (header.tagName === 'H2') {
+                        // Nếu là H2: Tạo li mới
+                        currentLi = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = '#' + header.id;
+                        link.textContent = header.textContent;
+
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            document.getElementById(header.id).scrollIntoView({ behavior: 'smooth' });
+                        });
+
+                        currentLi.appendChild(link);
+                        ul.appendChild(currentLi);
+
+                        subUl = null;
+                    }
+                    else if (header.tagName === 'H3' && currentLi) {
+                        // Nếu là H3 và đang nằm trong 1 H2: Tạo sub-list
+                        if (!subUl) {
+                            subUl = document.createElement('ul');
+                            subUl.className = 'toc-sublist';
+                            currentLi.appendChild(subUl);
+                        }
+
+                        const subLi = document.createElement('li');
+                        const link = document.createElement('a');
+                        link.href = '#' + header.id;
+                        link.textContent = header.textContent;
+
+                        link.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            document.getElementById(header.id).scrollIntoView({ behavior: 'smooth' });
+                        });
+
+                        subLi.appendChild(link);
+                        subUl.appendChild(subLi);
+                    }
+                });
+
+                tocBody.appendChild(ul);
+            }
+        }
+
+        // Toggle nút ẩn/hiện mục lục
+        document.getElementById('toggle-toc').addEventListener('click', function() {
+            if (tocBody.style.display === 'none') {
+                tocBody.style.display = 'block';
+            } else {
+                tocBody.style.display = 'none';
+            }
+        });
+    });
+</script>

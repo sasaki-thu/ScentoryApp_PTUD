@@ -11,7 +11,7 @@ public partial class Blog
 
     public string? DanhMucBlog { get; set; }
 
-    public string NoiDungNgan { get; set; } = null!;
+    public string? NoiDungNgan { get; set; }
 
     public string NoiDung { get; set; } = null!;
 

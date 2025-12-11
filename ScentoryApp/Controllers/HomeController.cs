@@ -160,9 +160,66 @@ namespace ScentoryApp.Controllers
             return View();
         }
         [AllowAnonymous]
-        public IActionResult Blog()
+        public async Task<IActionResult> Blog(int page = 1)
         {
-            return View();
+            int pageSize = 6; // Số bài viết mỗi trang
+            if (page < 1) page = 1;
+
+            // 1. Tạo Query từ bảng Blogs trong Database
+            var query = _context.Blogs.AsNoTracking();
+
+            // Nếu bạn muốn lọc bài viết đang ẩn/hiện thì bỏ comment dòng dưới:
+            // query = query.Where(b => b.TrangThai == 1); 
+
+            // Sắp xếp bài mới nhất lên đầu
+            query = query.OrderByDescending(b => b.ThoiGianTaoBlog);
+
+            // 2. Tính toán phân trang
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            if (totalPages > 0 && page > totalPages) page = totalPages;
+
+            // 3. Lấy dữ liệu theo trang
+            var pagedBlogs = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var vm = new BlogViewModel
+            {
+                Blogs = pagedBlogs,
+                CurrentPage = page,
+                TotalPages = totalPages
+            };
+
+            return View(vm);
+        }
+        [AllowAnonymous]
+        public async Task<IActionResult> BlogDetails(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            // 1. Lấy bài viết chính
+            var blog = await _context.Blogs.FirstOrDefaultAsync(b => b.IdBlog == id);
+            if (blog == null) return NotFound();
+
+            // Tăng lượt xem
+            blog.Views += 1;
+
+            // 2. Lấy danh sách bài viết liên quan (Lấy 3 bài mới nhất, trừ bài hiện tại)
+            var relatedBlogs = await _context.Blogs
+                .Where(b => b.IdBlog != id) // Loại trừ bài đang xem
+                .OrderByDescending(b => b.ThoiGianTaoBlog)
+                .Take(3)
+                .ToListAsync();
+
+            // Gửi danh sách này qua ViewBag
+            ViewBag.RelatedBlogs = relatedBlogs;
+
+            await _context.SaveChangesAsync();
+
+            return View(blog);
         }
         [AllowAnonymous]
         public async Task<IActionResult> ProductDetails(string id)
