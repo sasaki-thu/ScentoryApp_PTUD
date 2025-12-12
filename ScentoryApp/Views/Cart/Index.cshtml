@@ -26,14 +26,42 @@
                 <button class="btn btn-primary">ÁP DỤNG</button>
             </div>
         </div>
-
-        <div class="col-md-6 text-end">
-            <button class="btn btn-primary px-5">CẬP NHẬT GIỎ HÀNG</button>
+        <div class="col-md-6">
+            <button id="checkout-btn" disabled class="btn btn-primary px-5 ">THANH TOÁN</button>
         </div>
     </div>
 
     <div class="text-end mt-4">
-        <h4 class="fw-bold">Tổng cộng: <span id="cart-total">0 đ</span></h4>
+        <h4 class="fw-bold">Tổng cộng: <span id="cart-page-total">0 đ</span></h4>
+    </div>
+</div>
+
+<div id="checkout-overlay" class="checkout-overlay">
+    <div class="checkout-modal">
+        <h3 class="checkout-title">Thanh toán</h3>
+
+        <div class="checkout-field">
+            <label>Số tài khoản</label>
+            <input type="text" id="bankAccount">
+        </div>
+
+        <div class="checkout-field">
+            <label>Tên chủ tài khoản</label>
+            <input type="text" id="bankOwner">
+        </div>
+
+        <div class="checkout-field">
+            <label>Ngân hàng</label>
+            <input type="text" id="bankName">
+        </div>
+
+        <div class="checkout-actions">
+            <button class="btn-cancel" id="close-checkout">Hủy</button>
+            <button class="btn-confirm" id="confirm-checkout">
+                <span class="btn-text">Xác nhận thanh toán</span>
+                <span class="spinner hidden"></span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -103,108 +131,277 @@
         display: inline-block;
         line-height: 1.4;
     }
+
+    /* OVERLAY */
+    .checkout-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    /* MODAL BOX */
+    .checkout-modal {
+        background: #fff;
+        width: 420px;
+        border-radius: 10px;
+        padding: 28px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        animation: scaleIn 0.25s ease;
+    }
+
+    .checkout-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #c09250;
+    }
+
+    /* INPUT */
+    .checkout-field {
+        margin-bottom: 16px;
+    }
+
+        .checkout-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .checkout-field input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 15px;
+        }
+
+    /* ACTIONS */
+    .checkout-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .btn-cancel {
+        background: #f2f2f2;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .btn-confirm {
+        background: #c09250;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+        .btn-confirm:hover {
+            background: #a97b3d;
+        }
+
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.4);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: inline-block;
+        margin-left: 8px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .btn-confirm[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
 </style>
 
 <script>
-    // HARD CODE PRODUCT LIST (page only)
-    let cartPageItems = [
-        {
-            id: 1,
-            name: "Nước hoa Reminiscence - Eclipse (Huyền) 10ml | Scentory",
-            img: "assets/images/Eclipse 10ml.png",
-            price: 159000,
-            quantity: 1
-        },
-        {
-            id: 2,
-            name: "Nước hoa Reminiscence - Horizon (Miên) 10ml | Scentory",
-            img: "assets/images/Horizon 10ml.png",
-            price: 159000,
-            quantity: 1
-        },
-        {
-            id: 3,
-            name: "Nước hoa Reminiscence - Whisper (Thầm) 10ml | Scentory",
-            img: "assets/images/Whisper 10ml.png",
-            price: 159000,
-            quantity: 1
-        }
-    ];
-
     function formatVN(num) {
         return num.toLocaleString("vi-VN") + " đ";
     }
 
-    function renderCartPage() {
-        const tbody = document.getElementById("cart-body");
-        const totalBox = document.getElementById("cart-total");
+     function loadCartPage() {
+        fetch("/Cart/GetCartItems", { credentials: "include" })
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById("cart-body");
+                const totalBox = document.getElementById("cart-page-total");
+                const checkoutBtn = document.getElementById("checkout-btn");
 
-        tbody.innerHTML = "";
-        let total = 0;
+                tbody.innerHTML = "";
 
-        cartPageItems.forEach(item => {
-            const subtotal = item.price * item.quantity;
-            total += subtotal;
+                if (!data.items || data.items.length === 0) {
+                    totalBox.textContent = formatVN(0);
+                    checkoutBtn.disabled = true;
+                    return;
+                }
 
-            tbody.innerHTML += `
-                <tr>
-                    <td>
-                        <button class="remove-btn" data-id="${item.id}">&times;</button>
-                    </td>
-                    <td>
-                        <div class="d-flex gap-3 align-items-center">
-                            <img src="${item.img}" class="product-img">
-                            <span class="product-name">${item.name}</span>
-                        </div>
-                    </td>
-                    <td>${formatVN(item.price)}</td>
-                    <td>
-                        <div class="qty-box">
-                            <button class="qty-btn minus-btn" data-id="${item.id}">-</button>
-                            <input type="text" class="qty-input" value="${item.quantity}" readonly>
-                            <button class="qty-btn plus-btn" data-id="${item.id}">+</button>
-                        </div>
-                    </td>
-                    <td>${formatVN(subtotal)}</td>
-                </tr>
-            `;
-        });
+                checkoutBtn.disabled = false;
+                console.log('total', data.total)
+                let total = data.total || 0;
 
-        totalBox.textContent = formatVN(total);
-        attachCartPageEvents();
+                data.items.forEach(item => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>
+                                <button class="remove-btn" data-id="${item.id}">&times;</button>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-3 align-items-center">
+                                    <img src="${item.img}" class="product-img">
+                                    <span class="product-name">${item.name}</span>
+                                </div>
+                            </td>
+                            <td>${formatVN(item.price)}</td>
+                            <td>
+                                <div class="qty-box">
+                                    <button class="qty-btn minus-btn" data-id="${item.id}">-</button>
+                                    <input type="text" class="qty-input" value="${item.quantity}" readonly>
+                                    <button class="qty-btn plus-btn" data-id="${item.id}">+</button>
+                                </div>
+                            </td>
+                            <td>${formatVN(item.subtotal)}</td>
+                        </tr>
+                    `;
+                });
+
+                totalBox.textContent = formatVN(total);
+                bindCartEvents();
+            });
     }
 
-    function attachCartPageEvents() {
-        document.querySelectorAll(".remove-btn").forEach(btn => {
-            btn.onclick = function () {
-                const id = parseInt(this.dataset.id);
-                cartPageItems = cartPageItems.filter(x => x.id !== id);
-                renderCartPage();
-            };
+    function bindCartEvents() {
+        document.querySelectorAll(".plus-btn").forEach(btn => {
+            btn.onclick = () => updateQty(btn.dataset.id, 1);
         });
 
         document.querySelectorAll(".minus-btn").forEach(btn => {
-            btn.onclick = function () {
-                const id = parseInt(this.dataset.id);
-                const item = cartPageItems.find(x => x.id === id);
-
-                item.quantity--;
-                if (item.quantity <= 0) {
-                    cartPageItems = cartPageItems.filter(x => x.id !== id);
-                }
-                renderCartPage();
-            };
+            btn.onclick = () => updateQty(btn.dataset.id, -1);
         });
 
-        document.querySelectorAll(".plus-btn").forEach(btn => {
-            btn.onclick = function () {
-                const id = parseInt(this.dataset.id);
-                const item = cartPageItems.find(x => x.id === id);
-                item.quantity++;
-                renderCartPage();
-            };
+        document.querySelectorAll(".remove-btn").forEach(btn => {
+            btn.onclick = () => removeItem(btn.dataset.id);
         });
     }
 
-    document.addEventListener("DOMContentLoaded", renderCartPage);
+    function updateQty(productId, delta) {
+        fetch("/Cart/UpdateQuantity", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `productId=${productId}&delta=${delta}`
+        }).then(() => {
+            loadMiniCart();
+            loadCartPage();
+        });
+    }
+
+    function removeItem(productId) {
+        fetch("/Cart/RemoveItem", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `productId=${productId}`
+        }).then(() => {
+            loadMiniCart();
+            loadCartPage();
+        });
+    }
+
+    function loadMiniCart() {
+        fetch("/Cart/MiniCart", { credentials: "include" })
+            .then(res => res.json())
+            .then(data => {
+                const cartList = document.getElementById("cart-list");
+                const cartTotal = document.getElementById("cart-total");
+                const cartCount = document.querySelector(".cart-count");
+
+                if (!cartList || !cartTotal || !cartCount) return;
+
+                cartList.innerHTML = "";
+                let count = 0;
+
+                data.items.forEach(item => {
+                    count += item.quantity;
+                    cartList.innerHTML += `
+                        <li class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex gap-3">
+                                <img src="${item.img}" style="width:50px;height:50px;object-fit:cover;">
+                                <div>
+                                    <div class="fw-bold">${item.name}</div>
+                                    <small>${item.quantity} × ${formatVN(item.price)}</small>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+
+                cartTotal.textContent = formatVN(data.total || 0);
+                cartCount.textContent = `(${count})`;
+            });
+    }
+
+    document.addEventListener("DOMContentLoaded", loadCartPage);
+
+    const overlay = document.getElementById("checkout-overlay");
+
+    document.getElementById("checkout-btn").onclick = () => {
+        overlay.style.display = "flex";
+    };
+
+    document.getElementById("close-checkout").onclick = () => {
+        overlay.style.display = "none";
+    };
+
+    document.getElementById("confirm-checkout").onclick = () => {
+        const account = document.getElementById("bankAccount").value;
+        const owner = document.getElementById("bankOwner").value;
+        const bank = document.getElementById("bankName").value;
+
+        if (!account || !owner || !bank) {
+            showToast("Vui lòng nhập đầy đủ thông tin thanh toán","error")
+            return;
+        }
+
+        fetch("/Cart/Checkout", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `bankAccount=${account}&bankOwner=${owner}&bankName=${bank}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                overlay.style.display = "none";
+                showToast("Đặt hàng thành công!","success")
+                loadMiniCart();
+                loadCartPage();
+            } else {
+                showToast(data.message || "Thanh toán thất bại","error")
+            }
+        });
+    };
 </script>
+<script src="~/js/toast.js"></script>

@@ -262,74 +262,45 @@
 <!-- kế thúc menu-->
 <!-- SCRIPT XỬ LÝ GIỎ HÀNG -->
 <script>
-       let cartItems = [
-        {
-            id: 1,
-            name: "Nước hoa Reminiscence - Eclipse (Huyền) 10ml | Scentory",
-            price: 159000,
-            img: "assets/images/Eclipse 10ml.png"
-        },
-        {
-            id: 2,
-            name: "Nước hoa Reminiscence - Horizon (Miên) 10ml | Scentory",
-            price: 159000,
-            img: "assets/images/Horizon 10ml.png"
-        },
-        {
-            id: 3,
-            name: "Nước hoa Reminiscence - Whisper (Thầm) 10ml | Scentory",
-            price: 159000,
-            img: "assets/images/Whisper 10ml.png"
-        }
-    ];
-
-    function formatVN(num) {
+     function formatVN(num) {
         return num.toLocaleString("vi-VN") + " đ";
-    }
+     }
 
-    function renderCart() {
-        const cartList = document.getElementById("cart-list");
-        const cartTotal = document.getElementById("cart-total");
-        const cartCount = document.querySelector(".cart-count");
+    function loadMiniCart() {
+        fetch("/Cart/MiniCart")
+            .then(res => res.json())
+            .then(data => {
+                const cartList = document.getElementById("cart-list");
+                const cartTotal = document.getElementById("cart-total");
+                const cartCount = document.querySelector(".cart-count");
 
-        cartList.innerHTML = "";
-        let total = 0;
+                cartList.innerHTML = "";
+                let count = 0;
 
-        cartItems.forEach(item => {
-            total += item.price;
+                if (!data.items) return;
 
-            cartList.innerHTML += `
-                <li class="d-flex justify-content-between align-items-start">
-                    <div class="d-flex gap-3">
-                        <img src="${item.img}" style="width:50px;height:50px;object-fit:cover;">
-                        <div>
-                            <div class="fw-bold">${item.name}</div>
-                            <small>1 × ${formatVN(item.price)}</small>
-                        </div>
-                    </div>
+                data.items.forEach(item => {
+                    count += item.quantity;
 
-                    <span class="remove-btn" data-id="${item.id}">&times;</span>
-                </li>
-            `;
-        });
+                    cartList.innerHTML += `
+                        <li class="d-flex justify-content-between align-items-start">
+                            <div class="d-flex gap-3">
+                                <img src="${item.img}" style="width:50px;height:50px;object-fit:cover;">
+                                <div>
+                                    <div class="fw-bold">${item.name}</div>
+                                    <small>${item.quantity} × ${formatVN(item.price)}</small>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
 
-        cartTotal.textContent = formatVN(total);
-        cartCount.textContent = `(${cartItems.length})`;
-
-        attachRemoveEvents();
-    }
-
-    function attachRemoveEvents() {
-        document.querySelectorAll(".remove-btn").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const id = parseInt(this.getAttribute("data-id"));
-                cartItems = cartItems.filter(x => x.id !== id);
-                renderCart();
+                cartTotal.textContent = formatVN(data.total || 0);
+                cartCount.textContent = `(${count})`;
             });
-        });
     }
 
-    document.addEventListener("DOMContentLoaded", renderCart);
+    document.addEventListener("DOMContentLoaded", loadMiniCart);
 </script>
 <style>
     .mini-cart {

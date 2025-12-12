@@ -117,7 +117,8 @@
                                         @item.TenSanPham
                                     </p>
 
-                                    <button class="btn btn-add-cart">
+                                    <button class="btn btn-add-cart"
+                                            data-id="@item.IdSanPham">
                                         <i class="fa fa-shopping-cart"></i> Thêm vào giỏ hàng
                                     </button>
                                 </div>
@@ -358,3 +359,29 @@
             border-radius: 0 !important;
         }
 </style>
+<script src="~/js/toast.js"></script>
+<script>
+    document.querySelectorAll(".btn-add-cart").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const productId = this.dataset.id;
+
+            fetch("/Cart/AddToCart", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `id=${productId}&quantity=1`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadMiniCart(); // gọi mini cart reload
+                    showToast("Thêm vào giỏ hàng thành công", "success")
+                } else {
+                    showToast("Không thể thêm vào giỏ hàng", "error")
+                }
+            });
+        });
+    });
+</script>
