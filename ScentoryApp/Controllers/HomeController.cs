@@ -592,6 +592,62 @@ namespace ScentoryApp.Controllers
             return RedirectToAction("Account");
         }
 
+        [Authorize]
+        [HttpGet]
+        public IActionResult GetMyOrders()
+        {
+            var accountId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var kh = _context.KhachHangs
+                .FirstOrDefault(k => k.IdTaiKhoan == accountId);
+
+            if (kh == null)
+                return Unauthorized();
+
+            var orders = _context.DonHangs
+                .Where(dh => dh.IdKhachHang == kh.IdKhachHang)
+                .OrderByDescending(dh => dh.ThoiGianDatHang)
+                .Select(dh => new
+                {
+                    id = dh.IdDonHang,
+                    date = dh.ThoiGianDatHang,
+                    status = dh.TinhTrangDonHang,
+                    total = dh.TongTienDonHang
+                })
+                .ToList();
+
+            return Json(orders);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult GetOrderDetail(string orderId)
+        {
+            var order = _context.DonHangs
+                .Where(d => d.IdDonHang == orderId)
+                .Select(d => new
+                {
+                    id = d.IdDonHang,
+                    tinhTrang = d.TinhTrangDonHang,
+                    products = d.ChiTietDonHangs.Select(ct => new
+                    {
+                        name = ct.IdSanPhamNavigation.TenSanPham,
+                        quantity = ct.SoLuong,
+                        price = ct.DonGia
+                    }).ToList(),
+                    shippingFee = d.PhiVanChuyen,
+                    tax = d.ThueBanHang,
+                    total = d.TongTienDonHang
+                })
+                .FirstOrDefault();
+
+            if (order == null)
+                return NotFound();
+
+            return Json(order);
+        }
+
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

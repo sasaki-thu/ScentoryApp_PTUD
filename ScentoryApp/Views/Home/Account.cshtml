@@ -284,92 +284,77 @@
     <script>
         $(document).ready(function () {
 
-            // --- MOCK DATA ---
-            const mockOrders = [
-                { id: 5364, date: "Nov 22, 2025", status: "Đang vận chuyển", details: { products: [{ name: "Whisper – Thầm (10ml)", quantity: 1, price: 179000 }, { name: "Spring – Xuân (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 20000, shippingDiscount: 15000, address: "123 Đường ABC, P.1, Q.2, TP.HCM", phone: "0987654321", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5363, date: "Nov 21, 2025", status: "Đã giao", details: { products: [{ name: "Horizon – Miên (50ml)", quantity: 2, price: 649000 }], shippingFee: 30000, discount: 0, shippingDiscount: 0, address: "456 Đường XYZ, P.3, Q.4, TP.HCM", phone: "0123456789", paymentMethod: "Thanh toán bằng thẻ" } },
-                { id: 5362, date: "Nov 20, 2025", status: "Đã hủy", details: { products: [{ name: "Eclipse – Huyền (50ml)", quantity: 1, price: 649000 }], shippingFee: 30000, discount: 50000, shippingDiscount: 0, address: "789 Đường LMN, P.5, Q.6, TP.HCM", phone: "0912345678", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5361, date: "Nov 19, 2025", status: "Đã giao", details: { products: [{ name: "Aurora – Uyển (10ml)", quantity: 3, price: 179000 }], shippingFee: 30000, discount: 0, shippingDiscount: 30000, address: "321 Đường OPQ, P.7, Q.8, TP.HCM", phone: "0988888888", paymentMethod: "Ví điện tử" } },
-                { id: 5360, date: "Nov 18, 2025", status: "Đã giao", details: { products: [{ name: "Summer – Hạ (50ml)", quantity: 1, price: 349000 }, { name: "Autumn – Thu (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 0, shippingDiscount: 0, address: "654 Đường RST, P.9, Q.10, TP.HCM", phone: "0977777777", paymentMethod: "Thanh toán bằng thẻ" } },
-                { id: 5359, date: "Nov 17, 2025", status: "Đang vận chuyển", details: { products: [{ name: "Winter – Đông (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 10000, shippingDiscount: 10000, address: "987 Đường UVW, P.11, Q.12, TP.HCM", phone: "0966666666", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5358, date: "Nov 16, 2025", status: "Đã giao", details: { products: [{ name: "Whisper – Thầm (50ml)", quantity: 1, price: 649000 }], shippingFee: 30000, discount: 0, shippingDiscount: 0, address: "111 Đường BCD, P.2, Q.3, TP.HCM", phone: "0955555555", paymentMethod: "Ví điện tử" } },
-                { id: 5357, date: "Nov 15, 2025", status: "Đã giao", details: { products: [{ name: "Eclipse – Huyền (10ml)", quantity: 2, price: 179000 }, { name: "Horizon – Miên (10ml)", quantity: 1, price: 179000 }], shippingFee: 30000, discount: 25000, shippingDiscount: 0, address: "222 Đường EFG, P.4, Q.5, TP.HCM", phone: "0944444444", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5356, date: "Nov 14, 2025", status: "Đã giao", details: { products: [{ name: "Spring – Xuân (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 0, shippingDiscount: 15000, address: "444 Đường IJK, P.8, Q.9, TP.HCM", phone: "0933333333", paymentMethod: "Thanh toán bằng thẻ" } },
-                { id: 5355, date: "Nov 13, 2025", status: "Đã hủy", details: { products: [{ name: "Aurora – Uyển (50ml)", quantity: 1, price: 649000 }], shippingFee: 30000, discount: 0, shippingDiscount: 0, address: "555 Đường LMO, P.10, Q.11, TP.HCM", phone: "0922222222", paymentMethod: "Ví điện tử" } },
-                { id: 5354, date: "Nov 12, 2025", status: "Đã giao", details: { products: [{ name: "Summer – Hạ (50ml)", quantity: 2, price: 349000 }], shippingFee: 40000, discount: 70000, shippingDiscount: 0, address: "777 Đường PQR, P.13, Q.Bình Thạnh, TP.HCM", phone: "0911111111", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5353, date: "Nov 11, 2025", status: "Đang vận chuyển", details: { products: [{ name: "Autumn – Thu (50ml)", quantity: 1, price: 349000 }, { name: "Winter – Đông (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 0, shippingDiscount: 30000, address: "888 Đường STU, P.14, Q.Phú Nhuận, TP.HCM", phone: "0909090909", paymentMethod: "Thanh toán bằng thẻ" } },
-                { id: 5352, date: "Nov 10, 2025", status: "Đã giao", details: { products: [{ name: "Whisper – Thầm (10ml)", quantity: 5, price: 179000 }], shippingFee: 50000, discount: 100000, shippingDiscount: 0, address: "999 Đường VWX, P.15, Q.Tân Bình, TP.HCM", phone: "0912121212", paymentMethod: "Ví điện tử" } },
-                { id: 5351, date: "Nov 9, 2025", status: "Đã giao", details: { products: [{ name: "Eclipse – Huyền (50ml)", quantity: 1, price: 649000 }, { name: "Spring – Xuân (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 0, shippingDiscount: 0, address: "121 Đường YZA, P.16, Q.Gò Vấp, TP.HCM", phone: "0934343434", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5350, date: "Nov 8, 2025", status: "Đã giao", details: { products: [{ name: "Horizon – Miên (10ml)", quantity: 1, price: 179000 }], shippingFee: 30000, discount: 0, shippingDiscount: 15000, address: "343 Đường BCD, P.17, Q.1, TP.HCM", phone: "0945454545", paymentMethod: "Thanh toán bằng thẻ" } },
-                { id: 5349, date: "Nov 7, 2025", status: "Đã hủy", details: { products: [{ name: "Aurora – Uyển (10ml)", quantity: 2, price: 179000 }], shippingFee: 30000, discount: 20000, shippingDiscount: 0, address: "565 Đường EFG, P.18, Q.3, TP.HCM", phone: "0956565656", paymentMethod: "Ví điện tử" } },
-                { id: 5348, date: "Nov 6, 2025", status: "Đã giao", details: { products: [{ name: "Summer – Hạ (50ml)", quantity: 3, price: 349000 }], shippingFee: 45000, discount: 100000, shippingDiscount: 45000, address: "787 Đường HIJ, P.19, Q.5, TP.HCM", phone: "0967676767", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5347, date: "Nov 5, 2025", status: "Đang vận chuyển", details: { products: [{ name: "Autumn – Thu (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 0, shippingDiscount: 0, address: "909 Đường KLM, P.20, Q.7, TP.HCM", phone: "0978787878", paymentMethod: "Thanh toán bằng thẻ" } },
-                { id: 5346, date: "Nov 4, 2025", status: "Đã giao", details: { products: [{ name: "Winter – Đông (50ml)", quantity: 2, price: 349000 }], shippingFee: 30000, discount: 50000, shippingDiscount: 0, address: "131 Đường NOP, P.21, Q.9, TP.HCM", phone: "0989898989", paymentMethod: "Ví điện tử" } },
-                { id: 5345, date: "Nov 3, 2025", status: "Đã giao", details: { products: [{ name: "Whisper – Thầm (50ml)", quantity: 1, price: 649000 }, { name: "Eclipse – Huyền (10ml)", quantity: 1, price: 179000 }], shippingFee: 30000, discount: 0, shippingDiscount: 30000, address: "242 Đường QRS, P.22, Q.11, TP.HCM", phone: "0913131313", paymentMethod: "Thanh toán khi nhận hàng" } },
-                { id: 5344, date: "Nov 2, 2025", status: "Đã hủy", details: { products: [{ name: "Spring – Xuân (50ml)", quantity: 1, price: 349000 }], shippingFee: 30000, discount: 0, shippingDiscount: 0, address: "464 Đường TUV, P.23, Q.12, TP.HCM", phone: "0924242424", paymentMethod: "Thanh toán bằng thẻ" } },
-                { id: 5343, date: "Nov 1, 2025", status: "Đã giao", details: { products: [{ name: "Horizon – Miên (50ml)", quantity: 1, price: 649000 }], shippingFee: 30000, discount: 75000, shippingDiscount: 15000, address: "686 Đường WXY, P.24, Q.Thủ Đức, TP.HCM", phone: "0935353535", paymentMethod: "Ví điện tử" } },
-            ].map(o => {
-                const productTotal = o.details.products.reduce((acc, p) => acc + (p.price * p.quantity), 0);
-                o.total = productTotal + o.details.shippingFee - (o.details.discount || 0) - (o.details.shippingDiscount || 0);
-                return o;
-            });
-
             const tableBody = $('#orders-table-body');
-            mockOrders.forEach(order => {
-                const row = `
-                    <tr>
-                        <td><a class="account-order-id" href="#">#${order.id}</a></td>
-                        <td>${order.date}</td>
-                        <td>${order.status}</td>
-                        <td>${order.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</td>
-                        <td>
-                            <button class="btn btn-custom-brown-sm view-order-btn" data-bs-toggle="modal" data-bs-target="#orderDetailModal" data-order-id="${order.id}">
-                                <span>Xem</span>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-                tableBody.append(row);
-            });
 
-            const orderDetailModal = document.getElementById('orderDetailModal');
-            orderDetailModal.addEventListener('show.bs.modal', function (event) {
-                const button = event.relatedTarget;
-                const orderId = parseInt(button.getAttribute('data-order-id'));
-                const order = mockOrders.find(o => o.id === orderId);
+            // LOAD ĐƠN HÀNG
+            $.get('/Home/GetMyOrders', function (orders) {
+                tableBody.empty();
 
-                if (!order) return;
-
-                const modalTitle = orderDetailModal.querySelector('.modal-title');
-                const modalBody = orderDetailModal.querySelector('.modal-body');
-                const details = order.details;
-
-                // Set Modal Title
-                modalTitle.textContent = `Chi Tiết Đơn Hàng #${order.id}`;
-
-                // --- BUILD MODAL CONTENT ---
-                let productTotal = 0;
-                let productsHtml = `<div class="col-md-12"><h6 style="color: var(--cocoa); border-bottom: 2px solid var(--biscotti); padding-bottom: 5px; margin-bottom: 8px;">Sản phẩm đã đặt</h6><table class="table table-sm" style="vertical-align: middle; margin-bottom: 0;"><thead><tr><th>Sản phẩm</th><th class="text-center">Số lượng</th><th class="text-end">Giá</th></tr></thead><tbody>`;
-                details.products.forEach(p => {
-                    productTotal += p.price * p.quantity;
-                    productsHtml += `<tr><td>${p.name}</td><td class="text-center">${p.quantity}</td><td class="text-end">${p.price.toLocaleString('vi-VN')}₫</td></tr>`;
+                orders.forEach(order => {
+                    const row = `
+                        <tr>
+                            <td>#${order.id}</td>
+                            <td>${new Date(order.date).toLocaleDateString('vi-VN')}</td>
+                            <td>${order.status}</td>
+                            <td>${order.total.toLocaleString('vi-VN')}₫</td>
+                            <td>
+                                <button class="btn btn-custom-brown-sm view-order-btn"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#orderDetailModal"
+                                        data-order-id="${order.id}">
+                                    Xem
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
                 });
-                productsHtml += `</tbody><tfoot style="font-weight: bold;"><tr><td colspan="2">Tổng số tiền sản phẩm</td><td class="text-end">${productTotal.toLocaleString('vi-VN')}₫</td></tr></tfoot></table></div>`;
-
-                let paymentHtml = `<div class="col-md-7"><h6 style="color: var(--cocoa); border-bottom: 2px solid var(--biscotti); padding-bottom: 5px; margin-bottom: 8px;">Chi tiết thanh toán</h6><dl class="row mb-0" style="font-size: 0.9rem;"><dt class="col-sm-6">Tổng số tiền sản phẩm:</dt><dd class="col-sm-6 text-sm-end">${productTotal.toLocaleString('vi-VN')}₫</dd><dt class="col-sm-6">Phí vận chuyển:</dt><dd class="col-sm-6 text-sm-end">${details.shippingFee.toLocaleString('vi-VN')}₫</dd>`;
-                if (details.discount > 0) {
-                     paymentHtml += `<dt class="col-sm-6">Discount:</dt><dd class="col-sm-6 text-sm-end">-${details.discount.toLocaleString('vi-VN')}₫</dd>`;
-                }
-                if (details.shippingDiscount > 0) {
-                     paymentHtml += `<dt class="col-sm-6">Discount phí vận chuyển:</dt><dd class="col-sm-6 text-sm-end">-${details.shippingDiscount.toLocaleString('vi-VN')}₫</dd>`;
-                }
-                const finalTotal = productTotal + details.shippingFee - (details.discount || 0) - (details.shippingDiscount || 0);
-                paymentHtml += `<dt class="col-sm-6 border-top-dashed" style="font-size: 1.1rem; font-weight: 900; color: var(--cocoa);">Tổng thu:</dt><dd class="col-sm-6 text-sm-end border-top-dashed" style="font-size: 1.1rem; font-weight: 900; color: var(--cocoa);">${finalTotal.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</dd><dt class="col-sm-6 mt-2">Phương thức:</dt><dd class="col-sm-6 text-sm-end mt-2">${details.paymentMethod}</dd></dl></div>`;
-
-                const shippingHtml = `<div class="col-md-5"><h6 style="color: var(--cocoa); border-bottom: 2px solid var(--biscotti); padding-bottom: 5px; margin-bottom: 8px;">Thông tin giao hàng</h6><div style="font-size: 0.9rem;"><p style="margin-bottom: 5px;"><strong>Địa chỉ:</strong> ${details.address}</p><p class="mb-0"><strong>Số điện thoại:</strong> ${details.phone}</p></div></div>`;
-
-                modalBody.innerHTML = `<div class="container-fluid"><div class="row">${productsHtml}</div><hr style="color: var(--biscotti); margin: 8px 0;" /><div class="row">${paymentHtml}${shippingHtml}</div></div>`;
             });
+
+            // LOAD CHI TIẾT ĐƠN
+            $('#orderDetailModal').on('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const orderId = button.getAttribute('data-order-id');
+
+                $.get('/Home/GetOrderDetail', { orderId: orderId }, function (order) {
+
+                    const modal = $('#orderDetailModal');
+                    modal.find('.modal-title').text(`Chi tiết đơn hàng #${order.id}`);
+
+                    let html = `
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-center">SL</th>
+                                    <th class="text-end">Giá</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    order.products.forEach(p => {
+                        html += `
+                            <tr>
+                                <td>${p.name}</td>
+                                <td class="text-center">${p.quantity}</td>
+                                <td class="text-end">${p.price.toLocaleString('vi-VN')}₫</td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `
+                            </tbody>
+                        </table>
+                        <div class="text-end fw-bold">
+                            Tổng tiền: ${order.total.toLocaleString('vi-VN')}₫
+                        </div>
+                    `;
+
+                    modal.find('.modal-body').html(html);
+                });
+            });
+
         });
     </script>
 }
