@@ -161,9 +161,11 @@
                                 </div>
                                 <div class="card-body">
                                     @if(TempData["AccountInfoMessage"] != null) {
-                                        <div class="alert alert-warning">@TempData["AccountInfoMessage"]</div>
+                                        <div class="alert alert-success">@TempData["AccountInfoMessage"]</div>
                                     }
-                                    <form action="/Home/AccountUpdate" method="post" class="myaccount-form">
+                                    <form asp-action="AccountUpdate"
+                                          asp-controller="Home"
+                                          method="post">
                                         @Html.AntiForgeryToken()
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
@@ -189,7 +191,22 @@
                                             <label class="form-label">Địa chỉ*</label>
                                             <input type="text" name="Address" class="form-control" value="@(Model?.DiaChi ?? "")">
                                         </div>
+                                        <button type="submit" class="btn btn-custom-brown">
+                                            LƯU THAY ĐỔI
+                                        </button>
+                                    </form>
 
+                                    <hr />
+                                    @if (TempData["PasswordMessage"] != null)
+                                    {
+                                        <div class="alert alert-info">
+                                            @TempData["PasswordMessage"]
+                                        </div>
+                                    }
+                                    <form asp-action="ChangePassword"
+                                          asp-controller="Home"
+                                          method="post">
+                                        @Html.AntiForgeryToken()
                                         <fieldset class="mb-4">
                                             <legend class="h6">Đổi mật khẩu</legend>
                                             <div class="mb-3">
@@ -204,10 +221,11 @@
                                                 <label class="form-label">Xác nhận mật khẩu mới</label>
                                                 <input type="password" name="ConfirmNewPassword" class="form-control">
                                             </div>
+                                            <button type="submit"
+                                                    class="btn btn-custom-brown">
+                                                ĐỔI MẬT KHẨU
+                                            </button>
                                         </fieldset>
-                                        <button class="btn btn-custom-brown" type="submit">
-                                            <span>LƯU THAY ĐỔI</span>
-                                        </button>
                                     </form>
                                 </div>
                             </div>

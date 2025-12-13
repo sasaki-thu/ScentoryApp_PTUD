@@ -365,6 +365,13 @@ namespace ScentoryApp.Controllers
             public string Gender { get; set; }
         }
 
+        public class ChangePasswordRequest
+        {
+            public string CurrentPassword { get; set; }
+            public string NewPassword { get; set; }
+            public string ConfirmNewPassword { get; set; }
+        }
+
         [Authorize]
         public async Task<IActionResult> Logout()
         {
@@ -493,11 +500,11 @@ namespace ScentoryApp.Controllers
 
             return View(kh);
         }
+        
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize]
-        public async Task<IActionResult> AccountUpdate([FromForm] AccountUpdateRequest req)
+        public async Task<IActionResult> AccountUpdate(AccountUpdateRequest req)
         {
             var accountId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(accountId))
@@ -510,32 +517,81 @@ namespace ScentoryApp.Controllers
             if (kh == null)
                 return NotFound();
 
+            // Validate email trùng
             if (!string.Equals(kh.Email, req.Email, StringComparison.OrdinalIgnoreCase))
             {
-                var emailExists = await _context.KhachHangs.AnyAsync(k => k.Email == req.Email && k.IdKhachHang != kh.IdKhachHang);
+                var emailExists = await _context.KhachHangs
+                    .AnyAsync(k => k.Email == req.Email && k.IdKhachHang != kh.IdKhachHang);
+
                 if (emailExists)
                 {
-                    ModelState.AddModelError("Email", "Email đã được sử dụng bởi người khác.");
+                    TempData["AccountInfoMessage"] = "Email đã được sử dụng.";
+                    return RedirectToAction("Account");
                 }
             }
 
-            if (!ModelState.IsValid)
-            {
-                return View("Account", kh);
-            }
-
-            kh.HoTen = req.FullName ?? kh.HoTen;
-            kh.Email = req.Email ?? kh.Email;
-            kh.Sdt = req.Phone ?? kh.Sdt;
-            kh.DiaChi = req.Address ?? kh.DiaChi;
-            if (!string.IsNullOrEmpty(req.BirthDate) && DateOnly.TryParse(req.BirthDate, out var d))
-                kh.NgaySinh = d;
-            kh.GioiTinh = req.Gender ?? kh.GioiTinh;
+            // UPDATE DATA
+            kh.HoTen = req.FullName;
+            kh.Email = req.Email;
+            kh.Sdt = req.Phone;
+            kh.DiaChi = req.Address;
 
             await _context.SaveChangesAsync();
 
+            // THÔNG BÁO THÀNH CÔNG
+            TempData["AccountInfoMessage"] = "Cập nhật thông tin thành công!";
+
+            // LOAD LẠI DATA MỚI
             return RedirectToAction("Account");
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordRequest req)
+        {
+            var accountId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(accountId))
+                return Challenge();
+
+            var taiKhoan = await _context.TaiKhoans
+                .FirstOrDefaultAsync(t => t.IdTaiKhoan == accountId);
+
+            if (taiKhoan == null)
+                return NotFound();
+
+            // Kiểm tra nhập đủ
+            if (string.IsNullOrEmpty(req.CurrentPassword) ||
+                string.IsNullOrEmpty(req.NewPassword) ||
+                string.IsNullOrEmpty(req.ConfirmNewPassword))
+            {
+                TempData["PasswordMessage"] = "Vui lòng nhập đầy đủ thông tin.";
+                return RedirectToAction("Account");
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (taiKhoan.MatKhau != req.CurrentPassword)
+            {
+                TempData["PasswordMessage"] = "Mật khẩu hiện tại không đúng.";
+                return RedirectToAction("Account");
+            }
+
+            // Kiểm tra xác nhận mật khẩu
+            if (req.NewPassword != req.ConfirmNewPassword)
+            {
+                TempData["PasswordMessage"] = "Mật khẩu xác nhận không khớp.";
+                return RedirectToAction("Account");
+            }
+
+            // Update mật khẩu mới
+            taiKhoan.MatKhau = req.NewPassword;
+
+            await _context.SaveChangesAsync();
+
+            TempData["PasswordMessage"] = "Đổi mật khẩu thành công!";
+
+            return RedirectToAction("Account");
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
