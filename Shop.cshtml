@@ -1,4 +1,4 @@
-﻿@model ScentoryApp.Models.ShopFilterViewModel
+@model ScentoryApp.Models.ShopFilterViewModel
 
 @{
     ViewData["Title"] = "Cửa Hàng";
@@ -300,11 +300,21 @@
         margin-left: 5px;
     }
 
+    /* ========== CHECKBOX STYLES ========== */
+    .filter-group .form-check-input:checked {
+        background-color: #c38154;
+        border-color: #c38154;
+    }
+
+    .filter-group .form-check-input:focus {
+        border-color: #c38154;
+        box-shadow: 0 0 0 0.25rem rgba(195, 129, 84, 0.25);
+    }
 
     /* ========== RANGE SLIDER FIX - FORCE STYLES ========== */
 
     /* Reset all default styles */
-    .form-range {
+    .form-range.price-slider {
         -webkit-appearance: none !important;
         -moz-appearance: none !important;
         appearance: none !important;
@@ -320,7 +330,8 @@
 
         /* ========== THUMB STYLES - CRITICAL ========== */
 
-        .form-range::-webkit-slider-thumb {
+        /* Thumb - WebKit browsers (Chrome, Safari, Edge) */
+        .form-range.price-slider::-webkit-slider-thumb {
             -webkit-appearance: none !important;
             appearance: none !important;
             width: 22px !important;
@@ -331,7 +342,7 @@
             cursor: grab !important;
             border: 3px solid #fff !important;
             box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
-            margin-top: -8px !important; 
+            margin-top: -8px !important; /* Center vertically */
             transition: all 0.2s ease !important;
             position: relative !important;
             z-index: 10 !important;
@@ -340,21 +351,21 @@
 
         /* ========== HOVER STATES ========== */
 
-        .form-range::-webkit-slider-thumb:hover {
+        .form-range.price-slider::-webkit-slider-thumb:hover {
             background: #a66b42 !important;
             transform: scale(1.15) !important;
             box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
             cursor: grabbing !important;
         }
 
-        .form-range::-moz-range-thumb:hover {
+        .form-range.price-slider::-moz-range-thumb:hover {
             background: #a66b42 !important;
             transform: scale(1.15) !important;
             box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
             cursor: grabbing !important;
         }
 
-        .form-range::-ms-thumb:hover {
+        .form-range.price-slider::-ms-thumb:hover {
             background: #a66b42 !important;
             transform: scale(1.15) !important;
             box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
@@ -362,21 +373,21 @@
 
         /* ========== ACTIVE STATES ========== */
 
-        .form-range:active::-webkit-slider-thumb {
+        .form-range.price-slider:active::-webkit-slider-thumb {
             background: #8b5a35 !important;
             transform: scale(1.2) !important;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
             cursor: grabbing !important;
         }
 
-        .form-range:active::-moz-range-thumb {
+        .form-range.price-slider:active::-moz-range-thumb {
             background: #8b5a35 !important;
             transform: scale(1.2) !important;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
             cursor: grabbing !important;
         }
 
-        .form-range:active::-ms-thumb {
+        .form-range.price-slider:active::-ms-thumb {
             background: #8b5a35 !important;
             transform: scale(1.2) !important;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
@@ -384,20 +395,19 @@
 
         /* ========== FOCUS STATES ========== */
 
-        .form-range:focus {
+        .form-range.price-slider:focus {
             outline: none !important;
             box-shadow: none !important;
         }
 
-            .form-range:focus::-webkit-slider-thumb {
+            .form-range.price-slider:focus::-webkit-slider-thumb {
                 box-shadow: 0 0 0 4px rgba(195, 129, 84, 0.3) !important;
             }
 
-            .form-range:focus::-moz-range-thumb {
+            .form-range.price-slider:focus::-moz-range-thumb {
                 box-shadow: 0 0 0 4px rgba(195, 129, 84, 0.3) !important;
             }
 
-    
     /* ========== DISABLE POINTER EVENTS ON WRAPPER IF ANY ========== */
 
     .filter-group {
@@ -411,11 +421,11 @@
 
     /* ========== FORCE REMOVE BOOTSTRAP CONFLICTS ========== */
 
-    .form-range::-webkit-slider-runnable-track {
+    .form-range.price-slider::-webkit-slider-runnable-track {
         background: #ddd !important;
     }
 
-    .form-range::-moz-range-progress {
+    .form-range.price-slider::-moz-range-progress {
         background-color: #C38154 !important;
         height: 6px !important;
         border-radius: 3px !important; */
@@ -424,7 +434,7 @@
     /* ========== DEBUG HELPER - Remove after testing ========== */
     /* Uncomment này nếu vẫn không thấy thumb */
    
-    .form-range::-webkit-slider-thumb {
+    .form-range.price-slider::-webkit-slider-thumb {
         background: red !important;
         width: 30px !important;
         height: 30px !important;
@@ -485,7 +495,19 @@
         opacity: 0.5;
         pointer-events: none;
     }
-    
+
+    /* ========== RESPONSIVE ========== */
+    @@media (max-width: 768px) {
+        .form-range.price-slider::-webkit-slider-thumb {
+            width: 24px;
+            height: 24px;
+        }
+
+        .form-range.price-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+        }
+    }
 </style>
 
 <!-- ==================== SCRIPTS ==================== -->

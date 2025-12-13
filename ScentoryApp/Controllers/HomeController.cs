@@ -2,10 +2,15 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using ScentoryApp.Models;
 using System.Diagnostics;
+using System.Linq;
 using System.Security.Claims;
+using System.IO;
 
 namespace ScentoryApp.Controllers
 {
@@ -41,15 +46,16 @@ namespace ScentoryApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Shop(int page = 1)
         {
-            const int pageSize = 10;
-
+            const int pageSize = 12;
             if (page < 1) page = 1;
 
+            // Lấy tất cả sản phẩm active
             var query = _context.SanPhams
                 .Include(p => p.IdDanhMucSanPhamNavigation)
-                .Where(p => p.TrangThaiSp)                      // chỉ lấy sp đang active
-                .OrderByDescending(p => p.ThoiGianTaoSp);       // mới nhất lên trước
+                .Where(p => p.TrangThaiSp)
+                .OrderByDescending(p => p.ThoiGianTaoSp); // Mặc định sort theo thời gian tạo
 
+            // Tính toán pagination
             var totalItems = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             if (totalPages == 0) totalPages = 1;
@@ -60,15 +66,37 @@ namespace ScentoryApp.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            var vm = new ShopViewModel
+            // Lấy danh sách danh mục và đếm số sản phẩm
+            var categories = await _context.DanhMucSanPhams
+                .Select(c => new CategoryFilterItem
+                {
+                    IdDanhMuc = c.IdDanhMucSanPham,
+                    TenDanhMuc = c.TenDanhMucSanPham,
+                    ProductCount = _context.SanPhams.Count(p => p.IdDanhMucSanPham == c.IdDanhMucSanPham && p.TrangThaiSp)
+                })
+                .Where(c => c.ProductCount > 0)
+                .ToListAsync();
+
+            // Lấy giá min/max thực tế từ DB
+            var prices = await _context.SanPhams
+                .Where(p => p.TrangThaiSp)
+                .Select(p => p.GiaNiemYet)
+                .ToListAsync();
+
+            var vm = new ShopFilterViewModel
             {
                 Products = products,
                 CurrentPage = page,
-                TotalPages = totalPages
+                TotalPages = totalPages,
+                TotalItems = totalItems,
+                Categories = categories,
+                ActualMinPrice = prices.Any() ? prices.Min() : 0,
+                ActualMaxPrice = prices.Any() ? prices.Max() : 5000000
             };
 
             return View(vm);
         }
+
 
         [AllowAnonymous]
         public async Task<IActionResult> Perfumes(int page = 1)
@@ -653,6 +681,171 @@ namespace ScentoryApp.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        /// <summary>
+        /// API AJAX để filter sản phẩm real-time - VERSION FIXED
+        /// </summary>
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> FilterProducts([FromBody] ShopFilterViewModel filter)
+        {
+            try
+            {
+                _logger?.LogInformation("🔍 FilterProducts called with: {@Filter}", filter);
+
+                if (filter == null)
+                {
+                    _logger?.LogWarning("⚠️ Filter is null");
+                    return Json(new { success = false, message = "Invalid filter data" });
+                }
+
+                // Khởi tạo giá trị mặc định
+                if (filter.Page < 1) filter.Page = 1;
+                if (filter.PageSize < 1) filter.PageSize = 12;
+
+                // Query cơ bản
+                var query = _context.SanPhams
+                    .Include(p => p.IdDanhMucSanPhamNavigation)
+                    .Where(p => p.TrangThaiSp)
+                    .AsQueryable();
+
+                _logger?.LogInformation("📦 Initial query count: {Count}", await query.CountAsync());
+
+                // ============ FILTER THEO GIÁ ============
+                if (filter.MinPrice.HasValue && filter.MinPrice.Value > 0)
+                {
+                    query = query.Where(p => p.GiaNiemYet >= filter.MinPrice.Value);
+                    _logger?.LogInformation("💰 Applied min price filter: {MinPrice}", filter.MinPrice.Value);
+                }
+
+                if (filter.MaxPrice.HasValue && filter.MaxPrice.Value > 0)
+                {
+                    query = query.Where(p => p.GiaNiemYet <= filter.MaxPrice.Value);
+                    _logger?.LogInformation("💰 Applied max price filter: {MaxPrice}", filter.MaxPrice.Value);
+                }
+
+                // ============ FILTER THEO DANH MỤC ============
+                // FIX: Kiểm tra null và Any() trước khi dùng Contains
+                if (filter.CategoryIds != null && filter.CategoryIds.Any())
+                {
+                    _logger?.LogInformation("📂 Filtering by categories: {Categories}", string.Join(", ", filter.CategoryIds));
+
+                    // FIX: Trim whitespace và uppercase để đảm bảo khớp
+                    var normalizedCategories = filter.CategoryIds
+                        .Select(c => c?.Trim().ToUpper())
+                        .Where(c => !string.IsNullOrEmpty(c))
+                        .ToList();
+
+                    if (normalizedCategories.Any())
+                    {
+                        query = query.Where(p => normalizedCategories.Contains(p.IdDanhMucSanPham.ToUpper()));
+                        _logger?.LogInformation("📂 After category filter count: {Count}", await query.CountAsync());
+                    }
+                }
+                else
+                {
+                    _logger?.LogInformation("📂 No category filter applied");
+                }
+
+                // ============ SẮP XẾP ============
+                // FIX: Sắp xếp theo ThoiGianCapNhat cho "newest", theo GiaNiemYet cho price
+                _logger?.LogInformation("🔄 Sorting by: {SortBy}", filter.SortBy ?? "default");
+
+                query = filter.SortBy switch
+                {
+                    "price_asc" => query.OrderBy(p => p.GiaNiemYet),
+                    "price_desc" => query.OrderByDescending(p => p.GiaNiemYet),
+                    "newest" => query.OrderByDescending(p => p.ThoiGianCapNhat ?? p.ThoiGianTaoSp), // FIX: Dùng ThoiGianCapNhat, fallback ThoiGianTaoSp
+                    _ => query.OrderByDescending(p => p.ThoiGianTaoSp) // default: mới tạo nhất
+                };
+
+                // ============ PAGINATION ============
+                var totalItems = await query.CountAsync();
+                _logger?.LogInformation("📊 Total items after filter: {Count}", totalItems);
+
+                var totalPages = (int)Math.Ceiling(totalItems / (double)filter.PageSize);
+                if (totalPages == 0) totalPages = 1;
+                if (filter.Page > totalPages) filter.Page = totalPages;
+
+                var products = await query
+                    .Skip((filter.Page - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToListAsync();
+
+                _logger?.LogInformation("📦 Products returned: {Count}", products.Count);
+
+                // ============ RENDER PARTIAL VIEW ============
+                var html = await this.RenderViewAsync("_ProductList", products, true);
+
+                return Json(new
+                {
+                    success = true,
+                    html = html,
+                    totalItems = totalItems,
+                    totalPages = totalPages,
+                    currentPage = filter.Page
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "❌ Error in FilterProducts");
+                return Json(new
+                {
+                    success = false,
+                    message = "Có lỗi xảy ra: " + ex.Message
+                });
+            }
+        }
+    }
+
+    /// <summary>
+    /// Extension methods cho Controller
+    /// </summary>
+    public static class ControllerExtensions
+    {
+        /// <summary>
+        /// Render partial view thành HTML string
+        /// </summary>
+        public static async Task<string> RenderViewAsync<TModel>(this Controller controller, string viewName, TModel model, bool partial = false)
+        {
+            if (string.IsNullOrEmpty(viewName))
+            {
+                viewName = controller.ControllerContext.ActionDescriptor.ActionName;
+            }
+
+            controller.ViewData.Model = model;
+
+            using (var writer = new StringWriter())
+            {
+                IViewEngine viewEngine = controller.HttpContext.RequestServices.GetService(typeof(ICompositeViewEngine)) as ICompositeViewEngine;
+
+                if (viewEngine == null)
+                {
+                    throw new InvalidOperationException("Could not resolve ICompositeViewEngine");
+                }
+
+                ViewEngineResult viewResult = viewEngine.FindView(controller.ControllerContext, viewName, !partial);
+
+                if (viewResult.Success == false)
+                {
+                    var searchedLocations = string.Join(", ", viewResult.SearchedLocations);
+                    return $"ERROR: A view with the name '{viewName}' could not be found. Searched locations: {searchedLocations}";
+                }
+
+                ViewContext viewContext = new ViewContext(
+                    controller.ControllerContext,
+                    viewResult.View,
+                    controller.ViewData,
+                    controller.TempData,
+                    writer,
+                    new HtmlHelperOptions()
+                );
+
+                await viewResult.View.RenderAsync(viewContext);
+
+                return writer.GetStringBuilder().ToString();
+            }
         }
     }
 }

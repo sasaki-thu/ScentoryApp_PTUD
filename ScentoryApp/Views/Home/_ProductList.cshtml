@@ -1,0 +1,59 @@
+﻿@model List<ScentoryApp.Models.SanPham>
+
+@if (Model != null && Model.Any())
+{
+    foreach (var item in Model)
+    {
+        <div class="col-lg-3 col-md-6 col-6 mb-5">
+            <div class="product-card">
+                <a href="@Url.Action("ProductDetails", "Home", new { id = item.IdSanPham })" class="product-link">
+                    <div class="product-img-wrap">
+                        @{
+                            string imgSrc;
+                            if (item.AnhSanPham != null && item.AnhSanPham.Length > 0)
+                            {
+                                var base64 = Convert.ToBase64String(item.AnhSanPham);
+                                imgSrc = $"data:image/jpeg;base64,{base64}";
+                            }
+                            else
+                            {
+                                imgSrc = Url.Content("~/assets/images/placeholder-product.png");
+                            }
+                        }
+                        <img src="@imgSrc"
+                             alt="@item.TenSanPham"
+                             class="img-fluid mb-3">
+                    </div>
+                </a>
+
+                <div class="price-wrap">
+                    @{
+                        var salePrice = item.GiaNiemYet;
+                        var originalPrice = salePrice * 1.1m;
+                    }
+                    <span class="sale-price">@salePrice.ToString("N0") ₫</span>
+                    <span class="original-price">@originalPrice.ToString("N0") ₫</span>
+                </div>
+
+                <div class="product-info">
+                    <p class="product-title">
+                        @item.TenSanPham
+                    </p>
+
+                    <button class="btn btn-add-cart"
+                            data-id="@item.IdSanPham">
+                        <i class="fa fa-shopping-cart"></i> Thêm vào giỏ hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="fa fa-info-circle"></i> Không tìm thấy sản phẩm phù hợp với bộ lọc của bạn.
+        </div>
+    </div>
+}
