@@ -112,10 +112,12 @@
                                 <h5 class="element-title text-uppercase fs-5 mt-3">
                                     <a href="/Home/ProductDetails/SP005">Nước hoa Reminiscence – Whisper (Thầm) 10ml | Scentory</a>
                                 </h5>
-                                <a href="/Cart/AddToCart?id=SP005"
-                                   class="text-decoration-none"
-                                   data-after="Thêm vào giỏ hàng">
-                                    <span>179.000đ</span>
+                                <p class="price">179.000đ</p>
+
+                                <a href="javascript:void(0)"
+                                   class="add-to-cart-btn"
+                                   data-id="SP005">
+                                    Thêm vào giỏ hàng
                                 </a>
 
                             </div>
@@ -133,10 +135,12 @@
                                 <h5 class="text-uppercase fs-5 mt-3">
                                     <a href="/Home/ProductDetails/SP006">Nước hoa Reminiscence – Horizon (Miên) 10ml | Scentory</a>
                                 </h5>
-                                <a href="/Cart/AddToCart?id=SP006"
-                                   class="text-decoration-none"
-                                   data-after="Thêm vào giỏ hàng">
-                                    <span>179.000đ</span>
+                                <p class="price">179.000đ</p>
+
+                                <a href="javascript:void(0)"
+                                   class="add-to-cart-btn"
+                                   data-id="SP006">
+                                    Thêm vào giỏ hàng
                                 </a>
 
                             </div>
@@ -154,10 +158,12 @@
                                 <h5 class="text-uppercase fs-5 mt-3">
                                     <a href="/Home/ProductDetails/SP007">Nước hoa Reminiscence – Eclipse (Huyền) 10ml | Scentory</a>
                                 </h5>
-                                <a href="/Cart/AddToCart?id=SP007"
-                                   class="text-decoration-none"
-                                   data-after="Thêm vào giỏ hàng">
-                                    <span>179.000đ</span>
+                                <p class="price">179.000đ</p>
+
+                                <a href="javascript:void(0)"
+                                   class="add-to-cart-btn"
+                                   data-id="SP007">
+                                    Thêm vào giỏ hàng
                                 </a>
 
                             </div>
@@ -173,12 +179,14 @@
                             
                             <div class="product-content">
                                 <h5 class="text-uppercase fs-5 mt-3">
-                                    <a href="/Home/ProductDetails/SP013">Box quà đặc biệt Scentory x 20/10 | Scentory</a>
+                                    <a href="/Home/ProductDetails/SP013">Box quà đặc biệt nước hoa REMINISCENCE Scentory x 20/10 | Scentory</a>
                                 </h5>
-                                <a href="/Cart/AddToCart?id=SP013"
-                                   class="text-decoration-none"
-                                   data-after="Thêm vào giỏ hàng">
-                                    <span>799.000đ</span>
+                                <p class="price">799.000đ</p>
+
+                                <a href="javascript:void(0)"
+                                   class="add-to-cart-btn"
+                                   data-id="SP013">
+                                    Thêm vào giỏ hàng
                                 </a>
 
                             </div>
@@ -194,12 +202,14 @@
                             
                             <div class="product-content">
                                 <h5 class="text-uppercase fs-5 mt-3">
-                                    <a href="/Home/ProductDetails/SP013">Box quà đặc biệt Scentory x 20/10 | Scentory</a>
+                                    <a href="/Home/ProductDetails/SP013">Box quà đặc biệt nước hoa REMINISCENCE Scentory x 20/10 | Scentory</a>
                                 </h5>
-                                <a href="/Cart/AddToCart?id=SP013"
-                                   class="text-decoration-none"
-                                   data-after="Thêm vào giỏ hàng">
-                                    <span>799.000đ</span>
+                                <p class="price">799.000đ</p>
+
+                                <a href="javascript:void(0)"
+                                   class="add-to-cart-btn"
+                                   data-id="SP013">
+                                    Thêm vào giỏ hàng
                                 </a>
 
                             </div>
@@ -492,3 +502,29 @@
         </div>
     </div>
 </section>
+
+<script>
+    document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+        btn.addEventListener("click", function () {
+            const productId = this.dataset.id;
+
+            fetch("/Cart/AddToCart", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: `id=${productId}&quantity=1`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadMiniCart(); // gọi mini cart reload
+                    showToast("Thêm vào giỏ hàng thành công", "success")
+                } else {
+                    showToast("Không thể thêm vào giỏ hàng", "error")
+                }
+            });
+        });
+    });
+</script>
