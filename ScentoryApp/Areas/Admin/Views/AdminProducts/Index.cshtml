@@ -6,6 +6,7 @@
 }
 
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="~/css/toast.css">
 
 <style>
     .image-upload-area {
@@ -51,12 +52,22 @@
     #dataTable-1 thead th {
         color: #007bff;
     }
+    /* Thêm style báo lỗi chữ đỏ */
+    label.error {
+        color: red;
+        font-size: 13px;
+        display: block;
+        margin-top: 5px;
+    }
+
+    input.error, select.error {
+        border-color: red;
+    }
 </style>
 
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12">
-
             <div class="row align-items-center mb-2">
                 <div class="col">
                     <h2 class="h2 page-title">Quản lý sản phẩm</h2>
@@ -313,12 +324,32 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/toast.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Adminassets/js/jquery.validate.min.js"></script>
 
     <script>
         $(document).ready(function () {
-
+            // VALIDATE
+            $("#productForm").validate({
+                rules: {
+                    IdSanPham: { required: true, minlength: 5, maxlength: 5 },
+                    TenSanPham: { required: true },
+                    MoTaSanPham: { required: true },
+                    GiaNiemYet: { required: true, number: true, min: 0 },
+                    SoLuongTonKho: { required: true, number: true, min: 0 },
+                    IdDanhMucSanPham: { required: true }
+                },
+                messages: {
+                    IdSanPham: { required: "Vui lòng nhập ID", minlength: "ID phải 5 ký tự", maxlength: "ID phải 5 ký tự" },
+                    TenSanPham: "Vui lòng nhập Tên sản phẩm",
+                    MoTaSanPham: "Vui lòng nhập Mô tả",
+                    GiaNiemYet: { required: "Nhập giá", number: "Phải là số", min: "Không âm" },
+                    SoLuongTonKho: { required: "Nhập số lượng", number: "Phải là số", min: "Không âm" },
+                    IdDanhMucSanPham: "Vui lòng chọn Danh mục"
+                }
+            });
             // --- CẤU HÌNH DATATABLES ---
             var table = $('#dataTable-1').DataTable({
                 autoWidth: true,
@@ -342,7 +373,7 @@
                 }
             });
 
-            // -- START LOGIC LỌC
+            // -- LỌC
             $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
                     // 1. Lấy giá trị từ các ô input trong Modal
@@ -441,6 +472,10 @@
 
             // 2. RESET FORM
             function resetForm() {
+                var validator = $("#productForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
+
                 $('#productForm')[0].reset();
                 $('#IdSanPham').prop('readonly', false);
                 // reset ảnh
@@ -469,7 +504,10 @@
                 e.preventDefault();
                 var id = $(this).data('id');
                 var isDetail = $(this).hasClass('btn-details');
-
+                // Reset validate
+                var validator = $("#productForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
                 $.ajax({
                     url: '/Admin/AdminProducts/GetById',
                     type: 'GET',
@@ -503,49 +541,17 @@
                             }
                             $('#productModal').modal('show');
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Lỗi kết nối!", 'error'); }
                 });
             });
 
             // 5. NÚT LƯU
             $('#btnSave').click(function () {
-                if (!$('#IdSanPham').val()) {
-                    alert('Vui lòng nhập ID sản phẩm!');
-                    return;
-                }
-                if (!$('#TenSanPham').val()) {
-                    alert('Vui lòng nhập Tên sản phẩm!');
-                    return;
-                }
-                if (!$('#MoTaSanPham').val()) {
-                    alert('Vui lòng nhập Mô tả sản phẩm!');
-                    return;
-                }
-                if (!$('#GiaNiemYet').val()) {
-                    alert('Vui lòng nhập giá niêm yết!');
-                    return;
-                }
-                if (!$('#SoLuongTonKho').val()) {
-                    alert('Vui lòng nhập số lượng tồn kho!');
-                    return;
-                }
-                if (!$('#IdDanhMucSanPham').val()) {
-                    alert('Vui lòng chọn Danh mục sản phẩm!');
-                    return;
-                }
-                if (!$('#TrangThaiSp').val()) {
-                    alert('Vui lòng chọn trạng thái sản phẩm!');
-                    return;
-                }
-                        
-                var formData = new FormData($('#productForm')[0]);
-                if (!$('#TrangThaiSp').is(':checked')) {
-                    formData.set('TrangThaiSp', 'false');
-                } else {
-                    formData.set('TrangThaiSp', 'true');
-                }
+                 if ($("#productForm").valid()) {
+                    var formData = new FormData($('#productForm')[0]);
 
                 $.ajax({
                     url: '/Admin/AdminProducts/Save',
@@ -555,16 +561,15 @@
                     processData: false,
                     success: function (res) {
                         if (res.success) {
-                            alert(res.message);
-                            location.reload();
-                        } else {
-                            alert("Lỗi: " + res.message);
-                        }
-                    },
-                    error: function () {
-                        alert("Lỗi hệ thống!");
-                    }
-                });
+                                showToast(res.message, 'success');
+                                setTimeout(function() { location.reload(); }, 1500);
+                            } else {
+                                showToast(res.message, 'error');
+                            }
+                        },
+                        error: function () { showToast("Lỗi hệ thống!", 'error'); }
+                    });
+                }
             });
 
             // 6. NÚT XÓA
@@ -585,13 +590,13 @@
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
-                            // Xóa dòng trong DataTable (Cập nhật giao diện ngay mà ko cần reload)
-                            var table = $('#dataTable-1').DataTable();
-                            table.row($('#row-' + id)).remove().draw();
+                            showToast(res.message, 'success');
+                            setTimeout(function() { location.reload(); }, 1500);
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Không thể xóa danh mục này (có thể đang chứa sản phẩm).", 'error'); }
                 });
             });
         });

@@ -6,7 +6,7 @@
 }
 
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
-
+<link rel="stylesheet" href="~/css/toast.css">
 <style>
     .page-item.active .page-link {
         background-color: #007bff;
@@ -19,6 +19,17 @@
 
     #dataTable-1 thead th {
         color: #007bff;
+    }
+    /* Thêm style báo lỗi chữ đỏ */
+    label.error {
+        color: red;
+        font-size: 13px;
+        display: block;
+        margin-top: 5px;
+    }
+
+    input.error, select.error {
+        border-color: red;
     }
 </style>
 
@@ -153,9 +164,10 @@
                                 <label>Đơn hàng tối thiểu</label>
                                 <input type="number" class="form-control" id="GiaTriToiThieu" name="GiaTriToiThieu" value="0" required>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label>Giảm tối đa (Nếu là %)</label>
-                                <input type="number" class="form-control" id="GiaGiamToiDa" name="GiaGiamToiDa" value="0">
+                            <div class="form-group col-md-6" id="divGiaGiamToiDa" style="display:none;">
+                                <label>Giảm tối đa (VNĐ)</label>
+                                <input type="number" class="form-control" id="GiaGiamToiDa" name="GiaGiamToiDa" value="0" min="0">
+                                <small class="text-muted">Nhập 0 nếu không giới hạn.</small>
                             </div>
                         </div>
 
@@ -207,12 +219,43 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/toast.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Adminassets/js/jquery.validate.min.js"></script>
 
     <script>
         $(document).ready(function () {
-
+            // 0. VALIDATE
+            $("#couponForm").validate({
+                rules: {
+                    IdMaGiamGia: { required: true, minlength: 3 },
+                    MoTa: { required: true },
+                    GiaTriGiam: { required: true, number: true, min: 0 },
+                    GiaTriToiThieu: { required: true, number: true, min: 0 },
+                    ThoiGianBatDau: { required: true },
+                    ThoiGianKetThuc: { required: true },
+                    GioiHanSuDung: { required: true, number: true, min: 1 }
+                },
+                messages: {
+                    IdMaGiamGia: { required: "Vui lòng nhập Mã", minlength: "Mã quá ngắn" },
+                    MoTa: "Vui lòng nhập Mô tả",
+                    GiaTriGiam: "Nhập giá trị giảm hợp lệ",
+                    GiaTriToiThieu: "Nhập giá trị tối thiểu hợp lệ",
+                    ThoiGianBatDau: "Chọn thời gian bắt đầu",
+                    ThoiGianKetThuc: "Chọn thời gian kết thúc",
+                    GioiHanSuDung: "Nhập số lượng giới hạn"
+                }
+            });
+            // -------------
+            $('#LoaiGiam').change(function() {
+                if($(this).val() === '%') {
+                    $('#divGiaGiamToiDa').show();
+                } else {
+                    $('#divGiaGiamToiDa').hide();
+                    $('#GiaGiamToiDa').val(0);
+                }
+            });
             // 1. DATATABLES
             var table = $('#dataTable-1').DataTable({
                 autoWidth: true,
@@ -238,6 +281,8 @@
                 $('#IdMaGiamGia').prop('readonly', false);
                 $('#couponFieldset').prop('disabled', false);
                 $('#btnSave').show();
+                // chỉnh cho Loại Giảm
+                $('#LoaiGiam').val('VND').trigger('change');
             }
 
             // 3. THÊM MỚI
@@ -253,6 +298,9 @@
                 var id = $(this).data('id');
                 var isDetail = $(this).hasClass('btn-details');
 
+                var validator = $("#couponForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
                 $.ajax({
                     url: '/Admin/AdminCoupons/GetById',
                     type: 'GET',
@@ -282,49 +330,17 @@
                             }
                             $('#couponModal').modal('show');
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
                     },
-                    error: function() { alert("Lỗi kết nối!"); }
+                    error: function() { showToast("Lỗi kết nối!", 'error'); }
                 });
             });
 
             // 5. LƯU (SAVE)
             $('#btnSave').click(function () {
-                if (!$('#IdMaGiamGia').val()) {
-                    alert('Vui lòng nhập ID mã giảm giá!');
-                    return;
-                }
-                if (!$('#MoTa').val()) {
-                    alert('Vui lòng nhập mô tả mã giảm giá!');
-                    return;
-                }
-                if (!$('#LoaiGiam').val()) {
-                    alert('Vui lòng chọn loại giảm giá!');
-                    return;
-                }
-                if (!$('#GiaTriGiam').val()) {
-                    alert('Vui lòng nhập giá trị giảm!');
-                    return;
-                }
-                if (!$('#GiaTriToiThieu').val()) {
-                    alert('Vui lòng nhập giá trị tối thiểu cùa đơn hàng!');
-                    return;
-                }
-                if (!$('#ThoiGianBatDau').val()) {
-                    alert('Vui lòng nhập thời gian bắt đầu!');
-                    return;
-                }
-                if (!$('#ThoiGianKetThuc').val()) {
-                    alert('Vui lòng nhập thời gian kết thúc!');
-                    return;
-                }
-                if (!$('#GioiHanSuDung').val()) {
-                    alert('Vui lòng nhập giới hạn sử dụng!');
-                    return;
-                }
-
-                var formData = new FormData($('#couponForm')[0]);
+                if ($("#couponForm").valid()) {
+                    var formData = new FormData($('#couponForm')[0]);
 
                 $.ajax({
                     url: '/Admin/AdminCoupons/Save',
@@ -333,14 +349,15 @@
                     contentType: false, processData: false,
                     success: function (res) {
                         if (res.success) {
-                            alert(res.message);
-                            location.reload();
-                        } else {
-                            alert("Lỗi: " + res.message);
-                        }
-                    },
-                    error: function () { alert("Lỗi hệ thống!"); }
-                });
+                                showToast(res.message, 'success');
+                                setTimeout(function() { location.reload(); }, 1500);
+                            } else {
+                                showToast(res.message, 'error');
+                            }
+                        },
+                        error: function () { showToast("Lỗi hệ thống!", 'error'); }
+                    });
+                }
             });
 
             // 6. XÓA
@@ -360,12 +377,13 @@
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
-                            var t = $('#dataTable-1').DataTable();
-                            t.row($('#row-' + id)).remove().draw();
+                            showToast(res.message, 'success');
+                            setTimeout(function() { location.reload(); }, 1500);
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Không thể xóa mã này.", 'error'); }
                 });
             });
         });

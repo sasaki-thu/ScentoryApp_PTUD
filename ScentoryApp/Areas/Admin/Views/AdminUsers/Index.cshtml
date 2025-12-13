@@ -6,6 +6,7 @@
 }
 
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="~/css/toast.css">
 
 <style>
     .page-item.active .page-link {
@@ -19,6 +20,19 @@
 
     #dataTable-1 thead th {
         color: #007bff;
+    }
+
+    /* CSS cho Validation (Chữ đỏ) */
+    label.error {
+        color: #dc3545;
+        font-size: 13px;
+        display: block;
+        margin-top: 5px;
+        font-weight: normal;
+    }
+
+    input.error, select.error, textarea.error {
+        border-color: #dc3545;
     }
 </style>
 
@@ -78,11 +92,6 @@
 
                                                         <span class="badge badge-warning text-white">Nữ</span>
                                                     }
-                                                    else
-                                                    {
-
-                                                        <span class="badge badge-secondary">Khác</span>
-                                                    }
                                                 </td>
                                                 <td>@item.NgaySinh.ToString("dd/MM/yyyy")</td>
                                                 <td>
@@ -97,9 +106,7 @@
                                                 </td>
                                                 <td>
                                                     <div class="dropdown">
-                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown">
-                                                            <span class="text-muted sr-only">Action</span>
-                                                        </button>
+                                                        <button class="btn btn-sm dropdown-toggle more-vertical" type="button" data-toggle="dropdown"></button>
                                                         <div class="dropdown-menu dropdown-menu-right">
                                                             <a class="dropdown-item btn-details" href="javascript:void(0)" data-id="@item.IdKhachHang.Trim()">Chi tiết</a>
                                                             <a class="dropdown-item btn-edit" href="javascript:void(0)" data-id="@item.IdKhachHang.Trim()">Chỉnh sửa</a>
@@ -133,37 +140,37 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label>ID Khách hàng (*)</label>
-                                <input type="text" class="form-control" id="IdKhachHang" name="IdKhachHang" placeholder="KH00x" required>
+                                <input type="text" class="form-control" id="IdKhachHang" name="IdKhachHang" placeholder="KH00x" maxlength="5">
                             </div>
                             <div class="form-group col-md-8">
                                 <label>Họ và Tên (*)</label>
-                                <input type="text" class="form-control" id="HoTen" name="HoTen" required>
+                                <input type="text" class="form-control" id="HoTen" name="HoTen">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label>Email</label>
-                                <input type="email" class="form-control" id="Email" name="Email" required>
+                                <label>Email (*)</label>
+                                <input type="email" class="form-control" id="Email" name="Email">
                             </div>
                             <div class="form-group col-md-6">
-                                <label>Số điện thoại</label>
-                                <input type="text" class="form-control" id="Sdt" name="Sdt" required>
+                                <label>Số điện thoại (*)</label>
+                                <input type="text" class="form-control" id="Sdt" name="Sdt">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group col-md-6">
-                                <label>Giới tính</label>
-                                <select class="form-control" id="GioiTinh" name="GioiTinh" required>
+                                <label>Giới tính (*)</label>
+                                <select class="form-control" id="GioiTinh" name="GioiTinh">
+                                    <option value="">-- Chọn giới tính --</option>
                                     <option value="Nam">Nam</option>
                                     <option value="Nữ">Nữ</option>
-                                    <option value="Khác">Khác</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-6">
-                                <label>Ngày sinh</label>
-                                <input type="date" class="form-control" id="NgaySinh" name="NgaySinh" required>
+                                <label>Ngày sinh (*)</label>
+                                <input type="date" class="form-control" id="NgaySinh" name="NgaySinh">
                             </div>
                         </div>
 
@@ -176,8 +183,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Địa chỉ</label>
-                            <textarea class="form-control" id="DiaChi" name="DiaChi" required rows="2"></textarea>
+                            <label>Địa chỉ (*)</label>
+                            <textarea class="form-control" id="DiaChi" name="DiaChi" rows="2"></textarea>
                         </div>
                     </fieldset>
                 </form>
@@ -209,63 +216,97 @@
     </div>
 </div>
 
+<div id="toast"></div>
+
 @section Scripts {
+    <script src="~/js/toast.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Adminassets/js/jquery.validate.min.js"></script>
 
     <script>
         $(document).ready(function () {
 
-            // 1. DATATABLES
-            var table = $('#dataTable-1').DataTable({
-                autoWidth: true,
-                "lengthChange": false,
-                "searching": true,
-                "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
-                "language": {
-                    "sProcessing":   "Đang xử lý...",
-                    "sZeroRecords":  "Không tìm thấy khách hàng nào",
-                    "sInfo":         "Đang hiển thị _START_ đến _END_ trong _TOTAL_ khách hàng",
-                    "sInfoEmpty":    "Đang hiển thị 0 đến 0 trong 0 khách hàng",
-                    "sInfoFiltered": "(lọc từ _MAX_ khách hàng)",
-                    "sSearch":       "Tìm kiếm:",
-                    "oPaginate": { "sFirst": "Đầu", "sPrevious": "Trước", "sNext": "Tiếp", "sLast": "Cuối" }
+            // --- 4. CẤU HÌNH VALIDATE ---
+            $("#userForm").validate({
+                rules: {
+                    IdKhachHang: { required: true, minlength: 5, maxlength: 5 },
+                    HoTen: { required: true },
+                    Email: { required: true, email: true },
+                    Sdt: { required: true, number: true, minlength: 10, maxlength: 10 },
+                    GioiTinh: { required: true },
+                    NgaySinh: { required: true },
+                    DiaChi: { required: true }
+                },
+                messages: {
+                    IdKhachHang: {
+                        required: "Vui lòng nhập ID",
+                        minlength: "ID phải đúng 5 ký tự",
+                        maxlength: "ID phải đúng 5 ký tự"
+                    },
+                    HoTen: "Vui lòng nhập họ tên",
+                    Email: {
+                        required: "Vui lòng nhập email",
+                        email: "Email không đúng định dạng"
+                    },
+                    Sdt: {
+                        required: "Vui lòng nhập số điện thoại",
+                        number: "SĐT phải là số",
+                        minlength: "SĐT phải đủ 10 số",
+                        maxlength: "SĐT tối đa 10 số"
+                    },
+                    GioiTinh: "Vui lòng chọn giới tính",
+                    NgaySinh: "Vui lòng chọn ngày sinh",
+                    DiaChi: "Vui lòng nhập địa chỉ"
                 }
             });
 
+            // --- 5. DATATABLES ---
+            var table = $('#dataTable-1').DataTable({
+                "lengthChange": false,
+                "searching": true,
+                "dom": 'rt<"row mt-3"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6 text-md-right"p>>',
+                "language": { "sProcessing": "Đang xử lý...", "sZeroRecords": "Không tìm thấy khách hàng", "sInfo": "Hiển thị _START_ đến _END_ trong _TOTAL_ khách", "sSearch": "Tìm kiếm:", "oPaginate": { "sNext": "Tiếp", "sPrevious": "Trước" } }
+            });
             $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
 
-            // 2. RESET
+            // --- 6. RESET FORM ---
             function resetForm() {
+                var validator = $("#userForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
+
                 $('#userForm')[0].reset();
                 $('#IdKhachHang').prop('readonly', false);
                 $('#userFieldset').prop('disabled', false);
                 $('#btnSave').show();
             }
 
-            // 3. THÊM MỚI
+            // --- CÁC NÚT BẤM ---
             $('#addUserBtn').click(function () {
                 resetForm();
                 $('#modalTitle').text('Thêm khách hàng mới');
                 $('#userModal').modal('show');
             });
 
-            // 4. SỬA & CHI TIẾT
+            // Sửa / Chi tiết
             $('body').on('click', '.btn-edit, .btn-details', function (e) {
                 e.preventDefault();
                 var id = $(this).data('id');
                 var isDetail = $(this).hasClass('btn-details');
 
+                // Reset trước khi load
+                var validator = $("#userForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
+
                 $.ajax({
-                    url: '/Admin/AdminUsers/GetById', // Gọi AdminUsersController
+                    url: '/Admin/AdminUsers/GetById',
                     type: 'GET',
                     data: { id: id },
                     success: function (res) {
                         if (res.success) {
                             var d = res.data;
-                            resetForm();
-
-                            // Map dữ liệu
                             $('#IdKhachHang').val(d.idKhachHang).prop('readonly', true);
                             $('#HoTen').val(d.hoTen);
                             $('#Email').val(d.email);
@@ -273,8 +314,6 @@
                             $('#GioiTinh').val(d.gioiTinh);
                             $('#NgaySinh').val(d.ngaySinh);
                             $('#DiaChi').val(d.diaChi);
-
-                            // Chọn tài khoản trong Dropdown (Nếu có)
                             $('#IdTaiKhoan').val(d.idTaiKhoan);
 
                             if (isDetail) {
@@ -283,104 +322,63 @@
                                 $('#btnSave').hide();
                             } else {
                                 $('#modalTitle').text('Cập nhật khách hàng');
+                                $('#userFieldset').prop('disabled', false);
+                                $('#btnSave').show();
                             }
                             $('#userModal').modal('show');
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
                     },
-                    error: function() { alert("Lỗi kết nối!"); }
+                    error: function() { showToast("Lỗi kết nối!", 'error'); }
                 });
             });
 
-            // 5. LƯU (Đã tích hợp Logic SĐT sạch)
+            // --- 7. NÚT LƯU (CÓ VALIDATE & TOAST) ---
             $('#btnSave').click(function () {
-                // A. Lấy dữ liệu thô
-                var id = $('#IdKhachHang').val().trim();
-                var name = $('#HoTen').val().trim();
-                var email = $('#Email').val().trim();
-                var birthday = $('#NgaySinh').val();
-                var address = $('#DiaChi').val().trim();
-                var rawPhone = $('#Sdt').val().trim();
+                if ($("#userForm").valid()) {
+                    var formData = new FormData($('#userForm')[0]);
 
-                var errors = [];
-
-                // B. Validate cơ bản
-                if (!id) errors.push("Vui lòng nhập ID Khách hàng.");
-                if (!name) errors.push("Vui lòng nhập Họ và tên.");
-                if (!email) errors.push("Vui lòng nhập Email.");
-                if (!birthday) errors.push("Vui lòng chọn Ngày sinh.");
-                if (!address) errors.push("Vui lòng nhập Địa chỉ.");
-
-                // C. XỬ LÝ SỐ ĐIỆN THOẠI (Quan trọng)
-                var cleanPhone = rawPhone.replace(/\D/g, '');
-                if (cleanPhone.length === 9) { cleanPhone = '0' + cleanPhone; }
-
-                if (cleanPhone.length !== 10) {
-                    errors.push("Số điện thoại không hợp lệ (Phải đúng 10 số).");
-                } else {
-                    $('#Sdt').val(cleanPhone); // Gán lại số sạch vào input
+                    $.ajax({
+                        url: '/Admin/AdminUsers/Save',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false, processData: false,
+                        success: function (res) {
+                            if (res.success) {
+                                showToast(res.message, 'success');
+                                setTimeout(function() { location.reload(); }, 1500);
+                            } else {
+                                showToast(res.message, 'error');
+                            }
+                        },
+                        error: function () { showToast("Lỗi hệ thống!", 'error'); }
+                    });
                 }
-
-                // D. Validate Email
-                var emailRegex = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                if (email !== "" && !emailRegex.test(email)) {
-                    errors.push("Email không đúng định dạng.");
-                }
-
-                // E. Dừng nếu có lỗi
-                if (errors.length > 0) {
-                    alert(errors.join("\n"));
-                    return;
-                }
-
-                // F. Gửi AJAX
-                // Lưu ý: FormData sẽ lấy giá trị từ các thẻ input (bao gồm cả SĐT đã được làm sạch ở trên)
-                var formData = new FormData($('#userForm')[0]);
-
-                $.ajax({
-                    url: '/Admin/AdminUsers/Save',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (res) {
-                        if (res.success) {
-                            alert(res.message);
-                            location.reload();
-                        } else {
-                            alert("Lỗi từ hệ thống: " + res.message);
-                        }
-                    },
-                    error: function () {
-                        alert("Lỗi kết nối (Kiểm tra lại Server/Database)!");
-                    }
-                });
             });
 
-            // 6. XÓA
+            // --- 8. XÓA ---
             $('body').on('click', '.btn-delete', function () {
-                var id = $(this).data('id');
-                $('#deleteName').text(id);
-                $('#deleteId').val(id);
+                $('#deleteName').text($(this).data('id'));
+                $('#deleteId').val($(this).data('id'));
                 $('#deleteModal').modal('show');
             });
 
             $('#btnConfirmDelete').click(function () {
-                var id = $('#deleteId').val();
                 $.ajax({
                     url: '/Admin/AdminUsers/Delete',
                     type: 'POST',
-                    data: { id: id },
+                    data: { id: $('#deleteId').val() },
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
-                            var t = $('#dataTable-1').DataTable();
-                            t.row($('#row-' + id)).remove().draw();
+                            showToast(res.message, 'success');
+                            setTimeout(function() { location.reload(); }, 1500);
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Không thể xóa khách hàng này.", 'error'); }
                 });
             });
         });

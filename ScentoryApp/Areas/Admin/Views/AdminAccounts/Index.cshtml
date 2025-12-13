@@ -6,6 +6,7 @@
 }
 
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="~/css/toast.css">
 <style>
     .page-item.active .page-link {
         background-color: #007bff;
@@ -18,6 +19,17 @@
 
     #dataTable-1 thead th {
         color: #007bff;
+    }
+    /* Thêm style báo lỗi chữ đỏ */
+    label.error {
+        color: red;
+        font-size: 13px;
+        display: block;
+        margin-top: 5px;
+    }
+
+    input.error, select.error {
+        border-color: red;
     }
 </style>
 
@@ -179,12 +191,51 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/toast.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Adminassets/js/jquery.validate.min.js"></script>
 
     <script>
         $(document).ready(function () {
+            // 0. VALIDATE
+            // THÊM LUẬT VALIDATE MẬT KHẨU MẠNH ---
+            $.validator.addMethod("strongPassword", function(value, element) {
+                // Nếu đang sửa và không nhập pass thì bỏ qua
+                if ($('#IdTaiKhoan').prop('readonly') && value === "") return true;
 
+                // Regex: Ít nhất 1 hoa, 1 số, 1 ký tự đặc biệt
+                return /^(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_])/.test(value);
+            }, "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 số và 1 ký tự đặc biệt.");
+
+            // CẤU HÌNH VALIDATE ---
+            $("#accountForm").validate({
+                rules: {
+                    IdTaiKhoan: { required: true, minlength: 5, maxlength: 5 },
+                    TenDangNhap: { required: true },
+                    MatKhau: {
+                        required: function() {
+                            // Bắt buộc nhập nếu là Thêm mới (ID không readonly)
+                            return !$('#IdTaiKhoan').prop('readonly');
+                        },
+                        strongPassword: true // Áp dụng luật mật khẩu mạnh
+                    },
+                    VaiTro: { required: true }
+                },
+                messages: {
+                    IdTaiKhoan: {
+                        required: "Vui lòng nhập ID Tài khoản",
+                        minlength: "ID phải có đúng 5 ký tự",
+                        maxlength: "ID phải có đúng 5 ký tự"
+                    },
+                    TenDangNhap: "Vui lòng nhập tên đăng nhập",
+                    MatKhau: {
+                        required: "Vui lòng nhập mật khẩu"
+                        // Lỗi strongPassword sẽ dùng text mặc định đã khai báo ở trên
+                    }
+                }
+            });
+            // 1. DATATABLES
             var table = $('#dataTable-1').DataTable({
                 autoWidth: true,
                 "lengthChange": false,
@@ -204,16 +255,20 @@
             $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
 
             function resetForm() {
+                var validator = $("#accountForm").validate();
+                validator.resetForm(); // Xóa lỗi cũ
                 $('#accountForm')[0].reset();
                 $('#IdTaiKhoan').prop('readonly', false);
                 $('#accountForm input, #accountForm select').prop('disabled', false);
                 $('#btnSave').show();
                 $('#MatKhau').attr('type', 'password');
+                $('#passwordHelp').text("Để trống nếu không muốn đổi mật khẩu (khi sửa).");
             }
 
             $('#addAccountBtn').click(function () {
                 resetForm();
                 $('#modalTitle').text('Thêm tài khoản mới');
+                $('#passwordHelp').text("Mật khẩu yêu cầu: 1 Hoa, 1 Số, 1 Ký tự đặc biệt.");
                 $('#accountModal').modal('show');
             });
 
@@ -221,6 +276,9 @@
                 e.preventDefault();
                 var id = $(this).data('id');
                 var isDetail = $(this).hasClass('btn-details');
+                var validator = $("#accountForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
 
                 $.ajax({
                     url: '/Admin/AdminAccounts/GetById',
@@ -246,47 +304,33 @@
                             }
                             $('#accountModal').modal('show');
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
                     },
-                    error: function() { alert("Lỗi kết nối!"); }
+                    error: function() { showToast("Lỗi kết nối!", 'error');}
                 });
             });
 
             $('#btnSave').click(function () {
-                var id = $('#IdTaiKhoan').val().trim();
-                var username = $('#TenDangNhap').val().trim();
-                var password = $('#MatKhau').val();
-                var isEdit = $('#IdTaiKhoan').prop('readonly');
+                if ($("#accountForm").valid()) {
+                    var formData = new FormData($('#accountForm')[0]);
 
-                if (!id) { alert('Vui lòng nhập ID tài khoản!'); return; }
-                if (!username) { alert('Vui lòng nhập tên đăng nhập!'); return; }
-                if (!isEdit && !password) { alert('Vui lòng nhập mật khẩu cho tài khoản mới!'); return; }
-
-                // Regex
-                const validationRegex = /^[a-zA-Z0-9_.-]+$/;
-                if (!validationRegex.test(username)) {
-                    alert("Tên đăng nhập không hợp lệ (Không dấu, không khoảng trắng)!");
-                    return;
+                    $.ajax({
+                        url: '/Admin/AdminAccounts/Save',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false, processData: false,
+                        success: function (res) {
+                            if (res.success) {
+                                showToast(res.message, 'success');
+                                setTimeout(function() { location.reload(); }, 1500);
+                            } else {
+                                showToast(res.message, 'error');
+                            }
+                        },
+                        error: function () { showToast("Lỗi hệ thống!", 'error'); }
+                    });
                 }
-
-                var formData = new FormData($('#accountForm')[0]);
-
-                $.ajax({
-                    url: '/Admin/AdminAccounts/Save',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false, processData: false,
-                    success: function (res) {
-                        if (res.success) {
-                            alert(res.message);
-                            location.reload();
-                        } else {
-                            alert("Lỗi: " + res.message);
-                        }
-                    },
-                    error: function () { alert("Lỗi hệ thống!"); }
-                });
             });
 
             $('body').on('click', '.btn-delete', function () {
@@ -305,12 +349,13 @@
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
-                            var t = $('#dataTable-1').DataTable();
-                            t.row($('#row-' + id)).remove().draw();
+                            showToast(res.message, 'success');
+                            setTimeout(function() { location.reload(); }, 1500);
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Không thể xóa tài khoản này.", 'error'); }
                 });
             });
 
