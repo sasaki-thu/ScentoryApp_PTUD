@@ -6,6 +6,7 @@
 }
 
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="~/css/toast.css">
 
 <style>
     .image-upload-area {
@@ -49,6 +50,17 @@
     /* chỉnh màu */
     #dataTable-1 thead th {
         color: #007bff;
+    }
+    /* Thêm style báo lỗi chữ đỏ */
+    label.error {
+        color: red;
+        font-size: 13px;
+        display: block;
+        margin-top: 5px;
+    }
+
+    input.error, select.error {
+        border-color: red;
     }
 </style>
 
@@ -238,12 +250,30 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/toast.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
+    <script src="~/Adminassets/js/jquery.validate.min.js"></script>
 
     <script>
         $(document).ready(function () {
-
+            // 0. VALIDATE
+            $("#categoryForm").validate({
+                rules: {
+                    IdDanhMucSanPham: { required: true, minlength: 5, maxlength: 5 },
+                    TenDanhMucSanPham: { required: true },
+                    MoTaDanhMuc: { required: true }
+                },
+                messages: {
+                    IdDanhMucSanPham: {
+                        required: "Vui lòng nhập ID Danh mục",
+                        minlength: "ID phải có đúng 5 ký tự (VD: DM001)",
+                        maxlength: "ID phải có đúng 5 ký tự"
+                    },
+                    TenDanhMucSanPham: "Vui lòng nhập Tên danh mục",
+                    MoTaDanhMuc: "Vui lòng nhập Mô tả"
+                }
+            });
             // --- 1. CẤU HÌNH DATATABLES ---
             var table = $('#dataTable-1').DataTable({
                 autoWidth: true,
@@ -306,6 +336,10 @@
 
             // Reset Form
             function resetForm() {
+                var validator = $("#categoryForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
+
                 $('#categoryForm')[0].reset();
                 $('#IdDanhMucSanPham').prop('readonly', false);
                 $('#removeImageBtn').click();
@@ -330,6 +364,10 @@
                 e.preventDefault();
                 var id = $(this).data('id');
                 var isDetail = $(this).hasClass('btn-details');
+                // Reset validate
+                var validator = $("#categoryForm").validate();
+                validator.resetForm();
+                $('.error').removeClass('error');
 
                 $.ajax({
                     url: '/Admin/AdminCategories/GetById',
@@ -361,55 +399,41 @@
                             }
                             $('#categoryModal').modal('show');
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Lỗi kết nối!", 'error'); }
                 });
             });
 
             // Lưu
             $('#btnSave').click(function () {
-                if (!$('#IdDanhMucSanPham').val()) {
-                    alert('Vui lòng nhập ID danh mục sản phẩm!');
-                    return;
-                }
-                if (!$('#TenDanhMucSanPham').val()) {
-                    alert('Vui lòng nhập tên danh mục sản phẩm!');
-                    return;
-                }
-                if (!$('#MoTaDanhMuc').val()) {
-                    alert('Vui lòng nhập mô tả danh mục sản phẩm!');
-                    return;
-                }
-                // if (!$('#IdTrangThaiDanhMuc').val()) {
-                //     alert('Vui lòng chọn trạng thái danh mục sản phẩm!');
-                //     return;
-                // }
-                var formData = new FormData($('#categoryForm')[0]);
-                if (!$('#TrangThaiDanhMuc').is(':checked')) {
-                    formData.set('TrangThaiDanhMuc', 'false');
-                } else {
-                    formData.set('TrangThaiDanhMuc', 'true');
-                }
+                if ($("#categoryForm").valid()) {
+                    var formData = new FormData($('#categoryForm')[0]);
 
-                $.ajax({
-                    url: '/Admin/AdminCategories/Save',
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function (res) {
-                        if (res.success) {
-                            alert(res.message);
-                            location.reload();
-                        } else {
-                            alert("Lỗi: " + res.message);
-                        }
-                    },
-                    error: function () {
-                        alert("Lỗi hệ thống!");
+                    // Xử lý checkbox (vì checkbox không check sẽ không gửi value)
+                    if (!$('#TrangThaiDanhMuc').is(':checked')) {
+                        formData.set('TrangThaiDanhMuc', 'false');
+                    } else {
+                        formData.set('TrangThaiDanhMuc', 'true');
                     }
-                });
+
+                    $.ajax({
+                        url: '/Admin/AdminCategories/Save',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false, processData: false,
+                        success: function (res) {
+                            if (res.success) {
+                                showToast(res.message, 'success');
+                                setTimeout(function() { location.reload(); }, 1500);
+                            } else {
+                                showToast(res.message, 'error');
+                            }
+                        },
+                        error: function () { showToast("Lỗi hệ thống!", 'error'); }
+                    });
+                }
             });
 
             // Xóa
@@ -430,12 +454,13 @@
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
-                            var table = $('#dataTable-1').DataTable();
-                            table.row($('#row-' + id)).remove().draw();
+                            showToast(res.message, 'success');
+                            setTimeout(function() { location.reload(); }, 1500);
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Không thể xóa danh mục này (có thể đang chứa sản phẩm).", 'error'); }
                 });
             });
         });

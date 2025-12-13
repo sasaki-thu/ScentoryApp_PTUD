@@ -8,6 +8,7 @@
 <!-- CSS -->
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
 <link rel="stylesheet" href="~/Adminassets/css/quill.snow.css">
+<link rel="stylesheet" href="~/css/toast.css">
 <style>
     .page-item.active .page-link {
         background-color: #007bff;
@@ -325,6 +326,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/toast.js"></script>
     <script src="~/Adminassets/js/quill.min.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
@@ -551,13 +553,13 @@
                         contentType: false, processData: false,
                         success: function (res) {
                             if (res.success) {
-                                alert(res.message);
-                                location.reload();
-                            } else {
-                                alert("Lỗi: " + res.message);
+                                showToast(res.message, 'success');
+                                setTimeout(function() {location.reload(); }, 1500);
+                            } else { showToast(res.message, 'error');
                             }
                         },
-                        error: function () { alert("Lỗi hệ thống!"); }
+                        error: function () {
+                            showToast("Lỗi hệ thống! Vui lòng thử lại.", 'error'); }
                     });
                 } else {
                     // Nếu form lỗi, focus vào tab đầu tiên có lỗi
@@ -579,7 +581,18 @@
                     url: '/Admin/AdminBlogs/Delete',
                     type: 'POST',
                     data: { id: $('#deleteId').val() },
-                    success: function(res){ if(res.success) location.reload(); }
+                    success: function(res){
+                        if(res.success) {
+                            $('#deleteModal').modal('hide');
+                            showToast(res.message, 'success');
+                            setTimeout(function() {location.reload();}, 1500);
+                        } else {
+                            showToast(res.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        showToast("Không thể xóa bài viết này.", 'error');
+                    }
                 });
             });
             $('#TrangThaiSwitch').change(function() { $('#TrangThai').val(this.checked ? '1' : '0'); });
