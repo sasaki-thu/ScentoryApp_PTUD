@@ -24,12 +24,12 @@
                 <div class="filter-group">
                     <h5 class="filter-title">Khoảng giá</h5>
                     <input type="range"
-                           class="form-range price-slider"
-                           min="@Model.ActualMinPrice"
-                           max="@Model.ActualMaxPrice"
-                           step="50000"
+                           class="form-range"
+                           min="@Model.ActualMinPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                           max="@Model.ActualMaxPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                           step="10000"
                            id="priceRange"
-                           value="@Model.ActualMaxPrice">
+                           value="@Model.ActualMaxPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)">
                     <div class="d-flex justify-content-between mt-2">
                         <span class="small text-muted">@Model.ActualMinPrice.ToString("N0")đ</span>
                         <span class="small text-muted" id="currentMaxPrice">@Model.ActualMaxPrice.ToString("N0")đ</span>
@@ -68,14 +68,6 @@
                 </div>
 
                 <hr />
-
-                <!-- 3. THÔNG BÁO DUNG TÍCH (Tạm ẩn - chưa có trong DB) -->
-                <div class="filter-group" style="display: none;">
-                    <h5 class="filter-title">Dung tích</h5>
-                    <p class="text-muted small">
-                        <i class="fa fa-info-circle"></i> Tính năng đang được phát triển
-                    </p>
-                </div>
 
             </div>
         </div>
@@ -301,10 +293,9 @@
     }
 
 
-    /* ========== RANGE SLIDER FIX - FORCE STYLES ========== */
+    /* ========== SLIDER STYLES ========== */
 
-    /* Reset all default styles */
-    .form-range {
+    .form-range. {
         -webkit-appearance: none !important;
         -moz-appearance: none !important;
         appearance: none !important;
@@ -318,7 +309,7 @@
         cursor: pointer !important;
     }
 
-        /* ========== THUMB STYLES - CRITICAL ========== */
+        /* ========== THUMB STYLES ========== */
 
         .form-range::-webkit-slider-thumb {
             -webkit-appearance: none !important;
@@ -338,7 +329,7 @@
         }
 
 
-        /* ========== HOVER STATES ========== */
+        /* ========== HOVER ========== */
 
         .form-range::-webkit-slider-thumb:hover {
             background: #a66b42 !important;
@@ -360,7 +351,7 @@
             box-shadow: 0 3px 8px rgba(0,0,0,0.4) !important;
         }
 
-        /* ========== ACTIVE STATES ========== */
+        /* ========== ACTIVE ========== */
 
         .form-range:active::-webkit-slider-thumb {
             background: #8b5a35 !important;
@@ -382,8 +373,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
         }
 
-        /* ========== FOCUS STATES ========== */
-
         .form-range:focus {
             outline: none !important;
             box-shadow: none !important;
@@ -397,8 +386,6 @@
                 box-shadow: 0 0 0 4px rgba(195, 129, 84, 0.3) !important;
             }
 
-    
-    /* ========== DISABLE POINTER EVENTS ON WRAPPER IF ANY ========== */
 
     .filter-group {
         position: relative !important;
@@ -406,10 +393,8 @@
 
         .filter-group input[type="range"] {
             pointer-events: auto !important;
-            touch-action: none !important; /* Prevent scrolling on mobile */
+            touch-action: none !important; 
         }
-
-    /* ========== FORCE REMOVE BOOTSTRAP CONFLICTS ========== */
 
     .form-range::-webkit-slider-runnable-track {
         background: #ddd !important;
@@ -420,17 +405,6 @@
         height: 6px !important;
         border-radius: 3px !important; */
     }
-
-    /* ========== DEBUG HELPER - Remove after testing ========== */
-    /* Uncomment này nếu vẫn không thấy thumb */
-   
-    .form-range::-webkit-slider-thumb {
-        background: red !important;
-        width: 30px !important;
-        height: 30px !important;
-        border: 5px solid yellow !important;
-    }
-   
 
     /* ========== PAGINATION STYLES ========== */
     .pagination {
@@ -493,7 +467,6 @@
 <script src="~/js/shop-filter.js"></script>
 
 <script>
-    // Initial setup for add to cart buttons (for first page load)
     document.querySelectorAll(".btn-add-cart").forEach(btn => {
         btn.addEventListener("click", function () {
             const productId = this.dataset.id;
