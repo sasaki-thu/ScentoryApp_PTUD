@@ -6,6 +6,7 @@
 }
 
 <link rel="stylesheet" href="~/Adminassets/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="~/css/toast.css">
 
 <style>
     .page-item.active .page-link {
@@ -58,7 +59,7 @@
                                     <tr>
                                         <th>Mã đơn</th>
                                         <th>Khách hàng</th>
-                                        <th>Ngày đặt</th>
+                                        <th>Thời gian đặt</th>
                                         <th>Tổng tiền</th>
                                         <th>Trạng thái</th>
                                         <th>Giao dự kiến</th>
@@ -147,7 +148,7 @@
                                 <input type="text" class="form-control" id="KhachHang" readonly>
                             </div>
                             <div class="form-group col-md-4">
-                                <label>Ngày đặt hàng</label>
+                                <label>Thời gian đặt hàng</label>
                                 <input type="text" class="form-control" id="ThoiGianDatHang" readonly>
                             </div>
                         </div>
@@ -158,7 +159,7 @@
                                 <input type="text" class="form-control text-primary" id="TongTien" readonly style="font-weight:bold;">
                             </div>
                             <div class="form-group col-md-4">
-                                <label>Phí ship</label>
+                                <label>Phí vận chuyển</label>
                                 <input type="text" class="form-control" id="PhiShip" readonly>
                             </div>
                             <div class="form-group col-md-4">
@@ -275,6 +276,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/toast.js"></script>
     <script src="~/Adminassets/js/jquery.dataTables.min.js"></script>
     <script src="~/Adminassets/js/dataTables.bootstrap4.min.js"></script>
 
@@ -411,10 +413,10 @@
 
                             $('#orderModal').modal('show');
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
                     },
-                    error: function() { alert("Lỗi kết nối!"); }
+                    error: function() { showToast("Lỗi kết nối!", 'error'); }
                 });
             });
 
@@ -434,13 +436,13 @@
                     },
                     success: function (res) {
                         if (res.success) {
-                            alert(res.message);
-                            location.reload();
+                            showToast(res.message, 'success');
+                            setTimeout(function() { location.reload(); }, 1500);
                         } else {
-                            alert("Lỗi: " + res.message);
+                            showToast("Lỗi: " + res.message, 'error');
                         }
                     },
-                    error: function () { alert("Lỗi hệ thống!"); }
+                    error: function () { showToast("Lỗi hệ thống!", 'error'); }
                 });
             });
 
@@ -461,12 +463,14 @@
                     success: function (res) {
                         if (res.success) {
                             $('#deleteModal').modal('hide');
+                            showToast(res.message, 'success');
                             var t = $('#dataTable-1').DataTable();
                             t.row($('#row-' + id)).remove().draw();
                         } else {
-                            alert(res.message);
+                            showToast(res.message, 'error');
                         }
-                    }
+                    },
+                    error: function() { showToast("Lỗi khi xóa đơn hàng.", 'error'); }
                 });
             });
         });
