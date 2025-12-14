@@ -17,7 +17,7 @@
 
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="text-center mb-5">
+            <div class="text-center mb-3">
                 <h1 class="mb-3 font-weight-bold" style="font-size: 50px">@Model.TenBlog</h1>
                 <div class="text-muted d-flex align-items-center justify-content-center" style="font-size: 0.9rem;">
                     <span class="mr-3"><i class="fe fe-calendar"></i> @Model.ThoiGianTaoBlog.ToString("dd/MM/yyyy")</span>
@@ -27,6 +27,10 @@
                     <span><i class="fe fe-eye"></i> @Model.Views lượt xem</span>
                 </div>
             </div>
+
+            <p class="lead font-italic mb-4 text-justify" style="font-size: 18px;color: #555; border-left: 4px solid #C38154; padding-left: 20px;">
+                @Model.NoiDungNgan
+            </p>
 
             <div id="toc-container" class="toc-box mb-4" style="display: none;">
                 <div class="toc-header d-flex justify-content-between align-items-center">
