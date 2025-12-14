@@ -797,7 +797,179 @@ namespace ScentoryApp.Controllers
                 });
             }
         }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ExternalLogin(string provider, string returnUrl = "/", string role = "User")
+        {
+            // Chỉ cho khách hàng (User) dùng social login
+            if (!string.Equals(role, "User", StringComparison.OrdinalIgnoreCase))
+                return Forbid();
+
+            if (provider != "Google" && provider != "Facebook")
+                return BadRequest("Provider không hợp lệ.");
+
+            if (string.IsNullOrEmpty(returnUrl) || !Url.IsLocalUrl(returnUrl))
+                returnUrl = "/";
+
+            var props = new AuthenticationProperties
+            {
+                RedirectUri = Url.Action(nameof(ExternalLoginCallback), new { returnUrl, role })
+            };
+
+            return Challenge(props, provider);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = "/", string role = "User", string? remoteError = null)
+        {
+            if (!string.Equals(role, "User", StringComparison.OrdinalIgnoreCase))
+                return Forbid();
+
+            if (!string.IsNullOrEmpty(remoteError))
+            {
+                TempData["message"] = "Đăng nhập mạng xã hội bị lỗi: " + remoteError;
+                return RedirectToAction("Login", new { returnUrl });
+            }
+
+            var extResult = await HttpContext.AuthenticateAsync("External");
+            if (!extResult.Succeeded || extResult.Principal == null)
+            {
+                TempData["message"] = "Không lấy được thông tin đăng nhập từ Google/Facebook.";
+                return RedirectToAction("Login", new { returnUrl });
+            }
+
+            var principal = extResult.Principal;
+
+            var email = principal.FindFirstValue(ClaimTypes.Email);
+            var fullName = principal.FindFirstValue(ClaimTypes.Name) ?? email;
+
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                // Facebook đôi khi không trả email nếu account không có/không cấp quyền email
+                TempData["message"] = "Tài khoản Facebook/Google không cung cấp Email. Vui lòng dùng tài khoản khác hoặc đăng ký thủ công.";
+                await HttpContext.SignOutAsync("External");
+                return RedirectToAction("Login", new { returnUrl });
+            }
+
+            // 1) Tìm khách hàng theo Email
+            var existingCustomer = await _context.KhachHangs.FirstOrDefaultAsync(k => k.Email == email);
+
+            TaiKhoan account;
+            if (existingCustomer != null && !string.IsNullOrEmpty(existingCustomer.IdTaiKhoan))
+            {
+                // đã có customer + đã link tài khoản
+                account = await _context.TaiKhoans.FirstAsync(t => t.IdTaiKhoan == existingCustomer.IdTaiKhoan);
+            }
+            else
+            {
+                // 2) Chưa có -> tạo mới TaiKhoan + KhachHang, hoặc tạo TaiKhoan rồi gắn vào KhachHang đã có
+                var newAccountId = await GenerateTaiKhoanIdAsync();
+                var username = await GenerateUniqueUsernameFromEmailAsync(email);
+
+                account = new TaiKhoan
+                {
+                    IdTaiKhoan = newAccountId,
+                    TenDangNhap = username,
+                    MatKhau = Guid.NewGuid().ToString("N"), // mật khẩu random vì login bằng social
+                    VaiTro = "Khách hàng"
+                };
+
+                await _context.TaiKhoans.AddAsync(account);
+
+                if (existingCustomer == null)
+                {
+                    var newCustomer = new KhachHang
+                    {
+                        IdKhachHang = GenerateCustomerId(),
+                        HoTen = string.IsNullOrWhiteSpace(fullName) ? username : fullName,
+                        Email = email,
+                        Sdt = "",
+                        DiaChi = "",
+                        GioiTinh = "",
+                        NgaySinh = DateOnly.FromDateTime(DateTime.MinValue),
+                        IdTaiKhoan = account.IdTaiKhoan
+                    };
+                    await _context.KhachHangs.AddAsync(newCustomer);
+                }
+                else
+                {
+                    // đã có customer theo email nhưng chưa link tài khoản
+                    existingCustomer.IdTaiKhoan = account.IdTaiKhoan;
+                    if (string.IsNullOrWhiteSpace(existingCustomer.HoTen))
+                        existingCustomer.HoTen = string.IsNullOrWhiteSpace(fullName) ? username : fullName;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            // 3) Sign in bằng cookie của hệ thống giống LoginApi của bạn
+            var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, account.TenDangNhap),
+                    new Claim(ClaimTypes.NameIdentifier, account.IdTaiKhoan),
+                    new Claim(ClaimTypes.Role, MapRole(account.VaiTro)),
+                    new Claim(ClaimTypes.Email, email)
+                };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity)
+            );
+
+            // dọn cookie tạm
+            await HttpContext.SignOutAsync("External");
+
+            if (string.IsNullOrEmpty(returnUrl) || !Url.IsLocalUrl(returnUrl))
+                returnUrl = "/";
+
+            return Redirect(returnUrl);
+        }
+
+        // ==== helpers ====
+
+        private async Task<string> GenerateTaiKhoanIdAsync()
+        {
+            var existing = await _context.TaiKhoans
+                .Where(t => t.IdTaiKhoan.StartsWith("TK"))
+                .Select(t => t.IdTaiKhoan.Substring(2))
+                .ToListAsync();
+
+            int max = 0;
+            foreach (var s in existing)
+                if (int.TryParse(s, out var n)) max = Math.Max(max, n);
+
+            return "TK" + (max + 1).ToString("D3");
+        }
+
+        private string GenerateCustomerId()
+            => Guid.NewGuid().ToString("N").Substring(0, 5).ToUpper();
+
+        private async Task<string> GenerateUniqueUsernameFromEmailAsync(string email)
+        {
+            var baseName = email.Split('@')[0].Trim();
+            if (string.IsNullOrWhiteSpace(baseName)) baseName = "user";
+
+            // chỉ giữ ký tự an toàn
+            baseName = new string(baseName.Where(ch => char.IsLetterOrDigit(ch) || ch == '_' || ch == '.').ToArray());
+            if (string.IsNullOrWhiteSpace(baseName)) baseName = "user";
+
+            var username = baseName;
+            var i = 0;
+
+            while (await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap == username))
+            {
+                i++;
+                username = $"{baseName}{i}";
+            }
+
+            return username;
+        }
     }
+
+
 
     /// <summary>
     /// Extension methods cho Controller
