@@ -1,0 +1,14 @@
+﻿<div class="filter-group">
+    <h5 class="filter-title">Khoảng giá</h5>
+    <input type="range"
+           class="form-range"
+           min="@Model.ActualMinPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+           max="@Model.ActualMaxPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+           step="10000"
+           id="priceRange"
+           value="@Model.ActualMaxPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+    <div class="d-flex justify-content-between mt-2">
+        <span class="small text-muted">@Model.ActualMinPrice.ToString("N0")đ</span>
+        <span class="small text-muted" id="currentMaxPrice">@Model.ActualMaxPrice.ToString("N0")đ</span>
+    </div>
+</div>
