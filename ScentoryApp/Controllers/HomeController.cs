@@ -656,16 +656,23 @@ namespace ScentoryApp.Controllers
                 .Select(d => new
                 {
                     id = d.IdDonHang,
-                    tinhTrang = d.TinhTrangDonHang,
+
                     products = d.ChiTietDonHangs.Select(ct => new
                     {
                         name = ct.IdSanPhamNavigation.TenSanPham,
                         quantity = ct.SoLuong,
                         price = ct.DonGia
                     }).ToList(),
+
+                    tongTienSanPham = d.ChiTietDonHangs
+                        .Sum(ct => ct.SoLuong * ct.DonGia),
                     shippingFee = d.PhiVanChuyen,
-                    tax = d.ThueBanHang,
-                    total = d.TongTienDonHang
+                    total = d.TongTienDonHang,
+                    shippingInfo = new
+                    {
+                        address = d.IdKhachHangNavigation.DiaChi,
+                        phone = d.IdKhachHangNavigation.Sdt
+                    }
                 })
                 .FirstOrDefault();
 
@@ -674,7 +681,6 @@ namespace ScentoryApp.Controllers
 
             return Json(order);
         }
-
 
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
