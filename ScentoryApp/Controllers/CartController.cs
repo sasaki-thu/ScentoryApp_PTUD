@@ -267,7 +267,7 @@ namespace ScentoryApp.Controllers
         [HttpPost]
         [Authorize]
         [IgnoreAntiforgeryToken]
-        public IActionResult Checkout(string bankAccount, string bankOwner, string bankName)
+        public IActionResult Checkout(string bankAccount, string bankOwner, string bankName, string idMaGiamGia)
         {
             using var transaction = _context.Database.BeginTransaction();
 
@@ -288,6 +288,53 @@ namespace ScentoryApp.Controllers
                 if (cart == null || !cart.ChiTietGioHangs.Any())
                     return Json(new { success = false, message = "Giỏ hàng trống" });
 
+                MaGiamGium? maGiamGia = null;
+
+                if (!string.IsNullOrEmpty(idMaGiamGia))
+                {
+                    maGiamGia = _context.MaGiamGia
+                        .FirstOrDefault(m =>
+                            m.IdMaGiamGia == idMaGiamGia &&
+                            m.ThoiGianBatDau <= DateTime.Now &&
+                            m.ThoiGianKetThuc >= DateTime.Now);
+                }
+
+                decimal tongTienHang = cart.ChiTietGioHangs
+                .Sum(x => x.SoLuong * x.IdSanPhamNavigation.GiaNiemYet);
+
+                decimal tienGiam = 0;
+
+                if (maGiamGia != null)
+                {
+                    // Check tổng tiền tối thiểu
+                    if (tongTienHang < maGiamGia.GiaTriToiThieu)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = "Đơn hàng chưa đạt giá trị tối thiểu để áp dụng mã giảm giá"
+                        });
+                    }
+
+                    if (maGiamGia.LoaiGiam == "%")
+                    {
+                        tienGiam = tongTienHang * maGiamGia.GiaTriGiam / 100;
+
+                        if (maGiamGia.GiaGiamToiDa.HasValue)
+                        {
+                            tienGiam = Math.Min(tienGiam, maGiamGia.GiaGiamToiDa.Value);
+                        }
+                    }
+                    else if (maGiamGia.LoaiGiam == "VND")
+                    {
+                        tienGiam = maGiamGia.GiaTriGiam;
+                    }
+                }
+
+                decimal phiVanChuyen = 30000;
+
+                decimal tongTienDonHang =
+                    tongTienHang - tienGiam + phiVanChuyen;
                 // 1. Tạo DonHang
                 var donHang = new DonHang
                 {
@@ -296,11 +343,11 @@ namespace ScentoryApp.Controllers
                     ThoiGianDatHang = DateTime.Now,
                     NgayGiaoHangDuKien = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
                     IdDonViVanChuyen = "VC001",
-                    PhiVanChuyen = 30000,
+                    PhiVanChuyen = phiVanChuyen,
                     ThueBanHang = 0,
                     TinhTrangDonHang = "Đang chuẩn bị hàng",
-                    TongTienDonHang = cart.ChiTietGioHangs.Sum(x => x.SoLuong * x.IdSanPhamNavigation.GiaNiemYet) + 30000,
-                    IdMaGiamGia = "GG002"
+                    TongTienDonHang = tongTienDonHang,
+                    IdMaGiamGia = maGiamGia?.IdMaGiamGia
                 };
 
                 _context.DonHangs.Add(donHang);
@@ -332,6 +379,28 @@ namespace ScentoryApp.Controllers
                 transaction.Rollback();
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult GetAvailableDiscounts()
+        {
+            var now = DateTime.Now;
+
+            var discounts = _context.MaGiamGia
+                .Where(m =>
+                    m.ThoiGianBatDau <= now &&
+                    m.ThoiGianKetThuc >= now)
+                .Select(m => new
+                {
+                    id = m.IdMaGiamGia,
+                    label = m.LoaiGiam == "%"
+                        ? $"{m.IdMaGiamGia} - Giảm {m.GiaTriGiam}% (Tối đa {m.GiaGiamToiDa:N0}đ)"
+                        : $"{m.IdMaGiamGia} - Giảm {m.GiaTriGiam:N0}đ"
+                })
+                .ToList();
+
+            return Json(discounts);
         }
     }
 }
