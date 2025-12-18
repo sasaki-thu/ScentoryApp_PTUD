@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var message = ViewBag.Message as string ?? "You do not have permission to access this page.";
+}
+
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 text-center">
+            <h1 class="mb-3">Access Denied</h1>
+            <p class="lead">@message</p>
+            <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                <a class="btn btn-dark px-4" href="/">Back to home</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof showToast === 'function') {
+                showToast('Do not have permission to access the admin area.', 'error');
+            } else {
+                alert('Do not have permission to access the admin area.');
+            }
+        });
+    </script>
+}

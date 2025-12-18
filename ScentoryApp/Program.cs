@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Microsoft.AspNetCore.Authentication.Google;
+using System.Security.Claims;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,7 @@ builder.Services
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
     {
         options.LoginPath = "/Home/Login";
-        options.AccessDeniedPath = "/Home/Login";
+        options.AccessDeniedPath = "/Home/AccessDenied";
     })
     .AddCookie("External") // cookie tạm để nhận info từ Google/Facebook
     .AddGoogle("Google", options =>
@@ -71,6 +72,35 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
+// Enforce admin access rules: only signed-in admins can reach /Admin routes.
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path;
+    if (path.HasValue && path.Value.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase))
+    {
+        var isAuthenticated = context.User?.Identity?.IsAuthenticated == true;
+        if (!isAuthenticated)
+        {
+            var returnUrl = Uri.EscapeDataString(path + context.Request.QueryString);
+            context.Response.Redirect($"/Home/Login?returnUrl={returnUrl}");
+            return;
+        }
+
+        var role = context.User.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
+        var isAdmin = role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
+                      || role.IndexOf("admin", StringComparison.OrdinalIgnoreCase) >= 0
+                      || role.IndexOf("quan", StringComparison.OrdinalIgnoreCase) >= 0
+                      || role.IndexOf("qu?n", StringComparison.OrdinalIgnoreCase) >= 0;
+        if (!isAdmin)
+        {
+            var returnUrl = Uri.EscapeDataString(path + context.Request.QueryString);
+            context.Response.Redirect($"/Home/AccessDenied?returnUrl={returnUrl}");
+            return;
+        }
+    }
+
+    await next();
+});
 app.UseAuthorization();
 
 app.MapControllerRoute(
