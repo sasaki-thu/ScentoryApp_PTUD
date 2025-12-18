@@ -132,7 +132,7 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                return Json(new { success = true, message = "Lưu bài viết thành công!" });
+                return Json(new { success = true, message = "Lưu thành công!" });
             }
             catch (Exception ex)
             {
@@ -149,7 +149,7 @@ namespace ScentoryApp.Areas.Admin.Controllers
 
             _context.Blogs.Remove(blog);
             await _context.SaveChangesAsync();
-            return Json(new { success = true, message = "Đã xóa bài viết thành công!" });
+            return Json(new { success = true, message = "Đã xóa thành công!" });
         }
         // 5. API: Upload ảnh từ CKEditor (MỚI THÊM)
         [HttpPost]

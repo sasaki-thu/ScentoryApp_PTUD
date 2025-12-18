@@ -145,7 +145,7 @@ namespace ScentoryApp.Areas_Admin_Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                return Json(new { success = true, message = "Lưu dữ liệu thành công!" });
+                return Json(new { success = true, message = "Lưu thành công!" });
             }
             catch (Exception ex)
             {
