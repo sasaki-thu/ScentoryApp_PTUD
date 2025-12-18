@@ -155,30 +155,48 @@
                     <div class="offcanvas-body">
                         <ul class="navbar-nav justify-content-end flex-grow-1 gap-1 gap-md-5 pe-3">
                             <!-- 1. Trang chủ -->
-                            <li class="nav-item active">
-                                <a class="nav-link" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            <li class="nav-item">
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Index">
+                                    Trang chủ
+                                </a>
                             </li>
+
 
                             <!-- 2. Về chúng tôi-->
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="About">Về chúng tôi</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "About" ? "active" : "")"
+                                   asp-controller="Home" asp-action="About">
+                                    Về chúng tôi
+                                </a>
                             </li>
 
                             <!-- 3. Cửa hàng (gồm Nước hoa và tinh dầu-->
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Shop">Cửa hàng</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Shop" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Shop">
+                                    Cửa hàng
+                                </a>
                             </li>
+
 
                             <!-- 4. Blog -->
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Blog">Blog</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Blog" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Blog">
+                                    Blog
+                                </a>
                             </li>
 
 
                             <!-- 5. Liên hệ -->
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="Home" asp-action="Contact">Liên hệ</a>
+                                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Contact" ? "active" : "")"
+                                   asp-controller="Home" asp-action="Contact">
+                                    Liên hệ
+                                </a>
                             </li>
+
                         </ul>
                     </div>
                 </div>
@@ -361,3 +379,20 @@
         </div>
     </div>
 </div>
+<style>
+    .navbar-nav .nav-link {
+        position: relative;
+        padding-bottom: 6px;
+    }
+
+        .navbar-nav .nav-link.active::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: 1px;
+            width: 100%;
+            height: 1px;
+            background-color: #000;
+            border-radius: 2px;
+        }
+</style>
