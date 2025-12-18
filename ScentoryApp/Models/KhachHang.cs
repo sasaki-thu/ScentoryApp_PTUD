@@ -21,6 +21,8 @@ public partial class KhachHang
 
     public string IdTaiKhoan { get; set; } = null!;
 
+    public virtual ICollection<DanhGiaSanPham> DanhGiaSanPhams { get; set; } = new List<DanhGiaSanPham>();
+
     public virtual ICollection<DonHang> DonHangs { get; set; } = new List<DonHang>();
 
     public virtual ICollection<GioHang> GioHangs { get; set; } = new List<GioHang>();

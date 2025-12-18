@@ -217,6 +217,14 @@ namespace ScentoryApp.Controllers
             return View();
         }
 
+        [AllowAnonymous]
+        public IActionResult AccessDenied(string returnUrl = "/")
+        {
+            ViewBag.Message = "You do not have permission to access the admin area.";
+            ViewBag.ReturnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
+            return View();
+        }
+
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> LoginApi([FromBody] LoginRequest req)
@@ -238,17 +246,12 @@ namespace ScentoryApp.Controllers
             // Determine whether the client is attempting to sign in to Admin area or User area.
             // Priority: explicit `req.Role` -> infer from `req.ReturnUrl` -> default to User area.
             var selectedRole = req.Role?.Trim();
-            bool requestedAdminArea = false;
-            if (!string.IsNullOrEmpty(selectedRole))
-            {
-                requestedAdminArea = selectedRole.Equals("Admin", StringComparison.OrdinalIgnoreCase);
-            }
-            else if (!string.IsNullOrEmpty(req.ReturnUrl))
-            {
-                // If returnUrl targets admin area, treat it as admin login attempt
-                requestedAdminArea = req.ReturnUrl.IndexOf("/Admin/", StringComparison.OrdinalIgnoreCase) >= 0
-                                     || req.ReturnUrl.Equals("/Admin", StringComparison.OrdinalIgnoreCase);
-            }
+            // Detect admin intent either by explicit role selection or by admin returnUrl.
+            bool returnUrlTargetsAdmin = !string.IsNullOrEmpty(req.ReturnUrl) &&
+                                         (req.ReturnUrl.IndexOf("/Admin/", StringComparison.OrdinalIgnoreCase) >= 0
+                                          || req.ReturnUrl.Equals("/Admin", StringComparison.OrdinalIgnoreCase));
+            bool requestedAdminArea = (selectedRole != null && selectedRole.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                                      || returnUrlTargetsAdmin;
 
             // Detect whether the account in DB is an admin account. Support common variants (Admin, contains 'admin', or Vietnamese 'quản').
             bool isAdminAccount = false;
@@ -463,7 +466,7 @@ namespace ScentoryApp.Controllers
 
             return View(kh);
         }
-        
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -603,6 +606,8 @@ namespace ScentoryApp.Controllers
                         .Sum(ct => ct.SoLuong * ct.DonGia),
                     shippingFee = d.PhiVanChuyen,
                     total = d.TongTienDonHang,
+                    discountAmount = (d.ChiTietDonHangs.Sum(ct => ct.SoLuong * ct.DonGia) + d.PhiVanChuyen) - d.TongTienDonHang,
+                    discountCode = d.IdMaGiamGia,
                     shippingInfo = new
                     {
                         address = d.IdKhachHangNavigation.DiaChi,
