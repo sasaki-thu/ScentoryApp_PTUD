@@ -603,6 +603,8 @@ namespace ScentoryApp.Controllers
                         .Sum(ct => ct.SoLuong * ct.DonGia),
                     shippingFee = d.PhiVanChuyen,
                     total = d.TongTienDonHang,
+                    discountAmount = (d.ChiTietDonHangs.Sum(ct => ct.SoLuong * ct.DonGia)+ d.PhiVanChuyen)- d.TongTienDonHang,
+                    discountCode = d.IdMaGiamGia,
                     shippingInfo = new
                     {
                         address = d.IdKhachHangNavigation.DiaChi,
