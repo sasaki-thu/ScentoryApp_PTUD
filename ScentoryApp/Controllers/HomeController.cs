@@ -220,7 +220,7 @@ namespace ScentoryApp.Controllers
         [AllowAnonymous]
         public IActionResult AccessDenied(string returnUrl = "/")
         {
-            ViewBag.Message = "You do not have permission to access the admin area.";
+            ViewBag.Message = "Tài khoản không có quyền truy cập quản trị.";
             ViewBag.ReturnUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
             return View();
         }
