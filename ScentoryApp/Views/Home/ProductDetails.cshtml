@@ -30,20 +30,6 @@
                         </button>
                     </div>
 
-                    <!-- Thumbnail gallery (tạm dùng cùng 1 ảnh) -->
-                    <div class="thumbnail-gallery">
-                        <div class="row g-2">
-                            @for (int i = 0; i < 4; i++)
-                            {
-                                <div class="col-3">
-                                    <img src="@mainImgSrc"
-                                         alt="Thumbnail @(i + 1)"
-                                         class="img-fluid thumbnail-img @(i == 0 ? "active" : "")"
-                                         onclick="changeMainImage(this)">
-                                </div>
-                            }
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -154,16 +140,6 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
                             Mô tả
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="additional-tab" data-bs-toggle="tab" data-bs-target="#additional" type="button" role="tab">
-                            Thông tin bổ sung
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
-                            Đánh giá (0)
                         </button>
                     </li>
                 </ul>
