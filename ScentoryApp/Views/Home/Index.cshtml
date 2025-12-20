@@ -115,8 +115,7 @@
                                 <p class="price">179.000đ</p>
 
                                 <a href="javascript:void(0)"
-                                   class="add-to-cart-btn"
-                                   data-id="SP005">
+                                   onclick="addToCart('SP005')">
                                     Thêm vào giỏ hàng
                                 </a>
 
@@ -138,8 +137,7 @@
                                 <p class="price">179.000đ</p>
 
                                 <a href="javascript:void(0)"
-                                   class="add-to-cart-btn"
-                                   data-id="SP006">
+                                   onclick="addToCart('SP006')">
                                     Thêm vào giỏ hàng
                                 </a>
 
@@ -161,8 +159,7 @@
                                 <p class="price">179.000đ</p>
 
                                 <a href="javascript:void(0)"
-                                   class="add-to-cart-btn"
-                                   data-id="SP007">
+                                   onclick="addToCart('SP007')">
                                     Thêm vào giỏ hàng
                                 </a>
 
@@ -184,8 +181,7 @@
                                 <p class="price">799.000đ</p>
 
                                 <a href="javascript:void(0)"
-                                   class="add-to-cart-btn"
-                                   data-id="SP013">
+                                   onclick="addToCart('SP013')">
                                     Thêm vào giỏ hàng
                                 </a>
 
@@ -206,9 +202,8 @@
                                 </h5>
                                 <p class="price">799.000đ</p>
 
-                                <a href="javascript:void(0)"
-                                   class="add-to-cart-btn"
-                                   data-id="SP013">
+                                <<a href="javascript:void(0)"
+                                    onclick="addToCart('SP013')">
                                     Thêm vào giỏ hàng
                                 </a>
 
@@ -488,27 +483,39 @@
 </section>
 
 <script>
-    document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
-        btn.addEventListener("click", function () {
-            const productId = this.dataset.id;
+    function addToCart(productId) {
 
-            fetch("/Cart/AddToCart", {
-                method: "POST",
-                credentials: "include",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `id=${productId}&quantity=1`
+        fetch("/Cart/AddToCart", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: 1
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    loadMiniCart(); // gọi mini cart reload
-                    showToast("Thêm vào giỏ hàng thành công", "success")
-                } else {
-                    showToast("Không thể thêm vào giỏ hàng", "error")
+        })
+        .then(res => {
+            if (res.status === 401) {
+                window.location.href = "/Home/Login";
+                return;
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data && data.success) {
+                showToast("Đã thêm sản phẩm vào giỏ hàng", "success");
+
+                if (typeof loadMiniCart === "function") {
+                    loadMiniCart();
                 }
-            });
+            } else {
+                showToast(data.message || "Không thể thêm sản phẩm", "error");
+            }
+        })
+        .catch(() => {
+                showToast(data.message || "Không thể thêm sản phẩm", "error");
         });
-    });
+    }
 </script>
+
