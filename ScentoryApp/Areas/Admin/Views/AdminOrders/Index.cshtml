@@ -23,7 +23,7 @@
     }
 
     .badge-status {
-        min-width: 90px;
+        min-width: 110px; /* Chỉnh rộng hơn chút để chữ không bị xuống dòng */
     }
 </style>
 
@@ -39,7 +39,6 @@
                         <div class="form-group mr-2">
                             <input type="text" id="customSearch" class="form-control" placeholder="🔍 Tìm đơn hàng..." style="min-width: 250px;">
                         </div>
-                        <!-- lọc -->
                         <button type="button" class="btn btn-secondary mr-2" data-toggle="modal" data-target="#filterModal">
                             <i class="fe fe-filter fe-16"></i> Lọc đơn hàng
                         </button>
@@ -82,24 +81,21 @@
                                                     @item.TongTienDonHang.ToString("N0") ₫
                                                 </td>
                                                 <td>
-                                                    @if (item.TinhTrangDonHang == "Đã giao" || item.TinhTrangDonHang == "Hoàn tất")
+                                                    @if (item.TinhTrangDonHang == "Đã giao")
                                                     {
-                                                        <span class="badge badge-success badge-status">@item.TinhTrangDonHang</span>
+                                                        <span class="badge badge-success badge-status">Đã giao</span>
                                                     }
                                                     else if (item.TinhTrangDonHang == "Đang giao")
                                                     {
-
-                                                        <span class="badge badge-info badge-status">@item.TinhTrangDonHang</span>
+                                                        <span class="badge badge-info badge-status text-white">Đang giao</span>
                                                     }
                                                     else if (item.TinhTrangDonHang == "Đã hủy")
                                                     {
-
-                                                        <span class="badge badge-danger badge-status">@item.TinhTrangDonHang</span>
+                                                        <span class="badge badge-danger badge-status">Đã hủy</span>
                                                     }
                                                     else
                                                     {
-
-                                                        <span class="badge badge-warning text-white badge-status">@item.TinhTrangDonHang</span>
+                                                        <span class="badge badge-warning text-white badge-status">Đang chuẩn bị</span>
                                                     }
                                                 </td>
                                                 <td>@item.NgayGiaoHangDuKien.ToString("dd/MM/yyyy")</td>
@@ -177,8 +173,7 @@
                                 <select class="form-control" id="TinhTrangDonHang" name="TinhTrangDonHang">
                                     <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
                                     <option value="Đang giao">Đang giao</option>
-                                    <option value="Đã giao">Đã giao</option>
-                                    <option value="Hoàn tất">Hoàn tất</option>
+                                    <option value="Đã giao">Đã giao (Hoàn tất)</option>
                                     <option value="Đã hủy">Đã hủy</option>
                                 </select>
                             </div>
@@ -203,7 +198,6 @@
     </div>
 </div>
 
-<!-- thêm lọc -->
 <div class="modal fade modal-slide" id="filterModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -227,7 +221,6 @@
                             <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
                             <option value="Đang giao">Đang giao</option>
                             <option value="Đã giao">Đã giao</option>
-                            <option value="Hoàn tất">Hoàn tất</option>
                             <option value="Đã hủy">Đã hủy</option>
                         </select>
                     </div>
@@ -264,7 +257,7 @@
             </div>
             <div class="modal-body">
                 Bạn có chắc chắn muốn xóa đơn hàng <strong id="deleteName"></strong> không? <br />
-                <small class="text-danger">Lưu ý: Nên Cập nhật trạng thái thành "Đã hủy" thay vì xóa vĩnh viễn.</small>
+                <small class="text-danger">Lưu ý: Chỉ nên xóa đơn Đã hủy hoặc đơn rác.</small>
                 <input type="hidden" id="deleteId" />
             </div>
             <div class="modal-footer">
@@ -301,11 +294,8 @@
             });
 
             // LOGIC LỌC ĐƠN HÀNG
-
-            // Hàm chuyển đổi chuỗi ngày "dd/MM/yyyy HH:mm" thành đối tượng Date
             function parseDateVN(dateString) {
                 if (!dateString) return null;
-                // Cắt bỏ giờ phút, chỉ lấy ngày dd/MM/yyyy
                 var parts = dateString.split(' ')[0].split('/');
                 if (parts.length === 3) {
                     return new Date(parts[2], parts[1] - 1, parts[0]);
@@ -313,72 +303,51 @@
                 return null;
             }
 
-            // Đăng ký hàm lọc với DataTables
             $.fn.dataTable.ext.search.push(
                 function(settings, data, dataIndex) {
-                    // 1. Lấy giá trị input
                     var filterName = $('#filterName').val().toLowerCase();
                     var filterStatus = $('#filterStatus').val();
-                    var minDateVal = $('#minDate').val(); // yyyy-mm-dd
-                    var maxDateVal = $('#maxDate').val(); // yyyy-mm-dd
+                    var minDateVal = $('#minDate').val();
+                    var maxDateVal = $('#maxDate').val();
 
-                    // 2. Lấy dữ liệu từ dòng hiện tại
-                    // data[1]: Cột Khách hàng (Nhưng data[] lấy cả HTML, nên ta dùng jquery để lấy text thuần)
                     var customerText = $(table.row(dataIndex).node()).find('td:eq(1)').text().toLowerCase().trim();
-
-                    // data[2]: Ngày đặt (Format: 25/12/2025 10:30)
                     var orderDateRaw = data[2];
-
-                    // data[4]: Trạng thái (Lấy text trong badge)
                     var statusText = $(table.row(dataIndex).node()).find('td:eq(4)').text().trim();
 
+                    if (filterName && !customerText.includes(filterName)) return false;
 
-                    // 3. Logic kiểm tra
-
-                    // -- Kiểm tra Tên Khách hàng
-                    if (filterName && !customerText.includes(filterName)) {
-                        return false;
+                    // So sánh trạng thái
+                    if (filterStatus) {
+                        // Vì "Đang chuẩn bị hàng" ở badge hiển thị là "Đang chuẩn bị"
+                        if (filterStatus === "Đang chuẩn bị hàng" && !statusText.includes("Đang chuẩn bị")) return false;
+                        else if (filterStatus !== "Đang chuẩn bị hàng" && statusText !== filterStatus) return false;
                     }
 
-                    // -- Kiểm tra Trạng thái (So sánh chính xác)
-                    if (filterStatus && statusText !== filterStatus) {
-                        return false;
-                    }
-
-                    // -- Kiểm tra Ngày tháng
                     var orderDate = parseDateVN(orderDateRaw);
-
                     if (minDateVal) {
                         var minDate = new Date(minDateVal);
-                        // Reset giờ của orderDate về 0 để so sánh chính xác theo ngày
                         if (orderDate < minDate) return false;
                     }
-
                     if (maxDateVal) {
                         var maxDate = new Date(maxDateVal);
                         if (orderDate > maxDate) return false;
                     }
-
                     return true;
                 }
             );
 
-            // Xử lý sự kiện click "Áp dụng"
             $('#btnApplyFilter').click(function() {
                 table.draw();
                 $('#filterModal').modal('hide');
             });
 
-            // Xử lý sự kiện click "Đặt lại"
             $('#btnResetFilter').click(function() {
                 $('#filterName').val('');
                 $('#filterStatus').val('');
                 $('#minDate').val('');
                 $('#maxDate').val('');
-
-                table.draw(); // Vẽ lại bảng (về mặc định)
+                table.draw();
             });
-            // KẾT THÚC LỌC ĐƠN HÀNG
 
             $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
 
@@ -395,19 +364,16 @@
                         if (res.success) {
                             var d = res.data;
 
-                            // Đổ dữ liệu vào form (Readonly fields)
                             $('#IdDonHang').val(d.idDonHang);
                             $('#KhachHang').val(d.khachHang);
                             $('#ThoiGianDatHang').val(d.thoiGianDatHang);
 
-                            // Format tiền tệ
                             $('#TongTien').val(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(d.tongTien));
                             $('#PhiShip').val(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(d.phiShip));
 
                             $('#MaGiamGia').val(d.maGiamGia);
                             $('#DiaChiGiao').val(d.diaChiGiao);
 
-                            // Fields cho phép sửa
                             $('#TinhTrangDonHang').val(d.trangThai);
                             $('#NgayGiaoHangDuKien').val(d.ngayGiaoHangDuKien);
 
@@ -427,7 +393,7 @@
                 var date = $('#NgayGiaoHangDuKien').val();
 
                 $.ajax({
-                    url: '/Admin/AdminOrders/Update', // Gọi API Update riêng
+                    url: '/Admin/AdminOrders/Update',
                     type: 'POST',
                     data: {
                         IdDonHang: id,

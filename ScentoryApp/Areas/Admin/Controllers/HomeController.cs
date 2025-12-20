@@ -50,7 +50,7 @@ namespace ScentoryApp.Areas.Admin.Controllers
             var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
             model.DoanhThuThangNay = _context.DonHangs.Where(d => d.ThoiGianDatHang >= firstDayOfMonth && d.TinhTrangDonHang != "Đã hủy").Sum(d => d.TongTienDonHang);
             model.DoanhThuHomNay = _context.DonHangs.Where(d => d.ThoiGianDatHang.Date == today && d.TinhTrangDonHang != "Đã hủy").Sum(d => d.TongTienDonHang);
-            model.DonHangMoi = _context.DonHangs.Count(d => d.TinhTrangDonHang == "Đang chuẩn bị hàng" || d.TinhTrangDonHang == "Đang chờ xử lý");
+            model.DonHangMoi = _context.DonHangs.Count(d => d.TinhTrangDonHang == "Đang chuẩn bị hàng");
             model.TongKhachHang = _context.KhachHangs.Count();
 
             // --- 2. XỬ LÝ BIỂU ĐỒ THEO TUẦN ---
@@ -58,7 +58,7 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 .Where(d => d.ThoiGianDatHang >= startDate
                          && d.ThoiGianDatHang <= endDate.AddDays(1) // +1 để lấy hết ngày cuối
                          && d.TinhTrangDonHang != "Đã hủy")
-                .Select(d => new { d.ThoiGianDatHang, d.TongTienDonHang })z
+                .Select(d => new { d.ThoiGianDatHang, d.TongTienDonHang })
                 .ToList();
 
             model.LabelsBieuDo = new List<string>();
@@ -79,8 +79,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 model.DataBieuDoDoanhThu.Add(dailyData.Sum(x => x.TongTienDonHang));
                 model.DataBieuDoDonHang.Add(dailyData.Count);
             }
-
-            // --- CÁC PHẦN DƯỚI GIỮ NGUYÊN ---
             model.TyLeTrangThaiDonHang = _context.DonHangs.GroupBy(d => d.TinhTrangDonHang).Select(g => new ChartData { Label = g.Key, Value = g.Count() }).ToList();
 
             model.SanPhamBanChay = _context.ChiTietDonHangs
