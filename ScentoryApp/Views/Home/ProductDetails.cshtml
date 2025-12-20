@@ -83,7 +83,8 @@
                             <input type="number" class="qty-input" value="1" min="1" id="quantity">
                             <button class="qty-btn plus" onclick="increaseQty()">+</button>
                         </div>
-                        <button class="btn btn-add-to-cart">
+                        <button class="btn btn-add-to-cart"
+                                onclick="addToCart('@Model.IdSanPham')">
                             THÊM VÀO GIỎ HÀNG
                         </button>
                     </div>
@@ -129,6 +130,35 @@
         if (parseInt(qtyInput.value) > 1) {
             qtyInput.value = parseInt(qtyInput.value) - 1;
         }
+    }
+
+     function addToCart(productId) {
+        const quantity = parseInt(document.getElementById("quantity").value);
+
+        fetch("/Cart/AddToCart", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                productId: productId,
+                quantity: quantity
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast("Đã thêm sản phẩm vào giỏ hàng", "success");
+
+                document.getElementById("quantity").value = 1;
+
+                if (typeof loadMiniCart === "function") {
+                    loadMiniCart();
+                }
+            } else {
+                showToast(data.message || "Không thể thêm sản phẩm", "error");
+            }
+        });
     }
 </script>
 

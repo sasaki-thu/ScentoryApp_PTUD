@@ -8,553 +8,138 @@
     <table class="table cart-table align-middle">
         <thead>
             <tr>
-                <th></th>
-                <th>Tên sản phẩm</th>
+                <th><input type="checkbox" id="check-all" /></th>
+                <th>Sản phẩm</th>
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Tạm tính</th>
+                <th></th>
             </tr>
         </thead>
-        <tbody id="cart-body">
-        </tbody>
+        <tbody id="cart-body"></tbody>
     </table>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="checkout-field">
-                <label>Mã giảm giá</label>
-                <select id="discount-select">
-                    <option value="">-- Không sử dụng mã giảm giá --</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <button id="checkout-btn" disabled class="btn btn-primary px-5 ">THANH TOÁN</button>
-        </div>
-    </div>
-
     <div class="text-end mt-4">
-        <h4 class="fw-bold">Tổng cộng: <span id="cart-page-total">0 đ</span></h4>
+        <button id="buy-btn" disabled class="btn btn-primary px-5">
+            MUA HÀNG
+        </button>
     </div>
 </div>
-
-<div id="checkout-overlay" class="checkout-overlay">
-    <div class="checkout-modal" id="payment-method-modal">
-        <h3 class="checkout-title">Chọn phương thức thanh toán</h3>
-
-        <div class="payment-options">
-            <div class="payment-option" id="choose-cod">
-                <strong>🚚 Thanh toán khi nhận hàng (COD)</strong>
-                <p>Thanh toán bằng tiền mặt khi nhận hàng</p>
-            </div>
-
-            <div class="payment-option" id="choose-online">
-                <strong>💳 Thanh toán online</strong>
-                <p>Chuyển khoản / ngân hàng</p>
-            </div>
-        </div>
-
-        <div class="checkout-actions">
-            <button class="btn-cancel" id="close-payment-method">Hủy</button>
-        </div>
-    </div>
-    <div class="checkout-modal hidden" id="checkout-online-modal">
-        <h3 class="checkout-title">Thanh toán</h3>
-
-        <div class="checkout-field">
-            <label>Số tài khoản</label>
-            <input type="text" id="bankAccount">
-        </div>
-
-        <div class="checkout-field">
-            <label>Tên chủ tài khoản</label>
-            <input type="text" id="bankOwner">
-        </div>
-
-        <div class="checkout-field">
-            <label>Ngân hàng</label>
-            <input type="text" id="bankName">
-        </div>
-
-        <div class="checkout-actions">
-            <button class="btn-cancel" id="close-checkout">Hủy</button>
-            <button class="btn-confirm" id="confirm-checkout">
-                <span class="btn-text">Xác nhận thanh toán</span>
-                <span class="spinner hidden"></span>
-            </button>
-        </div>
-    </div>
-    <div class="checkout-modal hidden" id="checkout-cod-modal">
-        <h3 class="checkout-title">Thanh toán khi nhận hàng</h3>
-
-        <div class="checkout-field">
-            <label>Họ tên người nhận</label>
-            <input type="text" id="codName">
-        </div>
-
-        <div class="checkout-field">
-            <label>Số điện thoại</label>
-            <input type="text" id="codPhone">
-        </div>
-
-        <div class="checkout-field">
-            <label>Địa chỉ nhận hàng</label>
-            <input type="text" id="codAddress">
-        </div>
-
-        <div class="checkout-actions">
-            <button class="btn-cancel" id="back-to-method">Quay lại</button>
-            <button class="btn-confirm" id="confirm-cod">
-                <span class="btn-text">Xác nhận đặt hàng</span>
-                <span class="spinner hidden"></span>
-            </button>
-        </div>
-    </div>
-</div>
-
-<style>
-    .cart-table th {
-        background: #fafafa;
-        font-weight: 700;
-        font-size: 18px;
-        padding: 18px;
-    }
-
-    .cart-table td {
-        padding: 20px 12px;
-        vertical-align: middle;
-        border-bottom: 1px solid #eee;
-    }
-
-    .remove-btn {
-        font-size: 22px;
-        cursor: pointer;
-        border: none;
-        background: none;
-        color: #8c8c8c;
-    }
-
-        .remove-btn:hover {
-            color: #000;
-        }
-
-    .qty-box {
-        display: flex;
-        align-items: center;
-        border: 1px solid #ddd;
-        width: 120px;
-        border-radius: 4px;
-    }
-
-    .qty-btn {
-        width: 34px;
-        height: 34px;
-        border: none;
-        background: #f8f8f8;
-        font-size: 20px;
-        cursor: pointer;
-    }
-
-    .qty-input {
-        width: 50px;
-        text-align: center;
-        border: none;
-        outline: none;
-        background: white;
-    }
-
-    .product-img {
-        width: 70px;
-        height: 70px;
-        object-fit: cover;
-        border-radius: 6px;
-    }
-
-    .product-name {
-        font-size: 17px;
-        font-weight: 600;
-        color: #c09250;
-        max-width: 330px;
-        display: inline-block;
-        line-height: 1.4;
-    }
-
-    /* OVERLAY */
-    .checkout-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.45);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
-
-    /* MODAL BOX */
-    .checkout-modal {
-        background: #fff;
-        width: 420px;
-        border-radius: 10px;
-        padding: 28px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        animation: scaleIn 0.25s ease;
-    }
-
-    .checkout-title {
-        font-size: 22px;
-        font-weight: 700;
-        margin-bottom: 20px;
-        color: #c09250;
-    }
-
-    /* INPUT */
-    .checkout-field {
-        margin-bottom: 16px;
-    }
-
-        .checkout-field label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .checkout-field input {
-            width: 100%;
-            padding: 10px 12px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 15px;
-        }
-
-    /* ACTIONS */
-    .checkout-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn-cancel {
-        background: #f2f2f2;
-        border: none;
-        padding: 10px 18px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    .btn-confirm {
-        background: #c09250;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-    }
-
-        .btn-confirm:hover {
-            background: #a97b3d;
-        }
-
-    .spinner {
-        width: 18px;
-        height: 18px;
-        border: 2px solid rgba(255,255,255,0.4);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        display: inline-block;
-        margin-left: 8px;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    @@keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    .btn-confirm[disabled] {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
-    .payment-options {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
-
-    .payment-option {
-        border: 1px solid #ddd;
-        padding: 14px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .payment-option:hover {
-        border-color: #c09250;
-        background: #faf8f2;
-    }
-
-    .payment-option strong {
-        color: #c09250;
-    }
-
-    .checkout-field select {
-        width: 100%;
-        padding: 10px 12px;
-        border-radius: 6px;
-        border: 1px solid #ddd;
-        font-size: 15px;
-        background: white;
-    }
-</style>
 
 <script>
-     function loadDiscounts() {
-        fetch("/Cart/GetAvailableDiscounts", { credentials: "include" })
-            .then(res => res.json())
-            .then(data => {
-                const select = document.getElementById("discount-select");
-                if (!select) return;
-
-                data.forEach(d => {
-                    const opt = document.createElement("option");
-                    opt.value = d.id;
-                    opt.textContent = d.label;
-                    select.appendChild(opt);
-                });
-            });
-    }
-    function formatVN(num) {
-        return num.toLocaleString("vi-VN") + " đ";
+    function formatVN(n) {
+        return n.toLocaleString("vi-VN") + " đ";
     }
 
-     function loadCartPage() {
-        fetch("/Cart/GetCartItems", { credentials: "include" })
-            .then(res => res.json())
-            .then(data => {
+    function updateBuyButton() {
+        document.getElementById("buy-btn").disabled =
+            document.querySelectorAll(".cart-item-checkbox:checked").length === 0;
+    }
+
+    function syncCheckAll() {
+        const all = document.querySelectorAll(".cart-item-checkbox");
+        const checked = document.querySelectorAll(".cart-item-checkbox:checked");
+        document.getElementById("check-all").checked =
+            all.length > 0 && all.length === checked.length;
+    }
+
+    document.getElementById("check-all").onchange = e => {
+        document.querySelectorAll(".cart-item-checkbox")
+            .forEach(cb => cb.checked = e.target.checked);
+        updateBuyButton();
+    };
+
+    document.addEventListener("change", e => {
+        if (e.target.classList.contains("cart-item-checkbox")) {
+            syncCheckAll();
+            updateBuyButton();
+        }
+    });
+
+    function loadCart() {
+        fetch("/Cart/GetCartItems")
+            .then(r => r.json())
+            .then(d => {
                 const tbody = document.getElementById("cart-body");
-                const totalBox = document.getElementById("cart-page-total");
-                const checkoutBtn = document.getElementById("checkout-btn");
-
                 tbody.innerHTML = "";
 
-                if (!data.items || data.items.length === 0) {
-                    totalBox.textContent = formatVN(0);
-                    checkoutBtn.disabled = true;
+                if (!d.items || d.items.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">Giỏ hàng trống</td>
+                        </tr>`;
                     return;
                 }
 
-                checkoutBtn.disabled = false;
-                console.log('total', data.total)
-                let total = data.total || 0;
-
-                data.items.forEach(item => {
+                d.items.forEach(i => {
                     tbody.innerHTML += `
                         <tr>
                             <td>
-                                <button class="remove-btn" data-id="${item.id}">&times;</button>
+                                <input type="checkbox"
+                                       class="cart-item-checkbox"
+                                       data-id="${i.id}">
                             </td>
                             <td>
-                                <div class="d-flex gap-3 align-items-center">
-                                    <img src="${item.img}" class="product-img">
-                                    <span class="product-name">${item.name}</span>
-                                </div>
+                                <img src="${i.img}" style="width:60px;height:60px;border-radius:6px">
+                                ${i.name}
                             </td>
-                            <td>${formatVN(item.price)}</td>
+                            <td>${formatVN(i.price)}</td>
                             <td>
-                                <div class="qty-box">
-                                    <button class="qty-btn minus-btn" data-id="${item.id}">-</button>
-                                    <input type="text" class="qty-input" value="${item.quantity}" readonly>
-                                    <button class="qty-btn plus-btn" data-id="${item.id}">+</button>
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-sm btn-outline-secondary minus" data-id="${i.id}">−</button>
+                                    <span>${i.quantity}</span>
+                                    <button class="btn btn-sm btn-outline-secondary plus" data-id="${i.id}">+</button>
                                 </div>
                             </td>
-                            <td>${formatVN(item.subtotal)}</td>
-                        </tr>
-                    `;
+                            <td>${formatVN(i.subtotal)}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-danger remove" data-id="${i.id}">✕</button>
+                            </td>
+                        </tr>`;
                 });
 
-                totalBox.textContent = formatVN(total);
-                bindCartEvents();
+                bindActions();
             });
     }
 
-    function bindCartEvents() {
-        document.querySelectorAll(".plus-btn").forEach(btn => {
-            btn.onclick = () => updateQty(btn.dataset.id, 1);
-        });
-
-        document.querySelectorAll(".minus-btn").forEach(btn => {
-            btn.onclick = () => updateQty(btn.dataset.id, -1);
-        });
-
-        document.querySelectorAll(".remove-btn").forEach(btn => {
-            btn.onclick = () => removeItem(btn.dataset.id);
-        });
+    function bindActions() {
+        document.querySelectorAll(".plus").forEach(b =>
+            b.onclick = () => updateQty(b.dataset.id, 1)
+        );
+        document.querySelectorAll(".minus").forEach(b =>
+            b.onclick = () => updateQty(b.dataset.id, -1)
+        );
+        document.querySelectorAll(".remove").forEach(b =>
+            b.onclick = () => removeItem(b.dataset.id)
+        );
     }
 
-    function updateQty(productId, delta) {
+    function updateQty(id, delta) {
         fetch("/Cart/UpdateQuantity", {
             method: "POST",
-            credentials: "include",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `productId=${productId}&delta=${delta}`
-        }).then(() => {
-            loadMiniCart();
-            loadCartPage();
-        });
+            body: `productId=${id}&delta=${delta}`
+        }).then(loadCart);
     }
 
-    function removeItem(productId) {
+    function removeItem(id) {
         fetch("/Cart/RemoveItem", {
             method: "POST",
-            credentials: "include",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `productId=${productId}`
-        }).then(() => {
-            loadMiniCart();
-            loadCartPage();
-        });
+            body: `productId=${id}`
+        }).then(loadCart);
     }
 
-    function loadMiniCart() {
-        fetch("/Cart/MiniCart", { credentials: "include" })
-            .then(res => res.json())
-            .then(data => {
-                const cartList = document.getElementById("cart-list");
-                const cartTotal = document.getElementById("cart-total");
-                const cartCount = document.querySelector(".cart-count");
+    document.getElementById("buy-btn").onclick = () => {
+        const ids = [...document.querySelectorAll(".cart-item-checkbox:checked")]
+            .map(cb => cb.dataset.id);
 
-                if (!cartList || !cartTotal || !cartCount) return;
-
-                cartList.innerHTML = "";
-                let count = 0;
-
-                data.items.forEach(item => {
-                    count += item.quantity;
-                    cartList.innerHTML += `
-                        <li class="d-flex justify-content-between align-items-start">
-                            <div class="d-flex gap-3">
-                                <img src="${item.img}" style="width:50px;height:50px;object-fit:cover;">
-                                <div>
-                                    <div class="fw-bold">${item.name}</div>
-                                    <small>${item.quantity} × ${formatVN(item.price)}</small>
-                                </div>
-                            </div>
-                        </li>
-                    `;
-                });
-
-                cartTotal.textContent = formatVN(data.total || 0);
-                cartCount.textContent = `(${count})`;
-            });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        loadCartPage();
-        loadDiscounts();
-    });
-
-    const overlay = document.getElementById("checkout-overlay");
-    const paymentModal = document.getElementById("payment-method-modal");
-    const onlineModal = document.getElementById("checkout-online-modal");
-    const codModal = document.getElementById("checkout-cod-modal");
-
-    document.getElementById("checkout-btn").onclick = () => {
-        overlay.style.display = "flex";
-        paymentModal.classList.remove("hidden");
-        onlineModal.classList.add("hidden");
-        codModal.classList.add("hidden");
-    };
-
-    document.getElementById("back-to-method").onclick = () => {
-        codModal.classList.add("hidden");
-        paymentModal.classList.remove("hidden");
-    };
-
-    document.getElementById("choose-cod").onclick = () => {
-        paymentModal.classList.add("hidden");
-        codModal.classList.remove("hidden");
-    };
-
-    document.getElementById("choose-online").onclick = () => {
-        paymentModal.classList.add("hidden");
-        onlineModal.classList.remove("hidden");
-    };
-
-    document.getElementById("close-checkout").onclick = () => {
-        overlay.style.display = "none";
-    };
-
-    document.getElementById("close-payment-method").onclick = () => {
-        overlay.style.display = "none";
-    };
-
-    document.getElementById("confirm-cod").onclick = () => {
-        const name = document.getElementById("codName").value;
-        const phone = document.getElementById("codPhone").value;
-        const address = document.getElementById("codAddress").value;
-
-        if (!name || !phone || !address) {
-            showToast("Vui lòng nhập đầy đủ thông tin","error");
-            return;
-        }
-
-        fetch("/Cart/Checkout", {
+        fetch("/Checkout/Prepare", {
             method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `idMaGiamGia=${discountId}`
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                overlay.style.display = "none";
-                showToast("Đặt hàng COD thành công!","success");
-                loadMiniCart();
-                loadCartPage();
-            }
-        });
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(ids)
+        }).then(() => window.location.href = "/Checkout");
     };
 
-    document.getElementById("confirm-checkout").onclick = () => {
-        const account = document.getElementById("bankAccount").value;
-        const owner = document.getElementById("bankOwner").value;
-        const bank = document.getElementById("bankName").value;
-        const discountId = document.getElementById("discount-select").value || "";
-
-        if (!account || !owner || !bank) {
-            showToast("Vui lòng nhập đầy đủ thông tin thanh toán","error")
-            return;
-        }
-
-        fetch("/Cart/Checkout", {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body:
-            `bankAccount=${bankAccount}` +
-            `&bankOwner=${bankOwner}` +
-            `&bankName=${bankName}` +
-            `&idMaGiamGia=${discountId}`
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                overlay.style.display = "none";
-                showToast("Đặt hàng thanh toán online thành công!","success")
-                loadMiniCart();
-                loadCartPage();
-            } else {
-                showToast(data.message || "Thanh toán thất bại","error")
-            }
-        });
-    };
+    document.addEventListener("DOMContentLoaded", loadCart);
 </script>
-<script src="~/js/toast.js"></script>

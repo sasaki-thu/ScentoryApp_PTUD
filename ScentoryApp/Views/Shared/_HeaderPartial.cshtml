@@ -224,7 +224,11 @@
                                 </div>
 
                                 <a href="/Cart" class="btn w-100 mb-2 btn-outline-secondary">XEM GIỎ HÀNG</a>
-                                <a href="/Checkout" class="btn w-100 btn-primary">THANH TOÁN</a>
+                                <a href="javascript:void(0)"
+                                   id="header-checkout-btn"
+                                   class="btn w-100 btn-primary">
+                                    THANH TOÁN
+                                </a>
                             </div>
                         </div>
                     </li>
@@ -297,6 +301,26 @@
                 cartCount.textContent = `(${count})`;
             });
     }
+      document.getElementById("header-checkout-btn")?.addEventListener("click", () => {
+        fetch("/Cart/GetCartItems", { credentials: "include" })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.items || data.items.length === 0) {
+                    showToast("Giỏ hàng trống", "error");
+                    return;
+                }
+
+                const ids = data.items.map(i => i.id);
+
+                fetch("/Checkout/Prepare", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(ids)
+                }).then(() => {
+                    window.location.href = "/Checkout";
+                });
+            });
+    });
 
     document.addEventListener("DOMContentLoaded", loadMiniCart);
 </script>

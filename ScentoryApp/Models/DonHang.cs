@@ -29,6 +29,8 @@ public partial class DonHang
 
     public string IdMaGiamGia { get; set; } = null!;
 
+    public string DiaChiNhanHang { get; set; } = null!;
+
     public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
 
     public virtual DonViVanChuyen IdDonViVanChuyenNavigation { get; set; } = null!;

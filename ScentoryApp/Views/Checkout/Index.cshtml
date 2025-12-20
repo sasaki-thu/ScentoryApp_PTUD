@@ -1,0 +1,377 @@
+﻿@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="container my-5 checkout-page" id="checkout-page">
+
+    <h2 class="fw-bold mb-4">Thanh toán</h2>
+
+    <!-- EMPTY STATE -->
+    <div id="checkout-empty" class="text-center py-5 d-none">
+        <h5 class="mb-3">Bạn chưa có sản phẩm nào cần thanh toán</h5>
+        <a href="/Cart" class="btn btn-outline-secondary">Quay lại giỏ hàng</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="checkout-content" class="row g-4 d-none">
+
+        <!-- LEFT -->
+        <div class="col-lg-8">
+            <div class="checkout-box">
+                <h5 class="box-title">Sản phẩm đã chọn</h5>
+
+                <table class="table checkout-table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th class="text-center">SL</th>
+                            <th class="text-end">Tạm tính</th>
+                        </tr>
+                    </thead>
+                    <tbody id="checkout-items"></tbody>
+                </table>
+            </div>
+
+            <!-- ADDRESS -->
+            <div class="checkout-box mt-4">
+                <h5 class="box-title">Địa chỉ nhận hàng</h5>
+                <input id="shipping-address"
+                       class="form-control"
+                       placeholder="Nhập địa chỉ nhận hàng đầy đủ" />
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-4">
+            <div class="checkout-box summary-box">
+                <h5 class="box-title">Tóm tắt đơn hàng</h5>
+
+                <div class="summary-row">
+                    <span>Tiền hàng</span>
+                    <span id="summary-items">0 đ</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Phí vận chuyển</span>
+                    <span>30.000 đ</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Giảm giá</span>
+                    <span id="summary-discount">0 đ</span>
+                </div>
+
+                <div class="mb-3">
+                    <select id="discount-select" class="form-select">
+                        <option value="">-- Không sử dụng mã giảm giá --</option>
+                    </select>
+                </div>
+
+                <hr />
+
+                <div class="summary-row total">
+                    <span>Tổng thanh toán</span>
+                    <span id="summary-total">0 đ</span>
+                </div>
+
+                <button id="place-order-btn"
+                        disabled
+                        class="btn btn-primary w-100 mt-3">
+                    ĐẶT HÀNG
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= PAYMENT METHOD MODAL ================= -->
+<div class="modal fade" id="paymentMethodModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn phương thức thanh toán</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="payment-option" id="choose-online">
+                    <strong>💳 Thanh toán Online</strong>
+                    <p>Chuyển khoản ngân hàng</p>
+                </div>
+
+                <div class="payment-option mt-3" id="choose-cod">
+                    <strong>🚚 Thanh toán khi nhận hàng (COD)</strong>
+                    <p>Thanh toán tiền mặt</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= ONLINE MODAL ================= -->
+<div class="modal fade" id="onlineModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thanh toán Online</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p><b>Chủ tài khoản:</b> Scentory</p>
+                <p><b>Số tài khoản:</b> 0123 456 789</p>
+                <p><b>Ngân hàng:</b> Vietcombank</p>
+
+                <h5 class="text-gold mt-3">
+                    Số tiền: <span id="online-total"></span>
+                </h5>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button id="confirm-online" class="btn btn-primary">Xác nhận thanh toán</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= COD MODAL ================= -->
+<div class="modal fade" id="codModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận đơn COD</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><b>Địa chỉ nhận hàng:</b></p>
+                <p id="cod-address"></p>
+
+                <h5 class="text-gold">
+                    Tổng tiền: <span id="cod-total"></span>
+                </h5>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button id="confirm-cod" class="btn btn-primary">Xác nhận đặt hàng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .checkout-box {
+        background: #fff;
+        border-radius: 10px;
+        padding: 22px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    .box-title {
+        font-weight: 700;
+        margin-bottom: 18px;
+        color: #c09250;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+        .summary-row.total {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+    .summary-box {
+        position: sticky;
+        top: 90px;
+    }
+
+    .payment-option {
+        border: 1px solid #ddd;
+        padding: 14px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+        .payment-option:hover {
+            background: #faf8f2;
+            border-color: #c09250;
+        }
+
+    .text-gold {
+        color: #c09250;
+    }
+</style>
+
+<script>
+    let discountsMap = {};
+    let itemsTotal = 0;
+    let discountValue = 0;
+    function formatVN(num) {
+        return num.toLocaleString("vi-VN") + " đ";
+    }
+
+    let totalAmount = 0;
+
+        function loadDiscounts() {
+        fetch("/Cart/GetAvailableDiscounts")
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById("discount-select");
+
+                data.forEach(d => {
+                    discountsMap[d.id] = d;
+
+                    const opt = document.createElement("option");
+                    opt.value = d.id;
+                    opt.textContent = d.label;
+                    select.appendChild(opt);
+                });
+            });
+    }
+
+    function loadCheckout() {
+        fetch("/Checkout/GetCheckoutItems", { credentials: "include" })
+            .then(res => res.json())
+            .then(data => {
+                if (data.empty || !data.items || data.items.length === 0) {
+                    document.getElementById("checkout-empty").classList.remove("d-none");
+                    return;
+                }
+
+                document.getElementById("checkout-content").classList.remove("d-none");
+
+                const tbody = document.getElementById("checkout-items");
+                let sum = 0;
+                tbody.innerHTML = "";
+
+
+
+                data.items.forEach(i => {
+                    sum += i.subtotal;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>
+                                <img src="${i.img}" style="width:50px;height:50px;border-radius:6px;margin-right:8px">
+                                ${i.name}
+                            </td>
+                            <td class="text-center">${i.quantity}</td>
+                            <td class="text-end">${formatVN(i.subtotal)}</td>
+                        </tr>
+                    `;
+                });
+
+                totalAmount = sum + 30000;
+                itemsTotal = sum;
+                discountValue = 0;
+
+                document.getElementById("summary-items").textContent = formatVN(sum);
+                recalcTotal();
+            });
+    }
+
+    document.getElementById("discount-select").onchange = e => {
+        const id = e.target.value;
+        discountValue = 0;
+
+        if (!id || !discountsMap[id]) {
+            recalcTotal();
+            return;
+        }
+
+        const d = discountsMap[id];
+
+        // ❌ Không đạt giá trị tối thiểu
+        if (itemsTotal < d.giaTriToiThieu) {
+            showToast(
+                `Đơn hàng tối thiểu ${formatVN(d.giaTriToiThieu)} mới dùng được mã này`,
+                "error"
+            );
+            e.target.value = "";
+            recalcTotal();
+            return;
+        }
+
+        // ===== GIẢM THEO % =====
+        if (d.loaiGiam === "%") {
+            discountValue = itemsTotal * d.giaTriGiam / 100;
+
+            if (d.giaGiamToiDa) {
+                discountValue = Math.min(discountValue, d.giaGiamToiDa);
+            }
+        }
+
+        // ===== GIẢM THEO VND =====
+        if (d.loaiGiam === "VND") {
+            discountValue = d.giaTriGiam;
+        }
+
+        discountValue = Math.round(discountValue);
+        recalcTotal();
+    };
+
+
+    document.getElementById("shipping-address").oninput = e => {
+        document.getElementById("place-order-btn").disabled =
+            e.target.value.trim() === "";
+    };
+
+    document.getElementById("place-order-btn").onclick = () => {
+        new bootstrap.Modal(document.getElementById("paymentMethodModal")).show();
+    };
+
+    document.getElementById("choose-online").onclick = () => {
+        bootstrap.Modal.getInstance(paymentMethodModal).hide();
+        new bootstrap.Modal(document.getElementById("onlineModal")).show();
+    };
+
+    document.getElementById("choose-cod").onclick = () => {
+        const addr = document.getElementById("shipping-address").value;
+        document.getElementById("cod-address").textContent = addr;
+
+        bootstrap.Modal.getInstance(paymentMethodModal).hide();
+        new bootstrap.Modal(document.getElementById("codModal")).show();
+    };
+
+    function placeOrder(method) {
+        fetch("/Checkout/PlaceOrder", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                address: document.getElementById("shipping-address").value,
+                paymentMethod: method,
+                discountId: document.getElementById("discount-select").value
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showToast("Đơn hàng sẽ được xử lý khi cửa hàng xác nhận thanh toán của bạn", "success");
+                setTimeout(() => window.location.href = "/Checkout", 1200);
+            } else {
+                showToast(data.message || "Thanh toán thất bại", "error");
+            }
+        });
+    }
+
+    function recalcTotal() {
+        document.getElementById("summary-discount").textContent = formatVN(discountValue);
+
+        const total = itemsTotal + 30000 - discountValue;
+
+        document.getElementById("summary-total").textContent = formatVN(total);
+        document.getElementById("online-total").textContent = formatVN(total);
+        document.getElementById("cod-total").textContent = formatVN(total);
+    }
+
+    document.getElementById("confirm-online").onclick = () => placeOrder("ONLINE");
+    document.getElementById("confirm-cod").onclick = () => placeOrder("COD");
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadCheckout();
+        loadDiscounts();
+    });
+</script>
+
+<script src="~/js/toast.js"></script>

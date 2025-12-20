@@ -49,72 +49,83 @@ namespace ScentoryApp.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        // ================= ADD TO CART =================
         [HttpPost]
         [Authorize]
         [IgnoreAntiforgeryToken]
-        public IActionResult AddToCart([FromForm] string id, [FromForm] int quantity = 1)
+        public IActionResult AddToCart([FromBody] AddToCartDto req)
         {
+            if (req == null || req.Quantity < 1)
+                return Json(new { success = false, message = "Số lượng không hợp lệ" });
+
             var accountId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (accountId == null)
                 return Unauthorized();
 
-            var khachHang = _context.KhachHangs
+            var kh = _context.KhachHangs
                 .FirstOrDefault(k => k.IdTaiKhoan == accountId);
-
-            if (khachHang == null)
+            if (kh == null)
                 return Unauthorized();
 
-            // 1. Lấy giỏ hàng
-            var gioHang = _context.GioHangs
-                .FirstOrDefault(g => g.IdKhachHang == khachHang.IdKhachHang);
+            // 1. Get / Create cart
+            var cart = _context.GioHangs
+                .FirstOrDefault(g => g.IdKhachHang == kh.IdKhachHang);
 
-            // 2. Tạo mới nếu chưa có
-            if (gioHang == null)
+            if (cart == null)
             {
                 lock (_cartIdLock)
                 {
-                    var lastCart = _context.GioHangs
+                    var last = _context.GioHangs
                         .OrderByDescending(g => g.IdGioHang)
+                        .Select(g => g.IdGioHang)
                         .FirstOrDefault();
 
-                    int nextNumber = lastCart == null
-                        ? 1
-                        : int.Parse(lastCart.IdGioHang.Substring(2)) + 1;
+                    int next = last == null ? 1 : int.Parse(last.Substring(2)) + 1;
 
-                    gioHang = new GioHang
+                    cart = new GioHang
                     {
-                        IdGioHang = "GH" + nextNumber.ToString("D3"),
-                        IdKhachHang = khachHang.IdKhachHang,
+                        IdGioHang = "GH" + next.ToString("D3"),
+                        IdKhachHang = kh.IdKhachHang,
                         ThoiGianTaoGh = DateTime.Now
                     };
 
-                    _context.GioHangs.Add(gioHang);
+                    _context.GioHangs.Add(cart);
                     _context.SaveChanges();
                 }
             }
 
-            // 3. Thêm / update chi tiết
-            var chiTiet = _context.ChiTietGioHangs
-                .FirstOrDefault(c => c.IdGioHang == gioHang.IdGioHang && c.IdSanPham == id);
+            // 2. Add / Update item
+            var item = _context.ChiTietGioHangs
+                .FirstOrDefault(c =>
+                    c.IdGioHang == cart.IdGioHang &&
+                    c.IdSanPham == req.ProductId);
 
-            if (chiTiet == null)
+            if (item == null)
             {
                 _context.ChiTietGioHangs.Add(new ChiTietGioHang
                 {
-                    IdGioHang = gioHang.IdGioHang,
-                    IdSanPham = id,
-                    SoLuong = quantity
+                    IdGioHang = cart.IdGioHang,
+                    IdSanPham = req.ProductId,
+                    SoLuong = req.Quantity
                 });
             }
             else
             {
-                chiTiet.SoLuong += quantity;
+                item.SoLuong += req.Quantity;
             }
 
-            gioHang.ThoiGianCapNhatGh = DateTime.Now;
+            cart.ThoiGianCapNhatGh = DateTime.Now;
             _context.SaveChanges();
 
             return Json(new { success = true });
+        }
+
+        // ================= DTO =================
+        public class AddToCartDto
+        {
+            public string ProductId { get; set; } = null!;
+            public int Quantity { get; set; }
         }
 
         [Authorize]
@@ -394,6 +405,12 @@ namespace ScentoryApp.Controllers
                 .Select(m => new
                 {
                     id = m.IdMaGiamGia,
+                    loaiGiam = m.LoaiGiam,                 // % | VND
+                    giaTriGiam = m.GiaTriGiam,             // 5 | 20000
+                    giaTriToiThieu = m.GiaTriToiThieu,     // 200000
+                    giaGiamToiDa = m.GiaGiamToiDa,         // 30000 | null
+
+                    // label chỉ để hiển thị
                     label = m.LoaiGiam == "%"
                         ? $"{m.IdMaGiamGia} - Giảm {m.GiaTriGiam}% (Tối đa {m.GiaGiamToiDa:N0}đ)"
                         : $"{m.IdMaGiamGia} - Giảm {m.GiaTriGiam:N0}đ"
