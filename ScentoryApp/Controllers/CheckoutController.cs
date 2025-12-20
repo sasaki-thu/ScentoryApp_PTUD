@@ -68,60 +68,117 @@ namespace ScentoryApp.Controllers
             if (kh == null) return Unauthorized();
 
             var ids = GetSelectedIds();
-            if (!ids.Any())
-                return Json(new { success = false, message = "Không có sản phẩm" });
+            if (!ids.Any()) return Json(new { success = false, message = "Không có sản phẩm để thanh toán" });
+
+            // 1. Lấy Đơn vị vận chuyển
+            var dvvc = _context.DonViVanChuyens.FirstOrDefault();
+            if (dvvc == null)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: Chưa cấu hình đơn vị vận chuyển." });
+            }
 
             using var tx = _context.Database.BeginTransaction();
-
             try
             {
+                // 2. Lấy giỏ hàng
                 var cart = _context.GioHangs
                     .Include(g => g.ChiTietGioHangs)
                         .ThenInclude(c => c.IdSanPhamNavigation)
-                    .First(g => g.IdKhachHang == kh.IdKhachHang);
+                    .FirstOrDefault(g => g.IdKhachHang == kh.IdKhachHang);
+
+                if (cart == null) return Json(new { success = false, message = "Giỏ hàng không tồn tại" });
 
                 var items = cart.ChiTietGioHangs
                     .Where(c => ids.Contains(c.IdSanPham))
                     .ToList();
 
+                if (!items.Any()) return Json(new { success = false, message = "Sản phẩm không tồn tại trong giỏ" });
+
+                // 3. Tính toán tiền
                 decimal tienHang = items.Sum(i => i.SoLuong * i.IdSanPhamNavigation.GiaNiemYet);
                 decimal ship = 30000;
-                decimal tong = tienHang + ship;
+                decimal giamGia = 0;
 
+                // 4. Xử lý Mã giảm giá
+                if (!string.IsNullOrEmpty(req.DiscountId))
+                {
+                    var voucher = _context.MaGiamGia.FirstOrDefault(m => m.IdMaGiamGia == req.DiscountId);
+
+                    // Kiểm tra điều kiện:
+                    if (voucher != null &&
+                        voucher.ThoiGianKetThuc >= DateTime.Now &&
+                        tienHang >= voucher.GiaTriToiThieu)
+                    {
+                        if (voucher.LoaiGiam == "%")
+                        {
+                            giamGia = tienHang * (voucher.GiaTriGiam / 100m);
+                            if (voucher.GiaGiamToiDa.HasValue)
+                            {
+                                giamGia = Math.Min(giamGia, voucher.GiaGiamToiDa.Value);
+                            }
+                        }
+                        else // Giảm tiền mặt ("VND")
+                        {
+                            giamGia = voucher.GiaTriGiam;
+                        }
+                    }
+                    else
+                    {
+                        req.DiscountId = null; // Voucher không hợp lệ -> Hủy áp dụng
+                    }
+                }
+
+                decimal tongTien = (tienHang + ship) - giamGia;
+                if (tongTien < 0) tongTien = 0;
+
+                // 5. Tạo Đơn hàng
                 var donHang = new DonHang
                 {
                     IdDonHang = GenerateDonHangId(),
                     IdKhachHang = kh.IdKhachHang,
+
                     ThoiGianDatHang = DateTime.Now,
-                    DiaChiNhanHang = req.Address,
                     NgayGiaoHangDuKien = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
-                    IdDonViVanChuyen = "VC001",
+
+                    // Lấy ID thật từ DB
+                    IdDonViVanChuyen = dvvc.IdDonViVanChuyen,
+
+                    DiaChiNhanHang = req.Address,
                     PhiVanChuyen = ship,
                     ThueBanHang = 0,
+                    TongTienDonHang = tongTien,
+
                     TinhTrangDonHang = "Đang chuẩn bị hàng",
-                    TongTienDonHang = tong,
-                    IdMaGiamGia = req.DiscountId ?? null
+
+                    ThoiGianCapNhat = null,
+                    ThoiGianHoanTatDonHang = null,
+                    IdMaGiamGia = (!string.IsNullOrEmpty(req.DiscountId) && giamGia > 0) ? req.DiscountId : null
                 };
 
                 _context.DonHangs.Add(donHang);
                 _context.SaveChanges();
 
+                // 6. Tạo Chi tiết đơn hàng
                 foreach (var i in items)
                 {
-                    _context.ChiTietDonHangs.Add(new ChiTietDonHang
+                    var ctdh = new ChiTietDonHang
                     {
                         IdDonHang = donHang.IdDonHang,
                         IdSanPham = i.IdSanPham,
                         SoLuong = i.SoLuong,
                         DonGia = i.IdSanPhamNavigation.GiaNiemYet,
                         ThanhTien = i.SoLuong * i.IdSanPhamNavigation.GiaNiemYet
-                    });
+                    };
+                    _context.ChiTietDonHangs.Add(ctdh);
                 }
 
+                // 7. Xóa khỏi giỏ hàng
                 _context.ChiTietGioHangs.RemoveRange(items);
+
                 _context.SaveChanges();
                 tx.Commit();
 
+                // Xóa session
                 HttpContext.Session.Remove(CHECKOUT_SESSION_KEY);
 
                 return Json(new { success = true });
@@ -129,7 +186,7 @@ namespace ScentoryApp.Controllers
             catch (Exception ex)
             {
                 tx.Rollback();
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = "Lỗi xử lý: " + ex.Message });
             }
         }
 
@@ -150,21 +207,29 @@ namespace ScentoryApp.Controllers
 
         private string GenerateDonHangId()
         {
-            var last = _context.DonHangs
+            // Lấy ID lớn nhất hiện tại để tăng tự động: DH001 -> DH002
+            var lastId = _context.DonHangs
                 .OrderByDescending(d => d.IdDonHang)
                 .Select(d => d.IdDonHang)
                 .FirstOrDefault();
 
-            int n = last == null ? 0 : int.Parse(last[2..]);
-            return $"DH{(n + 1):D3}";
+            if (string.IsNullOrEmpty(lastId)) return "DH001";
+
+            // Giả sử format luôn là DHxxx
+            if (lastId.Length > 2 && int.TryParse(lastId.Substring(2), out int n))
+            {
+                return $"DH{(n + 1):D3}";
+            }
+
+            // Fallback nếu ID cũ không đúng định dạng
+            return $"DH{DateTime.Now.Ticks % 1000:D3}";
         }
     }
 
     public class PlaceOrderRequest
     {
         public string Address { get; set; } = "";
-        public string PaymentMethod { get; set; } = ""; // COD | ONLINE
+        public string PaymentMethod { get; set; } = "";
         public string? DiscountId { get; set; }
     }
-
 }
