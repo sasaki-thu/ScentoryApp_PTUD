@@ -486,11 +486,17 @@
                 method: "POST",
                 credentials: "include",
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
+                    "Content-Type": "application/json"
                 },
-                body: `id=${productId}&quantity=1`
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: 1
+                })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("Request failed");
+                return res.json();
+            })
             .then(data => {
                 if (data.success) {
                     if (typeof loadMiniCart === 'function') {
@@ -498,12 +504,12 @@
                     }
                     showToast("Thêm vào giỏ hàng thành công", "success");
                 } else {
-                    showToast("Không thể thêm vào giỏ hàng", "error");
+                    showToast(data.message || "Không thể thêm vào giỏ hàng", "error");
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showToast("Có lỗi xảy ra", "error");
+                console.error("AddToCart error:", error);
+                showToast("Có lỗi xảy ra khi thêm giỏ hàng", "error");
             });
         });
     });
