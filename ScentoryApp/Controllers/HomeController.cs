@@ -132,8 +132,7 @@ namespace ScentoryApp.Controllers
             // 1. Tạo Query từ bảng Blogs trong Database
             var query = _context.Blogs.AsNoTracking();
 
-            // Nếu bạn muốn lọc bài viết đang ẩn/hiện thì bỏ comment dòng dưới:
-            // query = query.Where(b => b.TrangThai == 1); 
+            query = query.Where(b => b.TrangThai == 1); 
 
             // Sắp xếp bài mới nhất lên đầu
             query = query.OrderByDescending(b => b.ThoiGianTaoBlog);
@@ -617,9 +616,10 @@ namespace ScentoryApp.Controllers
                     total = d.TongTienDonHang,
                     discountAmount = (d.ChiTietDonHangs.Sum(ct => ct.SoLuong * ct.DonGia) + d.PhiVanChuyen) - d.TongTienDonHang,
                     discountCode = d.IdMaGiamGia,
+                    
                     shippingInfo = new
                     {
-                        address = d.IdKhachHangNavigation.DiaChi,
+                        address = d.DiaChiNhanHang,
                         phone = d.IdKhachHangNavigation.Sdt
                     }
                 })
