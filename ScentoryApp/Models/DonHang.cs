@@ -29,7 +29,7 @@ public partial class DonHang
 
     public string IdMaGiamGia { get; set; } = null!;
 
-    public string DiaChiNhanHang { get; set; } = null!;
+    public string? DiaChiNhanHang { get; set; }
 
     public virtual ICollection<ChiTietDonHang> ChiTietDonHangs { get; set; } = new List<ChiTietDonHang>();
 

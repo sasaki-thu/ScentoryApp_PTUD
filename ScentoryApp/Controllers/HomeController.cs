@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 using ScentoryApp.Models;
+using ScentoryApp.Utilities;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
@@ -358,6 +359,14 @@ namespace ScentoryApp.Controllers
             if (req == null || string.IsNullOrEmpty(req.Username) || string.IsNullOrEmpty(req.Password) || string.IsNullOrEmpty(req.Email))
             {
                 return Json(new { success = false, message = "Dữ liệu đăng ký không hợp lệ." });
+            }
+
+            // Validate password complexity
+            var passwordErrors = PasswordValidator.ValidatePasswordWithErrors(req.Password);
+            if (passwordErrors.Count > 0)
+            {
+                var errorMessage = string.Join("\n", passwordErrors);
+                return Json(new { success = false, message = errorMessage });
             }
 
             // check username/email unique

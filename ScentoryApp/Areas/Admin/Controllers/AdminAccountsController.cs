@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScentoryApp.Models;
+using ScentoryApp.Utilities;
 
 namespace ScentoryApp.Areas.Admin.Controllers
 {
@@ -62,6 +63,14 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 if (existingAcc == null)
                 {
                     // === THÊM MỚI ===
+                    // Validate password complexity
+                    var passwordErrors = PasswordValidator.ValidatePasswordWithErrors(model.MatKhau);
+                    if (passwordErrors.Count > 0)
+                    {
+                        var errorMessage = string.Join("\n", passwordErrors);
+                        return Json(new { success = false, message = errorMessage });
+                    }
+
                     // Kiểm tra trùng tên đăng nhập
                     if (await _context.TaiKhoans.AnyAsync(u => u.TenDangNhap == model.TenDangNhap))
                     {
@@ -93,6 +102,17 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 else
                 {
                     // === CẬP NHẬT ===
+                    // Only validate password if it has been changed (not empty)
+                    if (!string.IsNullOrEmpty(model.MatKhau) && model.MatKhau != existingAcc.MatKhau)
+                    {
+                        var passwordErrors = PasswordValidator.ValidatePasswordWithErrors(model.MatKhau);
+                        if (passwordErrors.Count > 0)
+                        {
+                            var errorMessage = string.Join("\n", passwordErrors);
+                            return Json(new { success = false, message = errorMessage });
+                        }
+                    }
+
                     // Normalize role on update as well
                     if (!string.IsNullOrWhiteSpace(model.VaiTro) && model.VaiTro.Equals("User", StringComparison.OrdinalIgnoreCase))
                         model.VaiTro = "Khách hàng";

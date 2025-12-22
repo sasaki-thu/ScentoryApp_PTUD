@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11205.157
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -23,3 +22,53 @@ Global
 		SolutionGuid = {6FF81883-FA1B-47CF-B00C-A097D9FB7E1F}
 	EndGlobalSection
 EndGlobal
+
+using System;
+using System.Text.RegularExpressions;
+
+public class PasswordValidator
+{
+    /// <summary>
+    /// Validates if a password meets the security requirements:
+    /// - Contains at least one uppercase letter
+    /// - Contains at least one lowercase letter
+    /// - Contains at least one special character
+    /// </summary>
+    /// <param name="password">The password string to validate</param>
+    /// <returns>True if password meets all criteria, false otherwise</returns>
+    public static bool ValidatePassword(string password)
+    {
+        // Check if password is null or empty
+        if (string.IsNullOrEmpty(password))
+            return false;
+
+        // Check for at least one uppercase letter
+        bool hasUpperCase = Regex.IsMatch(password, @"[A-Z]");
+
+        // Check for at least one lowercase letter
+        bool hasLowerCase = Regex.IsMatch(password, @"[a-z]");
+
+        // Check for at least one special character
+        bool hasSpecialChar = Regex.IsMatch(password, @"[!@#$%^&*()_+\-=\[\]{};':""\|,.<>\/?]");
+
+        // Return true only if all conditions are met
+        return hasUpperCase && hasLowerCase && hasSpecialChar;
+    }
+
+    /// <summary>
+    /// Alternative: Single regex pattern validation
+    /// More efficient if you only need one check
+    /// </summary>
+    /// <param name="password">The password string to validate</param>
+    /// <returns>True if password meets all criteria, false otherwise</returns>
+    public static bool ValidatePasswordSingleRegex(string password)
+    {
+        if (string.IsNullOrEmpty(password))
+            return false;
+
+        // Single regex pattern that checks all three conditions
+        string pattern = @"^(?=.*[A-Z])(?=.*[a-z])(?=.*[!@#$%^&*()_+\-=\[\]{};':""\|,.<>\/?])";
+        
+        return Regex.IsMatch(password, pattern);
+    }
+}

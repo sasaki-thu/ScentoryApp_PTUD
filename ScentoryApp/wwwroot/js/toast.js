@@ -19,7 +19,8 @@
 
             const msg = document.createElement('div');
             msg.className = 'site-toast-message';
-            msg.textContent = message || '';
+            // Convert newlines to <br> tags for proper line breaks
+            msg.innerHTML = (message || '').replace(/\n/g, '<br>');
             toast.appendChild(msg);
 
             const close = document.createElement('button');
