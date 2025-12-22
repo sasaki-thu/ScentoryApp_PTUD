@@ -134,7 +134,8 @@
                 <form id="accountForm">
                     <div class="form-group">
                         <label>ID Tài khoản (*)</label>
-                        <input type="text" class="form-control" id="IdTaiKhoan" name="IdTaiKhoan" placeholder="VD: TK001" required>
+                        <input type="text" class="form-control" id="IdTaiKhoan" name="IdTaiKhoan"
+                               readonly style="background-color: #e9ecef; font-weight: bold;">
                     </div>
                     <div class="form-group">
                         <label>Tên đăng nhập (*)</label>
@@ -215,7 +216,6 @@
                     TenDangNhap: { required: true },
                     MatKhau: {
                         required: function() {
-                            // Bắt buộc nhập nếu là Thêm mới (ID không readonly)
                             return !$('#IdTaiKhoan').prop('readonly');
                         },
                         strongPassword: true // Áp dụng luật mật khẩu mạnh
@@ -256,9 +256,8 @@
 
             function resetForm() {
                 var validator = $("#accountForm").validate();
-                validator.resetForm(); // Xóa lỗi cũ
+                validator.resetForm();
                 $('#accountForm')[0].reset();
-                $('#IdTaiKhoan').prop('readonly', false);
                 $('#accountForm input, #accountForm select').prop('disabled', false);
                 $('#btnSave').show();
                 $('#MatKhau').attr('type', 'password');
@@ -269,8 +268,16 @@
                 resetForm();
                 $('#modalTitle').text('Thêm tài khoản mới');
                 $('#passwordHelp').text("Mật khẩu yêu cầu: 1 Hoa, 1 Số, 1 Ký tự đặc biệt.");
-                $('#accountModal').modal('show');
-            });
+                $.get('/Admin/AdminAccounts/GetNextId', function(res) {
+                    if(res.success) {
+                        $('#IdTaiKhoan').val(res.data)
+                        } else {
+                            showToast("Lỗi lấy mã tài khoản", "error");
+                        }
+                    });
+                    $('#accountModal').modal('show');
+                });
+
 
             $('body').on('click', '.btn-edit, .btn-details', function (e) {
                 e.preventDefault();

@@ -140,7 +140,8 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label>ID Khách hàng (*)</label>
-                                <input type="text" class="form-control" id="IdKhachHang" name="IdKhachHang" placeholder="KH00x" maxlength="5">
+                                <input type="text" class="form-control" id="IdKhachHang" name="IdKhachHang"
+                                       readonly style="background-color: #e9ecef; font-weight: bold;">
                             </div>
                             <div class="form-group col-md-8">
                                 <label>Họ và Tên (*)</label>
@@ -275,19 +276,26 @@
                 var validator = $("#userForm").validate();
                 validator.resetForm();
                 $('.error').removeClass('error');
-
                 $('#userForm')[0].reset();
-                $('#IdKhachHang').prop('readonly', false);
                 $('#userFieldset').prop('disabled', false);
                 $('#btnSave').show();
             }
 
             // --- CÁC NÚT BẤM ---
-            $('#addUserBtn').click(function () {
-                resetForm();
-                $('#modalTitle').text('Thêm khách hàng mới');
-                $('#userModal').modal('show');
+        $('#addUserBtn').click(function () {
+            resetForm();
+            $('#modalTitle').text('Thêm khách hàng mới');
+
+            $.get('/Admin/AdminUsers/GetNextId', function(res) {
+                if(res.success) {
+                    $('#IdKhachHang').val(res.data).prop('readonly', true);
+                } else {
+                    showToast("Lỗi lấy mã khách hàng", "error");
+                }
             });
+
+            $('#userModal').modal('show');
+        });
 
             // Sửa / Chi tiết
             $('body').on('click', '.btn-edit, .btn-details', function (e) {
@@ -334,7 +342,7 @@
                 });
             });
 
-            // --- 7. NÚT LƯU (CÓ VALIDATE & TOAST) ---
+            // --- 7. NÚT LƯU ---
             $('#btnSave').click(function () {
                 if ($("#userForm").valid()) {
                     var formData = new FormData($('#userForm')[0]);

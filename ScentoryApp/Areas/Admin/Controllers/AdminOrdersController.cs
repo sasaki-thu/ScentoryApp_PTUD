@@ -115,8 +115,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
             }
             catch (DbUpdateException dbEx)
             {
-                // BẮT LỖI SQL/TRIGGER CỤ THỂ
-                // Lấy lỗi bên trong cùng (InnerException) để biết Trigger nào hoặc Constraint nào chặn
                 var innerMessage = dbEx.InnerException?.Message ?? dbEx.Message;
                 return Json(new { success = false, message = "Lỗi Database: " + innerMessage });
             }
@@ -126,7 +124,7 @@ namespace ScentoryApp.Areas.Admin.Controllers
             }
         }
 
-        // 4. API: Xóa Vĩnh Viễn (Dùng cho nút Xóa Đơn)
+        // 4. API: Xóa Vĩnh Viễn 
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {

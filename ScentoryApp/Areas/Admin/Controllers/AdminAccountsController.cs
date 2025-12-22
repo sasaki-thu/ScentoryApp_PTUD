@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ScentoryApp.Models;
-using ScentoryApp.Utilities;
 
 namespace ScentoryApp.Areas.Admin.Controllers
 {
@@ -63,14 +62,10 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 if (existingAcc == null)
                 {
                     // === THÊM MỚI ===
-                    // Validate password complexity
-                    var passwordErrors = PasswordValidator.ValidatePasswordWithErrors(model.MatKhau);
-                    if (passwordErrors.Count > 0)
+                    if (string.IsNullOrEmpty(model.IdTaiKhoan))
                     {
-                        var errorMessage = string.Join("\n", passwordErrors);
-                        return Json(new { success = false, message = errorMessage });
+                        model.IdTaiKhoan = await GenerateTaiKhoanId();
                     }
-
                     // Kiểm tra trùng tên đăng nhập
                     if (await _context.TaiKhoans.AnyAsync(u => u.TenDangNhap == model.TenDangNhap))
                     {
@@ -102,17 +97,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 else
                 {
                     // === CẬP NHẬT ===
-                    // Only validate password if it has been changed (not empty)
-                    if (!string.IsNullOrEmpty(model.MatKhau) && model.MatKhau != existingAcc.MatKhau)
-                    {
-                        var passwordErrors = PasswordValidator.ValidatePasswordWithErrors(model.MatKhau);
-                        if (passwordErrors.Count > 0)
-                        {
-                            var errorMessage = string.Join("\n", passwordErrors);
-                            return Json(new { success = false, message = errorMessage });
-                        }
-                    }
-
                     // Normalize role on update as well
                     if (!string.IsNullOrWhiteSpace(model.VaiTro) && model.VaiTro.Equals("User", StringComparison.OrdinalIgnoreCase))
                         model.VaiTro = "Khách hàng";
@@ -136,7 +120,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
             var tk = await _context.TaiKhoans.FindAsync(id);
             if (tk == null) return Json(new { success = false, message = "Không tìm thấy tài khoản!" });
 
-            // Kiểm tra xem tài khoản này có đang được khách hàng nào sử dụng không (để tránh lỗi SQL)
             var isUsed = await _context.KhachHangs.AnyAsync(k => k.IdTaiKhoan == id);
             if (isUsed)
             {
@@ -152,6 +135,35 @@ namespace ScentoryApp.Areas.Admin.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Home", new { area = "" });
+        }
+        private async Task<string> GenerateTaiKhoanId()
+        {
+            var existingIds = await _context.TaiKhoans
+                .Where(k => k.IdTaiKhoan.StartsWith("TK"))
+                .Select(k => k.IdTaiKhoan)
+                .ToListAsync();
+            int max = 0;
+            foreach (var id in existingIds)
+            {
+                if (id.Length > 2 && int.TryParse(id.Substring(2), out int n))
+                {
+                    if (n > max) max = n;
+                }
+            }
+            return "TK" + (max + 1).ToString("D3");
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetNextId()
+        {
+            try
+            {
+                var nextId = await GenerateTaiKhoanId();
+                return Json(new { success = true, data = nextId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ScentoryApp.Areas_Admin_Controllers
             _context = context;
         }
 
-        // GET: AdminProducts (Chỉ hiển thị giao diện và danh sách ban đầu)
+        // GET: AdminProducts
         public async Task<IActionResult> Index()
         {
             var listSanPham = await _context.SanPhams
@@ -46,8 +46,6 @@ namespace ScentoryApp.Areas_Admin_Controllers
                 string base64Data = Convert.ToBase64String(sp.AnhSanPham);
                 imageBase64 = string.Format("data:image/jpg;base64,{0}", base64Data);
             }
-
-            // Trả về đối tượng Anonymous để tránh lỗi vòng lặp JSON (Circular Reference)
             return Json(new
             {
                 success = true,
@@ -85,16 +83,19 @@ namespace ScentoryApp.Areas_Admin_Controllers
         [HttpPost]
         public async Task<IActionResult> Save(SanPham model, IFormFile? ImageFile)
         {
-            // Vì ID là string người dùng nhập, ta kiểm tra xem ID đã có chưa để biết là Thêm hay Sửa
-            // Lưu ý: Logic này giả định người dùng không sửa ID khi bấm Edit (Input ID set readonly ở View)
-            var existingProduct = await _context.SanPhams.AsNoTracking().FirstOrDefaultAsync(x => x.IdSanPham == model.IdSanPham);
-
             try
             {
-                // Xử lý file ảnh: Chuyển IFormFile -> byte[]
+                var existingProduct = await _context.SanPhams.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.IdSanPham == model.IdSanPham);
+
                 byte[]? imageBytes = null;
                 if (ImageFile != null && ImageFile.Length > 0)
                 {
+                    // Validate ảnh
+                    var ext = Path.GetExtension(ImageFile.FileName).ToLower();
+                    if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
+                        return Json(new { success = false, message = "Chỉ cho phép JPG hoặc PNG" });
+
                     using (var memoryStream = new MemoryStream())
                     {
                         await ImageFile.CopyToAsync(memoryStream);
@@ -105,6 +106,11 @@ namespace ScentoryApp.Areas_Admin_Controllers
                 if (existingProduct == null)
                 {
                     // === THÊM MỚI ===
+                    if (string.IsNullOrEmpty(model.IdSanPham))
+                    {
+                        model.IdSanPham = await GenerateSanPhamId();
+                    }
+
                     model.ThoiGianTaoSp = DateTime.Now;
                     model.ThoiGianCapNhat = DateTime.Now;
                     if (imageBytes != null) model.AnhSanPham = imageBytes;
@@ -114,7 +120,6 @@ namespace ScentoryApp.Areas_Admin_Controllers
                 else
                 {
                     // === CẬP NHẬT ===
-                    // Phải load lại thực thể để update (để tránh lỗi tracking)
                     var productToUpdate = await _context.SanPhams.FindAsync(model.IdSanPham);
 
                     productToUpdate.TenSanPham = model.TenSanPham;
@@ -125,23 +130,9 @@ namespace ScentoryApp.Areas_Admin_Controllers
                     productToUpdate.IdDanhMucSanPham = model.IdDanhMucSanPham;
                     productToUpdate.ThoiGianCapNhat = DateTime.Now;
 
-                    // Chỉ cập nhật ảnh nếu người dùng có chọn file mới
-                    if (imageBytes != null)
-                    {
-                        productToUpdate.AnhSanPham = imageBytes;
-                    }
+                    if (imageBytes != null) productToUpdate.AnhSanPham = imageBytes;
 
                     _context.Update(productToUpdate);
-                }
-
-                if (ImageFile != null)
-                {
-                    var ext = Path.GetExtension(ImageFile.FileName).ToLower();
-                    if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
-                        return Json(new { success = false, message = "Chỉ cho phép JPG hoặc PNG" });
-
-                    if (ImageFile.Length > 2 * 1024 * 1024)
-                        return Json(new { success = false, message = "Dung lượng ảnh tối đa 2MB" });
                 }
 
                 await _context.SaveChangesAsync();
@@ -150,6 +141,37 @@ namespace ScentoryApp.Areas_Admin_Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+        private async Task<string> GenerateSanPhamId()
+        {
+            var existingIds = await _context.SanPhams
+                .Where(s => s.IdSanPham.StartsWith("SP"))
+                .Select(s => s.IdSanPham)
+                .ToListAsync();
+
+            int max = 0;
+            foreach (var id in existingIds)
+            {
+                if (id.Length > 2 && int.TryParse(id.Substring(2), out int n))
+                {
+                    if (n > max) max = n;
+                }
+            }
+            return "SP" + (max + 1).ToString("D3");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNextId()
+        {
+            try
+            {
+                var nextId = await GenerateSanPhamId();
+                return Json(new { success = true, data = nextId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

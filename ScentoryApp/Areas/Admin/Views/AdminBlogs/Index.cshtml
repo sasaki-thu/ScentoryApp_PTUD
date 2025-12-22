@@ -201,7 +201,8 @@
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label>ID Blog</label>
-                                    <input type="text" class="form-control" id="IdBlog" name="IdBlog" placeholder="BL00x" required>
+                                    <input type="text" class="form-control" id="IdBlog" name="IdBlog"
+                                           readonly style="background-color: #e9ecef; font-weight: bold;">
                                 </div>
                                 <div class="form-group col-md-8">
                                     <label>Tiêu đề</label>
@@ -445,7 +446,6 @@
                 $('.error').removeClass('error'); // Xóa class lỗi
 
                 $('#blogForm')[0].reset();
-                $('#IdBlog').prop('readonly', false);
                 $('#removeImageBtn').click();
                 $('#myTab a[href="#info"]').tab('show');
                 $('#TrangThaiSwitch').prop('checked', true); $('#TrangThai').val('1');
@@ -469,6 +469,13 @@
                 $('#modalTitle').text('Thêm bài viết mới');
                 var now = new Date().toLocaleString();
                 $('#ThoiGianTaoBlog').val(now);
+                $.get('/Admin/AdminBlogs/GetNextId', function(res) {
+                    if(res.success) {
+                        $('#IdBlog').val(res.data);
+                    } else {
+                        showToast("Lỗi lấy mã blog", "error");
+                    }
+                });
                 $('#blogModal').modal('show');
             });
 

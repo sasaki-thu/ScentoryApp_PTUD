@@ -175,7 +175,8 @@
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label>ID Danh Mục</label>
-                                <input type="text" class="form-control" id="IdDanhMucSanPham" name="IdDanhMucSanPham" placeholder="DM00x" required>
+                                <input type="text" class="form-control" id="IdDanhMucSanPham" name="IdDanhMucSanPham"
+                                       readonly style="background-color: #e9ecef; font-weight: bold;">
                             </div>
                             <div class="form-group col-md-6">
                                 <label>Tên Danh Mục</label>
@@ -341,7 +342,6 @@
                 $('.error').removeClass('error');
 
                 $('#categoryForm')[0].reset();
-                $('#IdDanhMucSanPham').prop('readonly', false);
                 $('#removeImageBtn').click();
                 $('#categoryFieldset').prop('disabled', false);
                 $('#btnSave').show();
@@ -356,6 +356,13 @@
                 $('#modalTitle').text('Thêm danh mục mới');
                 var now = new Date().toLocaleString();
                 $('#ThoiGianTaoDm').val(now);
+                $.get('/Admin/AdminCategories/GetNextId', function(res) {
+                    if(res.success) {
+                        $('#IdDanhMucSanPham').val(res.data);
+                    } else {
+                        showToast("Lỗi lấy mã danh mục", "error");
+                    }
+                });
                 $('#categoryModal').modal('show');
             });
 
@@ -410,8 +417,6 @@
             $('#btnSave').click(function () {
                 if ($("#categoryForm").valid()) {
                     var formData = new FormData($('#categoryForm')[0]);
-
-                    // Xử lý checkbox (vì checkbox không check sẽ không gửi value)
                     if (!$('#TrangThaiDanhMuc').is(':checked')) {
                         formData.set('TrangThaiDanhMuc', 'false');
                     } else {

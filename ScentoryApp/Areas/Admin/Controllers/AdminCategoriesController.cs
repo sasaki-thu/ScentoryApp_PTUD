@@ -70,7 +70,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
             var dm = await _context.DanhMucSanPhams.FindAsync(id);
             if (dm == null) return Json(new { success = false, message = "Không tìm thấy danh mục!" });
 
-            // Kiểm tra ràng buộc khóa ngoại (Có sản phẩm nào đang dùng danh mục này không?)
             var hasProduct = await _context.SanPhams.AnyAsync(s => s.IdDanhMucSanPham == id);
             if (hasProduct)
             {
@@ -86,7 +85,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Save(DanhMucSanPham model, IFormFile? ImageFile)
         {
-            // Kiểm tra xem ID đã tồn tại chưa
             var existingCategory = await _context.DanhMucSanPhams.AsNoTracking()
                                          .FirstOrDefaultAsync(x => x.IdDanhMucSanPham == model.IdDanhMucSanPham);
 
@@ -106,6 +104,10 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 if (existingCategory == null)
                 {
                     // === THÊM MỚI ===
+                    if (string.IsNullOrEmpty(model.IdDanhMucSanPham))
+                    {
+                        model.IdDanhMucSanPham = await GenerateDanhMucId();
+                    }
                     model.ThoiGianTaoDm = DateTime.Now;
                     model.ThoiGianCapNhatDm = DateTime.Now;
                     if (imageBytes != null) model.AnhDanhMuc = imageBytes;
@@ -136,6 +138,37 @@ namespace ScentoryApp.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
+        private async Task<string> GenerateDanhMucId()
+        {
+            var existingIds = await _context.DanhMucSanPhams
+                .Where(s => s.IdDanhMucSanPham.StartsWith("DM"))
+                .Select(s => s.IdDanhMucSanPham)
+                .ToListAsync();
+
+            int max = 0;
+            foreach (var id in existingIds)
+            {
+                if (id.Length > 2 && int.TryParse(id.Substring(2), out int n))
+                {
+                    if (n > max) max = n;
+                }
+            }
+            return "DM" + (max + 1).ToString("D3");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNextId()
+        {
+            try
+            {
+                var nextId = await GenerateDanhMucId();
+                return Json(new { success = true, data = nextId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
         }
     }

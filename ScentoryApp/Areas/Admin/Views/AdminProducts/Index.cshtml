@@ -171,7 +171,8 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label>ID Sản phẩm</label>
-                                <input type="text" class="form-control" id="IdSanPham" name="IdSanPham" placeholder="SP00x" required>
+                                <input type="text" class="form-control" id="IdSanPham" name="IdSanPham"
+                                       readonly style="background-color: #e9ecef; font-weight: bold;">
                             </div>
                             <div class="form-group col-md-8">
                                 <label>Tên Sản phẩm</label>
@@ -383,13 +384,10 @@
                     var statusFilter = $('input[name="filterStatus"]:checked').val();
 
                     // 2. Lấy dữ liệu từ dòng hiện tại trong bảng
-                    // data[2] là cột Giá (index 2), data[4] là Trạng thái, data[6] là Danh mục
-
-                    // Xử lý giá tiền: Xóa dấu chấm, dấu phẩy, chữ 'đ' để chuyển về số
                     var priceRaw = data[2] || "0";
                     var price = parseFloat(priceRaw.replace(/[\.,\sđ]/g, ""));
 
-                    var status = $(table.row(dataIndex).node()).find('td:eq(4)').text().trim(); // Lấy text từ HTML vì cột này chứa Badge
+                    var status = $(table.row(dataIndex).node()).find('td:eq(4)').text().trim(); 
                     var category = data[6] || "";
 
                     // 3. Logic kiểm tra (Nếu thỏa mãn tất cả điều kiện thì trả về true)
@@ -475,9 +473,7 @@
                 var validator = $("#productForm").validate();
                 validator.resetForm();
                 $('.error').removeClass('error');
-
                 $('#productForm')[0].reset();
-                $('#IdSanPham').prop('readonly', false);
                 // reset ảnh
                 $('#ImageFile').val('');
                 $('#previewImg').attr('src', '');
@@ -494,8 +490,16 @@
             $('#addProductBtn').click(function () {
                 resetForm();
                 $('#modalTitle').text('Thêm sản phẩm mới');
-                var now = new Date().toLocaleString();
+                var now = new Date().toLocaleString('vi-VN');
                 $('#ThoiGianTaoSp').val(now);
+                $.get('/Admin/AdminProducts/GetNextId', function(res) {
+                    if(res.success) {
+                        $('#IdSanPham').val(res.data);
+                    } else {
+                        showToast("Lỗi lấy mã sản phẩm", "error");
+                    }
+                });
+
                 $('#productModal').modal('show');
             });
 

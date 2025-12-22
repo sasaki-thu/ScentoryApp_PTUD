@@ -137,7 +137,8 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label>Mã Coupon</label>
-                                <input type="text" class="form-control" id="IdMaGiamGia" name="IdMaGiamGia" required>
+                                <input type="text" class="form-control" id="IdMaGiamGia" name="IdMaGiamGia"
+                                       readonly style="background-color: #e9ecef; font-weight: bold;">
                             </div>
                             <div class="form-group col-md-8">
                                 <label>Mô tả</label>
@@ -278,7 +279,6 @@
             // 2. HÀM RESET FORM
             function resetForm() {
                 $('#couponForm')[0].reset();
-                $('#IdMaGiamGia').prop('readonly', false);
                 $('#couponFieldset').prop('disabled', false);
                 $('#btnSave').show();
                 // chỉnh cho Loại Giảm
@@ -289,6 +289,13 @@
             $('#addCouponBtn').click(function () {
                 resetForm();
                 $('#modalTitle').text('Thêm mã giảm giá mới');
+                $.get('/Admin/AdminCoupons/GetNextId', function(res) {
+                    if(res.success) {
+                        $('#IdMaGiamGia').val(res.data);
+                    } else {
+                        showToast("Lỗi lấy mã mã giảm giá", "error");
+                    }
+                });
                 $('#couponModal').modal('show');
             });
 

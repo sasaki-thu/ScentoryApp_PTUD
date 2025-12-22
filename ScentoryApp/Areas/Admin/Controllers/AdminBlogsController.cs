@@ -103,6 +103,11 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 if (existingBlog == null)
                 {
                     // === THÊM MỚI ===
+                    if (string.IsNullOrEmpty(model.IdBlog))
+                    {
+                        model.IdBlog = await GenerateBlogId();
+                    }
+
                     model.ThoiGianTaoBlog = DateTime.Now;
                     model.ThoiGianCapNhatBlog = DateTime.Now;
                     model.Views = 0; // Mặc định view = 0
@@ -174,6 +179,37 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 return Json(new { uploaded = 1, fileName = fileName, url = url });
             }
             return Json(new { uploaded = 0, error = new { message = "Lỗi tải ảnh!" } });
+        }
+        private async Task<string> GenerateBlogId()
+        {
+            var existingIds = await _context.Blogs
+                .Where(s => s.IdBlog.StartsWith("BL"))
+                .Select(s => s.IdBlog)
+                .ToListAsync();
+
+            int max = 0;
+            foreach (var id in existingIds)
+            {
+                if (id.Length > 2 && int.TryParse(id.Substring(2), out int n))
+                {
+                    if (n > max) max = n;
+                }
+            }
+            return "BL" + (max + 1).ToString("D3");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNextId()
+        {
+            try
+            {
+                var nextId = await GenerateBlogId();
+                return Json(new { success = true, data = nextId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

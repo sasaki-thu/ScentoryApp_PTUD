@@ -27,7 +27,7 @@ namespace ScentoryApp.Areas.Admin.Controllers
             return View(coupons);
         }
 
-        // 2. API: Lấy chi tiết (Quan trọng: Format đúng để hiện lên Modal)
+        // 2. API: Lấy chi tiết
         [HttpGet]
         public async Task<IActionResult> GetById(string id)
         {
@@ -39,7 +39,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 success = true,
                 data = new
                 {
-                    // Lưu ý: Tên thuộc tính viết thường (camelCase) để JS dễ gọi
                     idMaGiamGia = coupon.IdMaGiamGia,
                     moTa = coupon.MoTa,
                     loaiGiam = coupon.LoaiGiam,
@@ -64,6 +63,10 @@ namespace ScentoryApp.Areas.Admin.Controllers
             {
                 if (existingCoupon == null)
                 {
+                    if (string.IsNullOrEmpty(model.IdMaGiamGia))
+                    {
+                        model.IdMaGiamGia = await GenerateMaGiamGiaId();
+                    }
                     // Thêm mới
                     _context.Add(model);
                 }
@@ -96,6 +99,37 @@ namespace ScentoryApp.Areas.Admin.Controllers
             _context.MaGiamGia.Remove(coupon);
             await _context.SaveChangesAsync();
             return Json(new { success = true, message = "Đã xóa thành công!" });
+        }
+        private async Task<string> GenerateMaGiamGiaId()
+        {
+            var existingIds = await _context.MaGiamGia
+                .Where(s => s.IdMaGiamGia.StartsWith("GG"))
+                .Select(s => s.IdMaGiamGia)
+                .ToListAsync();
+
+            int max = 0;
+            foreach (var id in existingIds)
+            {
+                if (id.Length > 2 && int.TryParse(id.Substring(2), out int n))
+                {
+                    if (n > max) max = n;
+                }
+            }
+            return "GG" + (max + 1).ToString("D3");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNextId()
+        {
+            try
+            {
+                var nextId = await GenerateMaGiamGiaId();
+                return Json(new { success = true, data = nextId });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }
