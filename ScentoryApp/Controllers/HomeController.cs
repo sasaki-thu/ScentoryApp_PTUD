@@ -327,8 +327,8 @@ namespace ScentoryApp.Controllers
             public string Email { get; set; }
             public string Phone { get; set; }
             public string Address { get; set; }
-            public string BirthDate { get; set; }
-            public string Gender { get; set; }
+            public DateOnly BirthDate { get; set; }
+            public string Gender { get; set; } = "";
         }
 
         public class ChangePasswordRequest
@@ -509,7 +509,8 @@ namespace ScentoryApp.Controllers
             kh.Email = req.Email;
             kh.Sdt = req.Phone;
             kh.DiaChi = req.Address;
-
+            kh.NgaySinh = req.BirthDate;
+            kh.GioiTinh = req.Gender;
             await _context.SaveChangesAsync();
 
             // THÔNG BÁO THÀNH CÔNG
