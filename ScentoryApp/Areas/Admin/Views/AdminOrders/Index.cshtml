@@ -23,8 +23,29 @@
     }
 
     .badge-status {
-        min-width: 110px; /* Chỉnh rộng hơn chút để chữ không bị xuống dòng */
+        min-width: 110px;
     }
+
+    .nav-tabs .nav-link {
+        cursor: pointer;
+    }
+
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+    /* Style cho bảng tổng tiền */
+    .summary-table td {
+        padding: 5px 10px;
+        text-align: right;
+    }
+
+        .summary-table td:first-child {
+            text-align: left;
+            color: #6c757d;
+            font-weight: 500;
+        }
 </style>
 
 <div class="container-fluid">
@@ -87,14 +108,17 @@
                                                     }
                                                     else if (item.TinhTrangDonHang == "Đang giao")
                                                     {
+
                                                         <span class="badge badge-info badge-status text-white">Đang giao</span>
                                                     }
                                                     else if (item.TinhTrangDonHang == "Đã hủy")
                                                     {
+
                                                         <span class="badge badge-danger badge-status">Đã hủy</span>
                                                     }
                                                     else
                                                     {
+
                                                         <span class="badge badge-warning text-white badge-status">Đang chuẩn bị</span>
                                                     }
                                                 </td>
@@ -132,63 +156,111 @@
                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
-                <form id="orderForm">
-                    <fieldset id="orderFieldset">
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label>Mã đơn hàng</label>
-                                <input type="text" class="form-control" id="IdDonHang" name="IdDonHang" readonly style="font-weight:bold;">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label>Khách hàng</label>
-                                <input type="text" class="form-control" id="KhachHang" readonly>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label>Thời gian đặt hàng</label>
-                                <input type="text" class="form-control" id="ThoiGianDatHang" readonly>
+
+                <ul class="nav nav-tabs" id="orderTab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="general-tab" data-toggle="tab" href="#general" role="tab">Thông tin chung</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="products-tab" data-toggle="tab" href="#products" role="tab">Danh sách sản phẩm</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-3" id="orderTabContent">
+
+                    <div class="tab-pane fade show active" id="general" role="tabpanel">
+                        <form id="orderForm">
+                            <fieldset id="orderFieldset">
+                                <div class="form-row">
+                                    <div class="form-group col-md-4">
+                                        <label>Mã đơn hàng</label>
+                                        <input type="text" class="form-control" id="IdDonHang" name="IdDonHang" readonly style="font-weight:bold;">
+                                    </div>
+                                    <div class="form-group col-md-8">
+                                        <label>Khách hàng</label>
+                                        <input type="text" class="form-control" id="KhachHang" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Thời gian đặt hàng</label>
+                                        <input type="text" class="form-control" id="ThoiGianDatHang" readonly>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Mã giảm giá áp dụng</label>
+                                        <input type="text" class="form-control" id="MaGiamGia" readonly>
+                                    </div>
+                                </div>
+
+                                <hr>
+                                <h6 class="text-muted mb-3">Cập nhật trạng thái</h6>
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Trạng thái đơn hàng</label>
+                                        <select class="form-control" id="TinhTrangDonHang" name="TinhTrangDonHang">
+                                            <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
+                                            <option value="Đang giao">Đang giao</option>
+                                            <option value="Đã giao">Đã giao (Hoàn tất)</option>
+                                            <option value="Đã hủy">Đã hủy</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Ngày giao dự kiến</label>
+                                        <input type="date" class="form-control" id="NgayGiaoHangDuKien" name="NgayGiaoHangDuKien">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Địa chỉ giao hàng</label>
+                                    <textarea class="form-control" id="DiaChiGiao" rows="2" readonly></textarea>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="products" role="tabpanel">
+                        <div class="table-responsive mb-3">
+                            <table class="table table-bordered table-hover mb-0">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th style="width: 50px;">Ảnh</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th class="text-center" style="width: 60px;">SL</th>
+                                        <th class="text-right">Đơn giá</th>
+                                        <th class="text-right">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productDetailsBody">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 offset-md-6">
+                                <table class="table table-borderless table-sm summary-table">
+                                    <tr>
+                                        <td>Tổng tiền sản phẩm:</td>
+                                        <td id="lblTongTienHang">0 ₫</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Phí vận chuyển:</td>
+                                        <td id="lblPhiShip">0 ₫</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Giảm giá <span id="lblCodeGiam" class="text-muted small"></span>:</td>
+                                        <td id="lblGiamGia" class="text-danger">- 0 ₫</td>
+                                    </tr>
+                                    <tr style="border-top: 1px solid #dee2e6;">
+                                        <td class="pt-2"><h5 class="font-weight-bold text-dark">Tổng tiền đơn hàng:</h5></td>
+                                        <td class="pt-2"><h5 class="text-primary font-weight-bold" id="lblTongCong">0 ₫</h5></td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label>Tổng tiền</label>
-                                <input type="text" class="form-control text-primary" id="TongTien" readonly style="font-weight:bold;">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label>Phí vận chuyển</label>
-                                <input type="text" class="form-control" id="PhiShip" readonly>
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label>Mã giảm giá</label>
-                                <input type="text" class="form-control" id="MaGiamGia" readonly>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <h6 class="text-muted mb-3">Cập nhật trạng thái</h6>
-
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label>Trạng thái đơn hàng</label>
-                                <select class="form-control" id="TinhTrangDonHang" name="TinhTrangDonHang">
-                                    <option value="Đang chuẩn bị hàng">Đang chuẩn bị hàng</option>
-                                    <option value="Đang giao">Đang giao</option>
-                                    <option value="Đã giao">Đã giao (Hoàn tất)</option>
-                                    <option value="Đã hủy">Đã hủy</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-6">
-                                <label>Ngày giao dự kiến</label>
-                                <input type="date" class="form-control" id="NgayGiaoHangDuKien" name="NgayGiaoHangDuKien">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Địa chỉ giao hàng (Readonly)</label>
-                            <textarea class="form-control" id="DiaChiGiao" rows="2" readonly></textarea>
-                        </div>
-                    </fieldset>
-                </form>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-dismiss="modal">Đóng</button>
@@ -203,9 +275,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Bộ lọc đơn hàng</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
             </div>
             <div class="modal-body">
                 <div class="p-2">
@@ -213,7 +283,6 @@
                         <label class="font-weight-bold">Khách hàng / Mã KH</label>
                         <input type="text" id="filterName" class="form-control" placeholder="Nhập tên hoặc ID...">
                     </div>
-
                     <div class="form-group my-3">
                         <label class="font-weight-bold">Trạng thái đơn hàng</label>
                         <select class="form-control" id="filterStatus">
@@ -224,7 +293,6 @@
                             <option value="Đã hủy">Đã hủy</option>
                         </select>
                     </div>
-
                     <div class="form-group my-3">
                         <label class="font-weight-bold">Ngày đặt hàng</label>
                         <div class="row">
@@ -293,7 +361,7 @@
                 }
             });
 
-            // LOGIC LỌC ĐƠN HÀNG
+            // LOGIC LỌC
             function parseDateVN(dateString) {
                 if (!dateString) return null;
                 var parts = dateString.split(' ')[0].split('/');
@@ -316,9 +384,7 @@
 
                     if (filterName && !customerText.includes(filterName)) return false;
 
-                    // So sánh trạng thái
                     if (filterStatus) {
-                        // Vì "Đang chuẩn bị hàng" ở badge hiển thị là "Đang chuẩn bị"
                         if (filterStatus === "Đang chuẩn bị hàng" && !statusText.includes("Đang chuẩn bị")) return false;
                         else if (filterStatus !== "Đang chuẩn bị hàng" && statusText !== filterStatus) return false;
                     }
@@ -336,22 +402,19 @@
                 }
             );
 
-            $('#btnApplyFilter').click(function() {
-                table.draw();
-                $('#filterModal').modal('hide');
-            });
-
+            $('#btnApplyFilter').click(function() { table.draw(); $('#filterModal').modal('hide'); });
             $('#btnResetFilter').click(function() {
-                $('#filterName').val('');
-                $('#filterStatus').val('');
-                $('#minDate').val('');
-                $('#maxDate').val('');
+                $('#filterName').val(''); $('#filterStatus').val('');
+                $('#minDate').val(''); $('#maxDate').val('');
                 table.draw();
             });
-
             $('#customSearch').on('keyup', function () { table.search(this.value).draw(); });
 
-            // 2. XEM CHI TIẾT / SỬA
+            function formatMoney(amount) {
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+            }
+
+            // 2. XEM CHI TIẾT
             $('body').on('click', '.btn-details', function (e) {
                 e.preventDefault();
                 var id = $(this).data('id');
@@ -364,18 +427,50 @@
                         if (res.success) {
                             var d = res.data;
 
+                            // Tab 1: Thông tin chung
                             $('#IdDonHang').val(d.idDonHang);
                             $('#KhachHang').val(d.khachHang);
                             $('#ThoiGianDatHang').val(d.thoiGianDatHang);
-
-                            $('#TongTien').val(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(d.tongTien));
-                            $('#PhiShip').val(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(d.phiShip));
-
                             $('#MaGiamGia').val(d.maGiamGia);
                             $('#DiaChiGiao').val(d.diaChiGiao);
-
                             $('#TinhTrangDonHang').val(d.trangThai);
                             $('#NgayGiaoHangDuKien').val(d.ngayGiaoHangDuKien);
+
+                            // Tab 2: Danh sách sản phẩm
+                            var productHtml = '';
+                            if (d.chiTietSanPham && d.chiTietSanPham.length > 0) {
+                                $.each(d.chiTietSanPham, function (index, item) {
+                                    var imgTag = item.anhSanPham
+                                        ? `<img src="${item.anhSanPham}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">`
+                                        : `<span class="text-muted small">No Img</span>`;
+
+                                    productHtml += `
+                                        <tr>
+                                            <td class="text-center">${imgTag}</td>
+                                            <td><span class="font-weight-bold text-dark">${item.tenSanPham}</span></td>
+                                            <td class="text-center">${item.soLuong}</td>
+                                            <td class="text-right">${formatMoney(item.donGia)}</td>
+                                            <td class="text-right text-primary font-weight-bold">${formatMoney(item.thanhTien)}</td>
+                                        </tr>
+                                    `;
+                                });
+                            } else {
+                                productHtml = '<tr><td colspan="5" class="text-center text-muted">Không có sản phẩm nào</td></tr>';
+                            }
+                            $('#productDetailsBody').html(productHtml);
+
+                            $('#lblTongTienHang').text(formatMoney(d.tongTienHang));
+                            $('#lblPhiShip').text(formatMoney(d.phiShip));
+                            if (d.maGiamGia) {
+                                $('#lblCodeGiam').text('(' + d.maGiamGia + ')');
+                            } else {
+                                $('#lblCodeGiam').text('');
+                            }
+                            $('#lblGiamGia').text('- ' + formatMoney(d.giamGia));
+
+                            $('#lblTongCong').text(formatMoney(d.tongCong));
+
+                            $('#orderTab a[href="#general"]').tab('show');
 
                             $('#orderModal').modal('show');
                         } else {
@@ -395,11 +490,7 @@
                 $.ajax({
                     url: '/Admin/AdminOrders/Update',
                     type: 'POST',
-                    data: {
-                        IdDonHang: id,
-                        TinhTrangDonHang: status,
-                        NgayGiaoHangDuKien: date
-                    },
+                    data: { IdDonHang: id, TinhTrangDonHang: status, NgayGiaoHangDuKien: date },
                     success: function (res) {
                         if (res.success) {
                             showToast(res.message, 'success');

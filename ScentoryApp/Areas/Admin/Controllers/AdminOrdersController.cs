@@ -35,9 +35,26 @@ namespace ScentoryApp.Areas.Admin.Controllers
         {
             var order = await _context.DonHangs
                                       .Include(d => d.IdKhachHangNavigation)
+                                      .Include(d => d.ChiTietDonHangs)
+                                          .ThenInclude(ct => ct.IdSanPhamNavigation)
                                       .FirstOrDefaultAsync(x => x.IdDonHang == id);
 
             if (order == null) return Json(new { success = false, message = "Không tìm thấy đơn hàng!" });
+
+            decimal tongTienHang = order.ChiTietDonHangs.Sum(ct => ct.ThanhTien);
+            decimal giamGia = (tongTienHang + order.PhiVanChuyen + order.ThueBanHang) - order.TongTienDonHang;
+
+            if (giamGia < 0) giamGia = 0;
+            var listProducts = order.ChiTietDonHangs.Select(ct => new
+            {
+                tenSanPham = ct.IdSanPhamNavigation.TenSanPham,
+                anhSanPham = ct.IdSanPhamNavigation.AnhSanPham != null
+                             ? "data:image/jpg;base64," + Convert.ToBase64String(ct.IdSanPhamNavigation.AnhSanPham)
+                             : null,
+                soLuong = ct.SoLuong,
+                donGia = ct.DonGia,
+                thanhTien = ct.ThanhTien
+            }).ToList();
 
             return Json(new
             {
@@ -46,24 +63,20 @@ namespace ScentoryApp.Areas.Admin.Controllers
                 {
                     idDonHang = order.IdDonHang,
                     khachHang = order.IdKhachHang + " - " + order.IdKhachHangNavigation.HoTen,
-
-                    // Format ngày tháng cho input datetime-local hoặc hiển thị
                     thoiGianDatHang = order.ThoiGianDatHang.ToString("dd/MM/yyyy HH:mm:ss"),
-
-                    // DateOnly convert sang string yyyy-MM-dd để input date hiểu
                     ngayGiaoHangDuKien = order.NgayGiaoHangDuKien.ToString("yyyy-MM-dd"),
 
                     idDonViVanChuyen = order.IdDonViVanChuyen,
-                    tongTien = order.TongTienDonHang,
-                    phiShip = order.PhiVanChuyen,
-                    thue = order.ThueBanHang,
                     trangThai = order.TinhTrangDonHang,
-                    maGiamGia = order.IdMaGiamGia,
+                    maGiamGia = order.IdMaGiamGia ?? "",
 
-                    // Lấy địa chỉ: Ưu tiên địa chỉ đơn hàng, nếu ko có thì lấy địa chỉ khách
                     diaChiGiao = !string.IsNullOrEmpty(order.DiaChiNhanHang) ? order.DiaChiNhanHang : order.IdKhachHangNavigation.DiaChi,
-
-                    thoiGianHoanTat = order.ThoiGianHoanTatDonHang.HasValue ? order.ThoiGianHoanTatDonHang.Value.ToString("dd/MM/yyyy HH:mm") : ""
+                    thoiGianHoanTat = order.ThoiGianHoanTatDonHang.HasValue ? order.ThoiGianHoanTatDonHang.Value.ToString("dd/MM/yyyy HH:mm") : "",
+                    tongTienHang = tongTienHang,
+                    phiShip = order.PhiVanChuyen,
+                    giamGia = giamGia,
+                    tongCong = order.TongTienDonHang,
+                    chiTietSanPham = listProducts
                 }
             });
         }
@@ -77,17 +90,14 @@ namespace ScentoryApp.Areas.Admin.Controllers
 
             try
             {
-                // 1. Kiểm tra trạng thái hợp lệ
                 string[] validStatus = { "Đang chuẩn bị hàng", "Đang giao", "Đã giao", "Đã hủy" };
                 if (!validStatus.Contains(TinhTrangDonHang))
                 {
                     return Json(new { success = false, message = "Trạng thái không hợp lệ!" });
                 }
 
-                // 2. Cập nhật thông tin
                 order.TinhTrangDonHang = TinhTrangDonHang;
 
-                // Chỉ cập nhật ngày giao dự kiến nếu đơn KHÔNG PHẢI là "Đã hủy"
                 if (TinhTrangDonHang != "Đã hủy")
                 {
                     order.NgayGiaoHangDuKien = NgayGiaoHangDuKien;
@@ -95,16 +105,13 @@ namespace ScentoryApp.Areas.Admin.Controllers
 
                 order.ThoiGianCapNhat = DateTime.Now;
 
-                // 3. Logic Hoàn tất đơn hàng
                 if (TinhTrangDonHang == "Đã giao")
                 {
-                    // Nếu chuyển sang Đã giao -> Cập nhật thời gian hoàn tất
                     if (order.ThoiGianHoanTatDonHang == null)
                         order.ThoiGianHoanTatDonHang = DateTime.Now;
                 }
                 else
                 {
-                    // Nếu chuyển sang trạng thái khác (kể cả Đã hủy) -> Xóa thời gian hoàn tất
                     order.ThoiGianHoanTatDonHang = null;
                 }
 
@@ -124,7 +131,7 @@ namespace ScentoryApp.Areas.Admin.Controllers
             }
         }
 
-        // 4. API: Xóa Vĩnh Viễn 
+        // 4. API: Xóa Vĩnh Viễn
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
@@ -133,7 +140,6 @@ namespace ScentoryApp.Areas.Admin.Controllers
 
             try
             {
-                // Xóa chi tiết trước để tránh lỗi khóa ngoại
                 var details = await _context.ChiTietDonHangs.Where(c => c.IdDonHang == id).ToListAsync();
                 _context.ChiTietDonHangs.RemoveRange(details);
 
