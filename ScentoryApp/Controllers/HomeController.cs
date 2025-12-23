@@ -900,8 +900,27 @@ namespace ScentoryApp.Controllers
             return "TK" + (max + 1).ToString("D3");
         }
 
-        private string GenerateCustomerId()
-            => Guid.NewGuid().ToString("N").Substring(0, 5).ToUpper();
+        public string GenerateCustomerId()
+        {
+            // Lấy mã lớn nhất hiện tại (KHxxx)
+            var lastCustomerId = _context.KhachHangs
+                .Where(x => x.IdKhachHang.StartsWith("KH"))
+                .OrderByDescending(x => x.IdKhachHang)
+                .Select(x => x.IdKhachHang)
+                .FirstOrDefault();
+
+            int nextNumber = 1;
+
+            if (!string.IsNullOrEmpty(lastCustomerId))
+            {
+                // KH001 -> 001
+                var numberPart = lastCustomerId.Substring(2);
+                nextNumber = int.Parse(numberPart) + 1;
+            }
+
+            // Format thành KH001
+            return $"KH{nextNumber:D3}";
+        }
 
         private async Task<string> GenerateUniqueUsernameFromEmailAsync(string email)
         {
