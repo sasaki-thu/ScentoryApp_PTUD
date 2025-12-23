@@ -6,24 +6,16 @@
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
 
     // 1. TÍNH TOÁN NGÀY CHO NÚT ĐIỀU HƯỚNG TUẦN
-    // Lấy ngày bắt đầu tuần từ Model (Controller đã tính sẵn)
     var currentStart = Model.StartDateSelected;
     var currentEnd = currentStart.AddDays(6);
-
-    // Tính ngày cho nút Lùi và Tới
     var prevWeekDate = currentStart.AddDays(-7).ToString("yyyy-MM-dd");
     var nextWeekDate = currentStart.AddDays(7).ToString("yyyy-MM-dd");
-
-    // Kiểm tra xem tuần sau có phải là tương lai không (để disable nút Next)
-    // Logic: Nếu ngày bắt đầu tuần sau lớn hơn ngày hôm nay -> Disable
     bool isFuture = currentStart.AddDays(7) > DateTime.Today;
 
     // 2. CHUYỂN DỮ LIỆU C# SANG JSON ĐỂ VẼ BIỂU ĐỒ
     var chartLabels = JsonSerializer.Serialize(Model.LabelsBieuDo);
     var chartRevenue = JsonSerializer.Serialize(Model.DataBieuDoDoanhThu);
     var chartOrders = JsonSerializer.Serialize(Model.DataBieuDoDonHang);
-
-    // Dữ liệu Pie Chart (nếu null thì trả về mảng rỗng để tránh lỗi)
     var pieLabels = JsonSerializer.Serialize(Model.TyLeTrangThaiDonHang?.Select(x => x.Label) ?? new List<string>());
     var pieData = JsonSerializer.Serialize(Model.TyLeTrangThaiDonHang?.Select(x => x.Value) ?? new List<int>());
 }
@@ -265,15 +257,19 @@
                                             <td>
                                                 @if (item.TinhTrangDonHang == "Hoàn tất" || item.TinhTrangDonHang == "Đã giao")
                                                 {
-                                                    <span class="badge badge-pill badge-success px-2 py-1">@item.TinhTrangDonHang</span>
+                                                    <span class="badge badge-pill badge-success px-2 py-1" style="background-color: #2ecc71;">@item.TinhTrangDonHang</span>
+                                                }
+                                                else if (item.TinhTrangDonHang == "Đang giao")
+                                                {
+                                                    <span class="badge badge-pill text-white px-2 py-1" style="background-color: #17a2b8;">@item.TinhTrangDonHang</span>
                                                 }
                                                 else if (item.TinhTrangDonHang == "Đã hủy")
                                                 {
-                                                    <span class="badge badge-pill badge-danger px-2 py-1">@item.TinhTrangDonHang</span>
+                                                    <span class="badge badge-pill badge-danger px-2 py-1" style="background-color: #dc3545">@item.TinhTrangDonHang</span>
                                                 }
                                                 else
                                                 {
-                                                    <span class="badge badge-pill badge-warning text-white px-2 py-1">@item.TinhTrangDonHang</span>
+                                                    <span class="badge badge-pill badge-warning text-white px-2 py-1" style="background-color: #f39c12">@item.TinhTrangDonHang</span>
                                                 }
                                             </td>
                                         </tr>
@@ -335,7 +331,6 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Cấu hình Font chữ & Màu sắc mặc định cho Chart.js
         Chart.defaults.font.family = 'Nunito, -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif';
         Chart.defaults.color = '#858796';
 
@@ -345,7 +340,7 @@
             var ctx = document.getElementById("myAreaChart");
             if(ctx) {
                 new Chart(ctx, {
-                    type: 'line', // Mặc định là đường
+                    type: 'line',
                     data: {
                         labels: @Html.Raw(chartLabels), // Nhãn: T2, T3, T4...
                         datasets: [{
@@ -362,14 +357,14 @@
                             pointHoverBorderColor: "rgba(78, 115, 223, 1)",
                             pointHitRadius: 10,
                             pointBorderWidth: 2,
-                            data: @Html.Raw(chartRevenue), // Dữ liệu tiền
+                            data: @Html.Raw(chartRevenue), 
                             yAxisID: 'y',
                         },
                         {
                             label: "Số đơn hàng",
-                            type: 'bar', // Dạng cột
+                            type: 'bar',
                             backgroundColor: "rgba(28, 200, 138, 0.5)",
-                            data: @Html.Raw(chartOrders), // Dữ liệu số đơn
+                            data: @Html.Raw(chartOrders), 
                             yAxisID: 'y1',
                             barThickness: 20
                         }]
@@ -418,20 +413,64 @@
             // --- 2. BIỂU ĐỒ TRÒN (PIE CHART) ---
             var ctxPie = document.getElementById("myPieChart");
             if (ctxPie) {
+                var myLabels = @Html.Raw(pieLabels);
+                var myBgColors = [];
+                var myHoverColors = [];
+
+                myLabels.forEach(function(label) {
+                    var l = label.toLowerCase();
+
+                    if (l.includes("đã giao") || l.includes("hoàn tất")) {
+                        myBgColors.push("#2ecc71");
+                        myHoverColors.push("#27ae60");
+                    }
+                    else if (l.includes("đang giao")) {
+                        myBgColors.push("#17a2b8");
+                        myHoverColors.push("#138496");
+                    }
+                    else if (l.includes("đã hủy")) {
+                        myBgColors.push("#dc3545");
+                        myHoverColors.push("#c82333");
+                    }
+                    else {
+                        myBgColors.push("#f39c12");
+                        myHoverColors.push("#d68910");
+                    }
+                });
+
+                // 3. Vẽ biểu đồ
                 new Chart(ctxPie, {
                     type: 'doughnut',
                     data: {
-                        labels: @Html.Raw(pieLabels),
+                        labels: myLabels,
                         datasets: [{
                             data: @Html.Raw(pieData),
-                            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
-                            hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617'],
+                            backgroundColor: myBgColors,
+                            hoverBackgroundColor: myHoverColors,
                             hoverBorderColor: "rgba(234, 236, 244, 1)",
                         }],
                     },
                     options: {
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: true, position: 'bottom' } },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        var label = context.label || '';
+                                        var value = context.parsed || 0;
+                                        return ' ' + label + ': ' + value + ' đơn';
+                                    }
+                                }
+                            }
+                        },
                         cutout: '70%',
                     },
                 });
